@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "secrets1": {
+      "type": "secrets"
+    },
+    "mssql1": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:Server=.:SQLExpress;Database=LogisticsSystem;Trusted_Connection=true;encrypt=false",
+      "dynamicId": null
+    }
+  }
+}
