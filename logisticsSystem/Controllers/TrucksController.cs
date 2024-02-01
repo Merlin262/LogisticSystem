@@ -5,54 +5,54 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using logisticsSystem.Models;
 using logisticsSystem.Data;
+using logisticsSystem.Models;
 
 namespace logisticsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddressesController : ControllerBase
+    public class TrucksController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
 
-        public AddressesController(LogisticsSystemContext context)
+        public TrucksController(LogisticsSystemContext context)
         {
             _context = context;
         }
 
-        // GET: api/Addresses
+        // GET: api/Trucks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+        public async Task<ActionResult<IEnumerable<Truck>>> GetTrucks()
         {
-            return await _context.Addresses.ToListAsync();
+            return await _context.Trucks.ToListAsync();
         }
 
-        // GET: api/Addresses/5
+        // GET: api/Trucks/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+        public async Task<ActionResult<Truck>> GetTruck(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            var truck = await _context.Trucks.FindAsync(id);
 
-            if (address == null)
+            if (truck == null)
             {
                 return NotFound();
             }
 
-            return address;
+            return truck;
         }
 
-        // PUT: api/Addresses/5
+        // PUT: api/Trucks/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, Address address)
+        public async Task<IActionResult> PutTruck(int id, Truck truck)
         {
-            if (id != address.Id)
+            if (id != truck.Chassis)
             {
                 return BadRequest();
             }
 
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(truck).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace logisticsSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
+                if (!TruckExists(id))
                 {
                     return NotFound();
                 }
@@ -73,19 +73,19 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        // POST: api/Addresses
+        // POST: api/Trucks
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Address>> PostAddress(Address address)
+        public async Task<ActionResult<Truck>> PostTruck(Truck truck)
         {
-            _context.Addresses.Add(address);
+            _context.Trucks.Add(truck);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (AddressExists(address.Id))
+                if (TruckExists(truck.Chassis))
                 {
                     return Conflict();
                 }
@@ -95,28 +95,28 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            return CreatedAtAction("GetTruck", new { id = truck.Chassis }, truck);
         }
 
-        // DELETE: api/Addresses/5
+        // DELETE: api/Trucks/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        public async Task<IActionResult> DeleteTruck(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
-            if (address == null)
+            var truck = await _context.Trucks.FindAsync(id);
+            if (truck == null)
             {
                 return NotFound();
             }
 
-            _context.Addresses.Remove(address);
+            _context.Trucks.Remove(truck);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AddressExists(int id)
+        private bool TruckExists(int id)
         {
-            return _context.Addresses.Any(e => e.Id == id);
+            return _context.Trucks.Any(e => e.Chassis == id);
         }
     }
 }

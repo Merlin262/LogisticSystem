@@ -5,54 +5,54 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using logisticsSystem.Models;
 using logisticsSystem.Data;
+using logisticsSystem.Models;
 
 namespace logisticsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddressesController : ControllerBase
+    public class MaintenancesController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
 
-        public AddressesController(LogisticsSystemContext context)
+        public MaintenancesController(LogisticsSystemContext context)
         {
             _context = context;
         }
 
-        // GET: api/Addresses
+        // GET: api/Maintenances
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+        public async Task<ActionResult<IEnumerable<Maintenance>>> GetMaintenances()
         {
-            return await _context.Addresses.ToListAsync();
+            return await _context.Maintenances.ToListAsync();
         }
 
-        // GET: api/Addresses/5
+        // GET: api/Maintenances/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+        public async Task<ActionResult<Maintenance>> GetMaintenance(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            var maintenance = await _context.Maintenances.FindAsync(id);
 
-            if (address == null)
+            if (maintenance == null)
             {
                 return NotFound();
             }
 
-            return address;
+            return maintenance;
         }
 
-        // PUT: api/Addresses/5
+        // PUT: api/Maintenances/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, Address address)
+        public async Task<IActionResult> PutMaintenance(int id, Maintenance maintenance)
         {
-            if (id != address.Id)
+            if (id != maintenance.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(maintenance).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace logisticsSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
+                if (!MaintenanceExists(id))
                 {
                     return NotFound();
                 }
@@ -73,19 +73,19 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        // POST: api/Addresses
+        // POST: api/Maintenances
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Address>> PostAddress(Address address)
+        public async Task<ActionResult<Maintenance>> PostMaintenance(Maintenance maintenance)
         {
-            _context.Addresses.Add(address);
+            _context.Maintenances.Add(maintenance);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (AddressExists(address.Id))
+                if (MaintenanceExists(maintenance.Id))
                 {
                     return Conflict();
                 }
@@ -95,28 +95,28 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            return CreatedAtAction("GetMaintenance", new { id = maintenance.Id }, maintenance);
         }
 
-        // DELETE: api/Addresses/5
+        // DELETE: api/Maintenances/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        public async Task<IActionResult> DeleteMaintenance(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
-            if (address == null)
+            var maintenance = await _context.Maintenances.FindAsync(id);
+            if (maintenance == null)
             {
                 return NotFound();
             }
 
-            _context.Addresses.Remove(address);
+            _context.Maintenances.Remove(maintenance);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AddressExists(int id)
+        private bool MaintenanceExists(int id)
         {
-            return _context.Addresses.Any(e => e.Id == id);
+            return _context.Maintenances.Any(e => e.Id == id);
         }
     }
 }

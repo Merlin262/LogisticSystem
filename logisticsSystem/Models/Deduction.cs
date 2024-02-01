@@ -12,4 +12,6 @@ public partial class Deduction
     public decimal? Amount { get; set; }
 
     public string? Description { get; set; }
+
+    public virtual ICollection<WageDeduction> WageDeductions { get; set; } = new List<WageDeduction>();
 }

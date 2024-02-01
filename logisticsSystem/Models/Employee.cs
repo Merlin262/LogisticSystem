@@ -18,4 +18,6 @@ public partial class Employee
     public virtual ICollection<Maintenance> Maintenances { get; set; } = new List<Maintenance>();
 
     public virtual ICollection<Shipping> Shippings { get; set; } = new List<Shipping>();
+
+    public virtual ICollection<TruckDriver> TruckDrivers { get; set; } = new List<TruckDriver>();
 }

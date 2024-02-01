@@ -5,54 +5,54 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using logisticsSystem.Models;
 using logisticsSystem.Data;
+using logisticsSystem.Models;
 
 namespace logisticsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddressesController : ControllerBase
+    public class ShippingsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
 
-        public AddressesController(LogisticsSystemContext context)
+        public ShippingsController(LogisticsSystemContext context)
         {
             _context = context;
         }
 
-        // GET: api/Addresses
+        // GET: api/Shippings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+        public async Task<ActionResult<IEnumerable<Shipping>>> GetShippings()
         {
-            return await _context.Addresses.ToListAsync();
+            return await _context.Shippings.ToListAsync();
         }
 
-        // GET: api/Addresses/5
+        // GET: api/Shippings/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+        public async Task<ActionResult<Shipping>> GetShipping(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            var shipping = await _context.Shippings.FindAsync(id);
 
-            if (address == null)
+            if (shipping == null)
             {
                 return NotFound();
             }
 
-            return address;
+            return shipping;
         }
 
-        // PUT: api/Addresses/5
+        // PUT: api/Shippings/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, Address address)
+        public async Task<IActionResult> PutShipping(int id, Shipping shipping)
         {
-            if (id != address.Id)
+            if (id != shipping.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(shipping).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace logisticsSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
+                if (!ShippingExists(id))
                 {
                     return NotFound();
                 }
@@ -73,19 +73,19 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        // POST: api/Addresses
+        // POST: api/Shippings
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Address>> PostAddress(Address address)
+        public async Task<ActionResult<Shipping>> PostShipping(Shipping shipping)
         {
-            _context.Addresses.Add(address);
+            _context.Shippings.Add(shipping);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (AddressExists(address.Id))
+                if (ShippingExists(shipping.Id))
                 {
                     return Conflict();
                 }
@@ -95,28 +95,28 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            return CreatedAtAction("GetShipping", new { id = shipping.Id }, shipping);
         }
 
-        // DELETE: api/Addresses/5
+        // DELETE: api/Shippings/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        public async Task<IActionResult> DeleteShipping(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
-            if (address == null)
+            var shipping = await _context.Shippings.FindAsync(id);
+            if (shipping == null)
             {
                 return NotFound();
             }
 
-            _context.Addresses.Remove(address);
+            _context.Shippings.Remove(shipping);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AddressExists(int id)
+        private bool ShippingExists(int id)
         {
-            return _context.Addresses.Any(e => e.Id == id);
+            return _context.Shippings.Any(e => e.Id == id);
         }
     }
 }

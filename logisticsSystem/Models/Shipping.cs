@@ -33,5 +33,7 @@ public partial class Shipping
 
     public virtual Employee? FkEmployee { get; set; }
 
+    public virtual ICollection<ItensShipped> ItensShippeds { get; set; } = new List<ItensShipped>();
+
     public virtual ICollection<ShippingPayment> ShippingPayments { get; set; } = new List<ShippingPayment>();
 }

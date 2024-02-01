@@ -14,4 +14,6 @@ public partial class EmployeeWage
     public int? FkEmployeeId { get; set; }
 
     public virtual Employee? FkEmployee { get; set; }
+
+    public virtual ICollection<WageDeduction> WageDeductions { get; set; } = new List<WageDeduction>();
 }

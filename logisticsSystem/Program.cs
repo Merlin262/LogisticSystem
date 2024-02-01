@@ -1,4 +1,4 @@
-using logisticsSystem.Models;
+using logisticsSystem.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

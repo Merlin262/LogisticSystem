@@ -12,47 +12,47 @@ namespace logisticsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddressesController : ControllerBase
+    public class DeductionsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
 
-        public AddressesController(LogisticsSystemContext context)
+        public DeductionsController(LogisticsSystemContext context)
         {
             _context = context;
         }
 
-        // GET: api/Addresses
+        // GET: api/Deductions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+        public async Task<ActionResult<IEnumerable<Deduction>>> GetDeductions()
         {
-            return await _context.Addresses.ToListAsync();
+            return await _context.Deductions.ToListAsync();
         }
 
-        // GET: api/Addresses/5
+        // GET: api/Deductions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+        public async Task<ActionResult<Deduction>> GetDeduction(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            var deduction = await _context.Deductions.FindAsync(id);
 
-            if (address == null)
+            if (deduction == null)
             {
                 return NotFound();
             }
 
-            return address;
+            return deduction;
         }
 
-        // PUT: api/Addresses/5
+        // PUT: api/Deductions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, Address address)
+        public async Task<IActionResult> PutDeduction(int id, Deduction deduction)
         {
-            if (id != address.Id)
+            if (id != deduction.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(deduction).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace logisticsSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
+                if (!DeductionExists(id))
                 {
                     return NotFound();
                 }
@@ -73,19 +73,19 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        // POST: api/Addresses
+        // POST: api/Deductions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Address>> PostAddress(Address address)
+        public async Task<ActionResult<Deduction>> PostDeduction(Deduction deduction)
         {
-            _context.Addresses.Add(address);
+            _context.Deductions.Add(deduction);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (AddressExists(address.Id))
+                if (DeductionExists(deduction.Id))
                 {
                     return Conflict();
                 }
@@ -95,28 +95,28 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            return CreatedAtAction("GetDeduction", new { id = deduction.Id }, deduction);
         }
 
-        // DELETE: api/Addresses/5
+        // DELETE: api/Deductions/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        public async Task<IActionResult> DeleteDeduction(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
-            if (address == null)
+            var deduction = await _context.Deductions.FindAsync(id);
+            if (deduction == null)
             {
                 return NotFound();
             }
 
-            _context.Addresses.Remove(address);
+            _context.Deductions.Remove(deduction);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AddressExists(int id)
+        private bool DeductionExists(int id)
         {
-            return _context.Addresses.Any(e => e.Id == id);
+            return _context.Deductions.Any(e => e.Id == id);
         }
     }
 }

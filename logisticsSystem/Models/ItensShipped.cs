@@ -5,6 +5,8 @@ namespace logisticsSystem.Models;
 
 public partial class ItensShipped
 {
+    public int Id { get; set; }
+
     public int? FkItensStockId { get; set; }
 
     public int? FkShippingId { get; set; }

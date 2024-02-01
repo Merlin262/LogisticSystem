@@ -5,54 +5,54 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using logisticsSystem.Models;
 using logisticsSystem.Data;
+using logisticsSystem.Models;
 
 namespace logisticsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddressesController : ControllerBase
+    public class ShippingPaymentsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
 
-        public AddressesController(LogisticsSystemContext context)
+        public ShippingPaymentsController(LogisticsSystemContext context)
         {
             _context = context;
         }
 
-        // GET: api/Addresses
+        // GET: api/ShippingPayments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+        public async Task<ActionResult<IEnumerable<ShippingPayment>>> GetShippingPayments()
         {
-            return await _context.Addresses.ToListAsync();
+            return await _context.ShippingPayments.ToListAsync();
         }
 
-        // GET: api/Addresses/5
+        // GET: api/ShippingPayments/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+        public async Task<ActionResult<ShippingPayment>> GetShippingPayment(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            var shippingPayment = await _context.ShippingPayments.FindAsync(id);
 
-            if (address == null)
+            if (shippingPayment == null)
             {
                 return NotFound();
             }
 
-            return address;
+            return shippingPayment;
         }
 
-        // PUT: api/Addresses/5
+        // PUT: api/ShippingPayments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, Address address)
+        public async Task<IActionResult> PutShippingPayment(int id, ShippingPayment shippingPayment)
         {
-            if (id != address.Id)
+            if (id != shippingPayment.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(shippingPayment).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace logisticsSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
+                if (!ShippingPaymentExists(id))
                 {
                     return NotFound();
                 }
@@ -73,19 +73,19 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        // POST: api/Addresses
+        // POST: api/ShippingPayments
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Address>> PostAddress(Address address)
+        public async Task<ActionResult<ShippingPayment>> PostShippingPayment(ShippingPayment shippingPayment)
         {
-            _context.Addresses.Add(address);
+            _context.ShippingPayments.Add(shippingPayment);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (AddressExists(address.Id))
+                if (ShippingPaymentExists(shippingPayment.Id))
                 {
                     return Conflict();
                 }
@@ -95,28 +95,28 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            return CreatedAtAction("GetShippingPayment", new { id = shippingPayment.Id }, shippingPayment);
         }
 
-        // DELETE: api/Addresses/5
+        // DELETE: api/ShippingPayments/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        public async Task<IActionResult> DeleteShippingPayment(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
-            if (address == null)
+            var shippingPayment = await _context.ShippingPayments.FindAsync(id);
+            if (shippingPayment == null)
             {
                 return NotFound();
             }
 
-            _context.Addresses.Remove(address);
+            _context.ShippingPayments.Remove(shippingPayment);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AddressExists(int id)
+        private bool ShippingPaymentExists(int id)
         {
-            return _context.Addresses.Any(e => e.Id == id);
+            return _context.ShippingPayments.Any(e => e.Id == id);
         }
     }
 }

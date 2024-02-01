@@ -12,4 +12,6 @@ public partial class ItensStock
     public int? Quantity { get; set; }
 
     public decimal? Price { get; set; }
+
+    public virtual ICollection<ItensShipped> ItensShippeds { get; set; } = new List<ItensShipped>();
 }

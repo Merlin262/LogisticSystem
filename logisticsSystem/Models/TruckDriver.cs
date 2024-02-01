@@ -5,6 +5,8 @@ namespace logisticsSystem.Models;
 
 public partial class TruckDriver
 {
+    public int Id { get; set; }
+
     public int? FkTruckChassis { get; set; }
 
     public int? FkEmployeeId { get; set; }

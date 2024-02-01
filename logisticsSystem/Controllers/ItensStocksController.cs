@@ -12,47 +12,47 @@ namespace logisticsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddressesController : ControllerBase
+    public class ItensStocksController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
 
-        public AddressesController(LogisticsSystemContext context)
+        public ItensStocksController(LogisticsSystemContext context)
         {
             _context = context;
         }
 
-        // GET: api/Addresses
+        // GET: api/ItensStocks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+        public async Task<ActionResult<IEnumerable<ItensStock>>> GetItensStocks()
         {
-            return await _context.Addresses.ToListAsync();
+            return await _context.ItensStocks.ToListAsync();
         }
 
-        // GET: api/Addresses/5
+        // GET: api/ItensStocks/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+        public async Task<ActionResult<ItensStock>> GetItensStock(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            var itensStock = await _context.ItensStocks.FindAsync(id);
 
-            if (address == null)
+            if (itensStock == null)
             {
                 return NotFound();
             }
 
-            return address;
+            return itensStock;
         }
 
-        // PUT: api/Addresses/5
+        // PUT: api/ItensStocks/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, Address address)
+        public async Task<IActionResult> PutItensStock(int id, ItensStock itensStock)
         {
-            if (id != address.Id)
+            if (id != itensStock.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(itensStock).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace logisticsSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
+                if (!ItensStockExists(id))
                 {
                     return NotFound();
                 }
@@ -73,19 +73,19 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        // POST: api/Addresses
+        // POST: api/ItensStocks
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Address>> PostAddress(Address address)
+        public async Task<ActionResult<ItensStock>> PostItensStock(ItensStock itensStock)
         {
-            _context.Addresses.Add(address);
+            _context.ItensStocks.Add(itensStock);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (AddressExists(address.Id))
+                if (ItensStockExists(itensStock.Id))
                 {
                     return Conflict();
                 }
@@ -95,28 +95,28 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            return CreatedAtAction("GetItensStock", new { id = itensStock.Id }, itensStock);
         }
 
-        // DELETE: api/Addresses/5
+        // DELETE: api/ItensStocks/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        public async Task<IActionResult> DeleteItensStock(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
-            if (address == null)
+            var itensStock = await _context.ItensStocks.FindAsync(id);
+            if (itensStock == null)
             {
                 return NotFound();
             }
 
-            _context.Addresses.Remove(address);
+            _context.ItensStocks.Remove(itensStock);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AddressExists(int id)
+        private bool ItensStockExists(int id)
         {
-            return _context.Addresses.Any(e => e.Id == id);
+            return _context.ItensStocks.Any(e => e.Id == id);
         }
     }
 }

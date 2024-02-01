@@ -12,47 +12,47 @@ namespace logisticsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddressesController : ControllerBase
+    public class EmployeeWagesController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
 
-        public AddressesController(LogisticsSystemContext context)
+        public EmployeeWagesController(LogisticsSystemContext context)
         {
             _context = context;
         }
 
-        // GET: api/Addresses
+        // GET: api/EmployeeWages
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+        public async Task<ActionResult<IEnumerable<EmployeeWage>>> GetEmployeeWages()
         {
-            return await _context.Addresses.ToListAsync();
+            return await _context.EmployeeWages.ToListAsync();
         }
 
-        // GET: api/Addresses/5
+        // GET: api/EmployeeWages/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+        public async Task<ActionResult<EmployeeWage>> GetEmployeeWage(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            var employeeWage = await _context.EmployeeWages.FindAsync(id);
 
-            if (address == null)
+            if (employeeWage == null)
             {
                 return NotFound();
             }
 
-            return address;
+            return employeeWage;
         }
 
-        // PUT: api/Addresses/5
+        // PUT: api/EmployeeWages/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, Address address)
+        public async Task<IActionResult> PutEmployeeWage(int id, EmployeeWage employeeWage)
         {
-            if (id != address.Id)
+            if (id != employeeWage.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(employeeWage).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace logisticsSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
+                if (!EmployeeWageExists(id))
                 {
                     return NotFound();
                 }
@@ -73,19 +73,19 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        // POST: api/Addresses
+        // POST: api/EmployeeWages
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Address>> PostAddress(Address address)
+        public async Task<ActionResult<EmployeeWage>> PostEmployeeWage(EmployeeWage employeeWage)
         {
-            _context.Addresses.Add(address);
+            _context.EmployeeWages.Add(employeeWage);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (AddressExists(address.Id))
+                if (EmployeeWageExists(employeeWage.Id))
                 {
                     return Conflict();
                 }
@@ -95,28 +95,28 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            return CreatedAtAction("GetEmployeeWage", new { id = employeeWage.Id }, employeeWage);
         }
 
-        // DELETE: api/Addresses/5
+        // DELETE: api/EmployeeWages/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        public async Task<IActionResult> DeleteEmployeeWage(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
-            if (address == null)
+            var employeeWage = await _context.EmployeeWages.FindAsync(id);
+            if (employeeWage == null)
             {
                 return NotFound();
             }
 
-            _context.Addresses.Remove(address);
+            _context.EmployeeWages.Remove(employeeWage);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AddressExists(int id)
+        private bool EmployeeWageExists(int id)
         {
-            return _context.Addresses.Any(e => e.Id == id);
+            return _context.EmployeeWages.Any(e => e.Id == id);
         }
     }
 }
