@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,102 +22,110 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/Employees
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
-        {
-            return await _context.Employees.ToListAsync();
-        }
-
-        // GET: api/Employees/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Employee>> GetEmployee(int id)
-        {
-            var employee = await _context.Employees.FindAsync(id);
-
-            if (employee == null)
-            {
-                return NotFound();
-            }
-
-            return employee;
-        }
-
-        // PUT: api/Employees/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployee(int id, Employee employee)
-        {
-            if (id != employee.FkPersonId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(employee).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EmployeeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Employees
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // CREATE - Método POST
         [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
+        public IActionResult CreateEmployee([FromBody] EmployeeDTO employeeDTO)
         {
-            _context.Employees.Add(employee);
-            try
+            // Mapear EmployeeDTO para a entidade Employee
+            var newEmployee = new Employee
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (EmployeeExists(employee.FkPersonId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                FkPersonId = employeeDTO.FkPersonId,
+                Position = employeeDTO.Position,
+                Commission = employeeDTO.Commission
+            };
 
-            return CreatedAtAction("GetEmployee", new { id = employee.FkPersonId }, employee);
+            // Adicionar o novo funcionário ao contexto
+            _context.Employees.Add(newEmployee);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar o novo funcionário criado
+            return Ok(newEmployee);
         }
 
-        // DELETE: api/Employees/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployee(int id)
+        // READ - Método GET (Todos)
+        [HttpGet]
+        public IActionResult GetAllEmployees()
         {
-            var employee = await _context.Employees.FindAsync(id);
+            // Obter todos os funcionários
+            var employees = _context.Employees.ToList();
+
+            // Mapear Employee para EmployeeDTO
+            var employeesDto = employees.Select(e => new EmployeeDTO
+            {
+                FkPersonId = e.FkPersonId,
+                Position = e.Position,
+                Commission = e.Commission
+            }).ToList();
+
+            return Ok(employeesDto);
+        }
+
+        // READ - Método GET por FkPersonId
+        [HttpGet("{fkPersonId}")]
+        public IActionResult GetEmployeeByFkPersonId(int fkPersonId)
+        {
+            // Obter o funcionário com o FkPersonId fornecido
+            var employee = _context.Employees.FirstOrDefault(e => e.FkPersonId == fkPersonId);
+
             if (employee == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se o funcionário não for encontrado
             }
 
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+            // Mapear Employee para EmployeeDTO
+            var employeeDto = new EmployeeDTO
+            {
+                FkPersonId = employee.FkPersonId,
+                Position = employee.Position,
+                Commission = employee.Commission
+            };
 
-            return NoContent();
+            return Ok(employeeDto);
         }
 
-        private bool EmployeeExists(int id)
+        // UPDATE - Método PUT
+        [HttpPut("{fkPersonId}")]
+        public IActionResult UpdateEmployee(int fkPersonId, [FromBody] EmployeeDTO employeeDTO)
         {
-            return _context.Employees.Any(e => e.FkPersonId == id);
+            // Obter o funcionário com o FkPersonId fornecido
+            var employee = _context.Employees.FirstOrDefault(e => e.FkPersonId == fkPersonId);
+
+            if (employee == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o funcionário não for encontrado
+            }
+
+            // Atualizar propriedades do funcionário
+            employee.Position = employeeDTO.Position;
+            employee.Commission = employeeDTO.Commission;
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(employee);
+        }
+
+        // DELETE - Método DELETE
+        [HttpDelete("{fkPersonId}")]
+        public IActionResult DeleteEmployee(int fkPersonId)
+        {
+            // Obter o funcionário com o FkPersonId fornecido
+            var employee = _context.Employees.FirstOrDefault(e => e.FkPersonId == fkPersonId);
+
+            if (employee == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o funcionário não for encontrado
+            }
+
+            // Remover o funcionário do contexto
+            _context.Employees.Remove(employee);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

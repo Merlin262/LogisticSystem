@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,82 +24,161 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/Clients
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Client>>> GetClients()
+        [HttpGet("api/clients")]
+        public IActionResult GetAllClients()
         {
-            return await _context.Clients.ToListAsync();
+            // Obter todos os clientes
+            var clients = _context.Clients
+                .Include(c => c.FkPerson)
+                .ThenInclude(p => p.FkAddress)
+                .ToList();
+
+            // Mapear os clientes para o formato desejado
+            var clientsDto = clients.Select(client => new
+            {
+                Id = client.FkPerson.Id, // Ajuste aqui conforme necessário
+                client.FkPerson.Name,
+                client.FkPerson.Email,
+                FkAddress = new
+                {
+                    client.FkPerson.FkAddress.Country,
+                    client.FkPerson.FkAddress.State,
+                    client.FkPerson.FkAddress.City,
+                    client.FkPerson.FkAddress.Street,
+                    client.FkPerson.FkAddress.Number,
+                    client.FkPerson.FkAddress.Complement,
+                    client.FkPerson.FkAddress.Zipcode,
+                    Id = client.FkPerson.FkAddress.Id // Ajuste aqui conforme necessário
+                }
+            }).ToList();
+
+            // Converta a lista para JSON e imprima no console
+            var jsonResult = JsonSerializer.Serialize(clientsDto, new JsonSerializerOptions { WriteIndented = true });
+            Console.WriteLine(jsonResult);
+
+            return Ok(clientsDto); // Retorna 200 OK com os dados dos clientes no formato desejado
         }
 
-        // GET: api/Clients/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Client>> GetClient(int id)
+
+        [HttpGet("api/clients/{id}")]
+        public IActionResult GetClientById(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
+            // Obter o cliente com o ID fornecido
+            var client = _context.Clients
+                .Include(c => c.FkPerson)
+                .ThenInclude(p => p.FkAddress)
+                .FirstOrDefault(c => c.FkPerson.Id == id);
 
             if (client == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se o cliente não for encontrado
             }
 
-            return client;
+            // Mapear a entidade Client para o formato desejado
+            var clientDto = new
+            {
+                Id = client.FkPerson.Id, // Ajuste aqui conforme necessário
+                client.FkPerson.Name,
+                client.FkPerson.Email,
+                FkAddress = new
+                {
+                    client.FkPerson.FkAddress.Country,
+                    client.FkPerson.FkAddress.State,
+                    client.FkPerson.FkAddress.City,
+                    client.FkPerson.FkAddress.Street,
+                    client.FkPerson.FkAddress.Number,
+                    client.FkPerson.FkAddress.Complement,
+                    client.FkPerson.FkAddress.Zipcode,
+                    Id = client.FkPerson.FkAddress.Id // Ajuste aqui conforme necessário
+                }
+            };
+
+            // Converta o objeto para JSON e imprima no console
+            var jsonResult = JsonSerializer.Serialize(clientDto, new JsonSerializerOptions { WriteIndented = true });
+            Console.WriteLine(jsonResult);
+
+            return Ok(clientDto); // Retorna 200 OK com os dados do cliente no formato desejado
         }
 
-        // PUT: api/Clients/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutClient(int id, Client client)
+
+
+        [HttpPost("api/clients")]
+        public IActionResult CreateClient([FromBody] ClientDTO request)
         {
-            if (id != client.FkPersonId)
+            // Crie uma nova instância de Client e relacione-a com Person e Address conforme necessário
+            var newClient = new Client
             {
-                return BadRequest();
-            }
-
-            _context.Entry(client).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClientExists(id))
+                FkPerson = new Person
                 {
-                    return NotFound();
+                    Id = request.Id,
+                    Name = request.Name,
+                    Email = request.Email,
+                    FkAddress = new Address
+                    {
+                        Id = request.FkAddress.Id,
+                        Country = request.FkAddress.Country,
+                        State = request.FkAddress.State,
+                        City = request.FkAddress.City,
+                        Street = request.FkAddress.Street,
+                        Number = request.FkAddress.Number
+                    }
                 }
-                else
-                {
-                    throw;
-                }
-            }
+            };
 
-            return NoContent();
+            // Adicione o novo cliente ao contexto
+            _context.Clients.Add(newClient);
+
+            // Salve as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Configure as opções para lidar com referências cíclicas
+            var jsonOptions = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                MaxDepth = 32 // Defina um valor adequado para a profundidade máxima, se necessário
+            };
+
+            // Converta o novo cliente para JSON
+            var jsonResult = JsonSerializer.Serialize(newClient, jsonOptions);
+
+            // Retorne o novo cliente criado
+            return Ok(jsonResult);
         }
 
-        // POST: api/Clients
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Client>> PostClient(Client client)
+
+
+
+        [HttpPut("api/clients/{id}")]
+        public IActionResult UpdateClient(int id, [FromBody] ClientDTO request)
         {
-            _context.Clients.Add(client);
-            try
+            // Obter o cliente com o ID fornecido
+            var client = _context.Clients.Find(id);
+
+            if (client == null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ClientExists(client.FkPersonId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound(); // Retorna 404 Not Found se o cliente não for encontrado
             }
 
-            return CreatedAtAction("GetClient", new { id = client.FkPersonId }, client);
+            // Atualizar propriedades do cliente
+            client.FkPerson.Name = request.Name;
+            client.FkPerson.Email = request.Email;
+
+            // Atualizar propriedades do endereço
+            client.FkPerson.FkAddress.Country = request.FkAddress.Country;
+            client.FkPerson.FkAddress.State = request.FkAddress.State;
+            client.FkPerson.FkAddress.City = request.FkAddress.City;
+            client.FkPerson.FkAddress.Street = request.FkAddress.Street;
+            client.FkPerson.FkAddress.Number = request.FkAddress.Number;
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(client); // Retorna 200 OK com os dados atualizados do cliente
         }
+
+
+
+
 
         // DELETE: api/Clients/5
         [HttpDelete("{id}")]
@@ -118,5 +200,7 @@ namespace logisticsSystem.Controllers
         {
             return _context.Clients.Any(e => e.FkPersonId == id);
         }
+
+        
     }
 }

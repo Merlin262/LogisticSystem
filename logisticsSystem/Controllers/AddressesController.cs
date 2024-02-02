@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
-using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -46,24 +45,31 @@ namespace logisticsSystem.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAddress(int id, [FromBody] AddressDTO addressDTO)
         {
+            if (id != addressDTO.Id)
+            {
+                return BadRequest();
+            }
+
+            var existingAddress = await _context.Addresses.FindAsync(id);
+
+            if (existingAddress == null)
+            {
+                return NotFound();
+            }
+
+            // Atualizar os campos necessários com base no DTO
+            existingAddress.Country = addressDTO.Country;
+            existingAddress.State = addressDTO.State;
+            existingAddress.City = addressDTO.City;
+            existingAddress.Street = addressDTO.Street;
+            existingAddress.Number = addressDTO.Number;
+            existingAddress.ComplementoComplement = addressDTO.ComplementoComplement;
+            existingAddress.Zipcode = addressDTO.Zipcode;
+
+            _context.Entry(existingAddress).State = EntityState.Modified;
+
             try
             {
-                var address = await _context.Addresses.FindAsync(id);
-
-                if (address == null)
-                {
-                    return NotFound();
-                }
-
-                address.Country = addressDTO.Country;
-                address.State = addressDTO.State;
-                address.City = addressDTO.City;
-                address.Street = addressDTO.Street;
-                address.Number = addressDTO.Number;
-                address.ComplementoComplement = addressDTO.ComplementoComplement;
-                address.Zipcode = addressDTO.Zipcode;
-
-                _context.Entry(address).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -81,31 +87,19 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
+        // POST: api/Addresses
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<AddressDTO>> PostAddress([FromBody] AddressDTO addressDTO)
+        public async Task<ActionResult<Address>> PostAddress(Address address)
         {
+            _context.Addresses.Add(address);
             try
-            { 
-                var address = new Address
-                {
-                    Id = addressDTO.Id,
-                    Country = addressDTO.Country,
-                    State = addressDTO.State,
-                    City = addressDTO.City,
-                    Street = addressDTO.Street,
-                    Number = addressDTO.Number,
-                    ComplementoComplement = addressDTO.ComplementoComplement,
-                    Zipcode = addressDTO.Zipcode,
-                };
-
-                _context.Addresses.Add(address);
-                _context.SaveChanges();
-            }
-
-            catch (DbUpdateException)
-            
             {
-                if (AddressExists(addressDTO.Id))
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (AddressExists(address.Id))
                 {
                     return Conflict();
                 }
@@ -115,9 +109,8 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = addressDTO.Id }, addressDTO);
+            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
         }
-    
 
         // DELETE: api/Addresses/5
         [HttpDelete("{id}")]

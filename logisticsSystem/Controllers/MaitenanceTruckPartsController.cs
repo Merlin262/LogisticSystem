@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,88 +22,106 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/MaitenanceTruckParts
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<MaitenanceTruckPart>>> GetMaitenanceTruckParts()
-        {
-            return await _context.MaitenanceTruckParts.ToListAsync();
-        }
-
-        // GET: api/MaitenanceTruckParts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<MaitenanceTruckPart>> GetMaitenanceTruckPart(int id)
-        {
-            var maitenanceTruckPart = await _context.MaitenanceTruckParts.FindAsync(id);
-
-            if (maitenanceTruckPart == null)
-            {
-                return NotFound();
-            }
-
-            return maitenanceTruckPart;
-        }
-
-        // PUT: api/MaitenanceTruckParts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMaitenanceTruckPart(int id, MaitenanceTruckPart maitenanceTruckPart)
-        {
-            if (id != maitenanceTruckPart.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(maitenanceTruckPart).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MaitenanceTruckPartExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/MaitenanceTruckParts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // CREATE - Método POST para MaintenanceTruckPart
         [HttpPost]
-        public async Task<ActionResult<MaitenanceTruckPart>> PostMaitenanceTruckPart(MaitenanceTruckPart maitenanceTruckPart)
+        public IActionResult CreateMaintenanceTruckPart([FromBody] MaintenanceTruckPartDTO maintenanceTruckPartDTO)
         {
-            _context.MaitenanceTruckParts.Add(maitenanceTruckPart);
-            await _context.SaveChangesAsync();
+            // Mapear MaintenanceTruckPartDTO para a entidade MaintenanceTruckPart
+            var newMaintenanceTruckPart = new MaitenanceTruckPart()
+            {
+                FkTruckPartId = maintenanceTruckPartDTO.FkTruckPartId,
+                FkMaintenanceId = maintenanceTruckPartDTO.FkMaintenanceId
+            };
 
-            return CreatedAtAction("GetMaitenanceTruckPart", new { id = maitenanceTruckPart.Id }, maitenanceTruckPart);
+            // Adicionar o novo relacionamento ao contexto
+            _context.MaitenanceTruckParts.Add(newMaintenanceTruckPart);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar o novo relacionamento criado
+            return Ok(newMaintenanceTruckPart);
         }
 
-        // DELETE: api/MaitenanceTruckParts/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMaitenanceTruckPart(int id)
+        // READ - Método GET (Todos) para MaintenanceTruckPart
+        [HttpGet]
+        public IActionResult GetAllMaintenanceTruckPart()
         {
-            var maitenanceTruckPart = await _context.MaitenanceTruckParts.FindAsync(id);
-            if (maitenanceTruckPart == null)
+            // Obter todos os relacionamentos
+            var maintenanceTruckParts = _context.MaitenanceTruckParts.ToList();
+
+            // Mapear MaintenanceTruckPart para MaintenanceTruckPartDTO
+            var maintenanceTruckPartDtoList = maintenanceTruckParts.Select(mtp => new MaintenanceTruckPartDTO
             {
-                return NotFound();
+                FkTruckPartId = mtp.FkTruckPartId,
+                FkMaintenanceId = mtp.FkMaintenanceId
+            }).ToList();
+
+            return Ok(maintenanceTruckPartDtoList);
+        }
+
+        // READ - Método GET por FkMaintenanceId para MaintenanceTruckPart
+        [HttpGet("{fkMaintenanceId}")]
+        public IActionResult GetMaintenanceTruckPartByFkMaintenanceId(int fkMaintenanceId)
+        {
+            // Obter os relacionamentos com o FkMaintenanceId fornecido
+            var maintenanceTruckParts = _context.MaitenanceTruckParts
+                .Where(mtp => mtp.FkMaintenanceId == fkMaintenanceId)
+                .ToList();
+
+            // Mapear MaintenanceTruckPart para MaintenanceTruckPartDTO
+            var maintenanceTruckPartDtoList = maintenanceTruckParts.Select(mtp => new MaintenanceTruckPartDTO
+            {
+                FkTruckPartId = mtp.FkTruckPartId,
+                FkMaintenanceId = mtp.FkMaintenanceId
+            }).ToList();
+
+            return Ok(maintenanceTruckPartDtoList);
+        }
+
+        // UPDATE - Método PUT para MaintenanceTruckPart
+        [HttpPut("{fkMaintenanceId}")]
+        public IActionResult UpdateMaintenanceTruckPart(int fkMaintenanceId, [FromBody] MaintenanceTruckPartDTO maintenanceTruckPartDTO)
+        {
+            // Obter o relacionamento com o FkMaintenanceId fornecido
+            var maintenanceTruckPart = _context.MaitenanceTruckParts
+                .FirstOrDefault(mtp => mtp.FkMaintenanceId == fkMaintenanceId);
+
+            if (maintenanceTruckPart == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o relacionamento não for encontrado
             }
 
-            _context.MaitenanceTruckParts.Remove(maitenanceTruckPart);
-            await _context.SaveChangesAsync();
+            // Atualizar propriedades do relacionamento
+            maintenanceTruckPart.FkTruckPartId = maintenanceTruckPartDTO.FkTruckPartId;
+            maintenanceTruckPart.FkMaintenanceId = maintenanceTruckPartDTO.FkMaintenanceId;
 
-            return NoContent();
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(maintenanceTruckPart);
         }
 
-        private bool MaitenanceTruckPartExists(int id)
+        // DELETE - Método DELETE para MaintenanceTruckPart
+        [HttpDelete("{fkMaintenanceId}")]
+        public IActionResult DeleteMaintenanceTruckPart(int fkMaintenanceId)
         {
-            return _context.MaitenanceTruckParts.Any(e => e.Id == id);
+            // Obter o relacionamento com o FkMaintenanceId fornecido
+            var maintenanceTruckPart = _context.MaitenanceTruckParts
+                .FirstOrDefault(mtp => mtp.FkMaintenanceId == fkMaintenanceId);
+
+            if (maintenanceTruckPart == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o relacionamento não for encontrado
+            }
+
+            // Remover o relacionamento do contexto
+            _context.MaitenanceTruckParts.Remove(maintenanceTruckPart);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

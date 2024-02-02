@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,102 +22,114 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/Phones
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Phone>>> GetPhones()
-        {
-            return await _context.Phones.ToListAsync();
-        }
-
-        // GET: api/Phones/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Phone>> GetPhone(int id)
-        {
-            var phone = await _context.Phones.FindAsync(id);
-
-            if (phone == null)
-            {
-                return NotFound();
-            }
-
-            return phone;
-        }
-
-        // PUT: api/Phones/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPhone(int id, Phone phone)
-        {
-            if (id != phone.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(phone).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PhoneExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Phones
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // CREATE - Método POST para Phone
         [HttpPost]
-        public async Task<ActionResult<Phone>> PostPhone(Phone phone)
+        public IActionResult CreatePhone([FromBody] PhoneDTO phoneDTO)
         {
-            _context.Phones.Add(phone);
-            try
+            // Mapear PhoneDTO para a entidade Phone
+            var newPhone = new Phone
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (PhoneExists(phone.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                Id = phoneDTO.Id,
+                AreaCode = phoneDTO.AreaCode,
+                Number = phoneDTO.Number,
+                FkPersonId = phoneDTO.FkPersonId
+            };
 
-            return CreatedAtAction("GetPhone", new { id = phone.Id }, phone);
+            // Adicionar o novo telefone ao contexto
+            _context.Phones.Add(newPhone);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar o novo telefone criado
+            return Ok(newPhone);
         }
 
-        // DELETE: api/Phones/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePhone(int id)
+        // READ - Método GET (Todos) para Phone
+        [HttpGet]
+        public IActionResult GetAllPhones()
         {
-            var phone = await _context.Phones.FindAsync(id);
+            // Obter todos os telefones
+            var phones = _context.Phones.ToList();
+
+            // Mapear Phone para PhoneDTO
+            var phoneDtoList = phones.Select(p => new PhoneDTO
+            {
+                Id = p.Id,
+                AreaCode = p.AreaCode,
+                Number = p.Number,
+                FkPersonId = p.FkPersonId
+            }).ToList();
+
+            return Ok(phoneDtoList);
+        }
+
+        // READ - Método GET por Id para Phone
+        [HttpGet("{id}")]
+        public IActionResult GetPhoneById(int id)
+        {
+            // Obter o telefone com o Id fornecido
+            var phone = _context.Phones.FirstOrDefault(p => p.Id == id);
+
             if (phone == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se o telefone não for encontrado
             }
 
-            _context.Phones.Remove(phone);
-            await _context.SaveChangesAsync();
+            // Mapear Phone para PhoneDTO
+            var phoneDto = new PhoneDTO
+            {
+                Id = phone.Id,
+                AreaCode = phone.AreaCode,
+                Number = phone.Number,
+                FkPersonId = phone.FkPersonId
+            };
 
-            return NoContent();
+            return Ok(phoneDto);
         }
 
-        private bool PhoneExists(int id)
+        // UPDATE - Método PUT para Phone
+        [HttpPut("{id}")]
+        public IActionResult UpdatePhone(int id, [FromBody] PhoneDTO phoneDTO)
         {
-            return _context.Phones.Any(e => e.Id == id);
+            // Obter o telefone com o Id fornecido
+            var phone = _context.Phones.FirstOrDefault(p => p.Id == id);
+
+            if (phone == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o telefone não for encontrado
+            }
+
+            // Atualizar propriedades do telefone
+            phone.AreaCode = phoneDTO.AreaCode;
+            phone.Number = phoneDTO.Number;
+            phone.FkPersonId = phoneDTO.FkPersonId;
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(phone);
+        }
+
+        // DELETE - Método DELETE para Phone
+        [HttpDelete("{id}")]
+        public IActionResult DeletePhone(int id)
+        {
+            // Obter o telefone com o Id fornecido
+            var phone = _context.Phones.FirstOrDefault(p => p.Id == id);
+
+            if (phone == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o telefone não for encontrado
+            }
+
+            // Remover o telefone do contexto
+            _context.Phones.Remove(phone);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

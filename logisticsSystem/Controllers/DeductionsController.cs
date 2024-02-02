@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,102 +22,114 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/Deductions
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Deduction>>> GetDeductions()
-        {
-            return await _context.Deductions.ToListAsync();
-        }
-
-        // GET: api/Deductions/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Deduction>> GetDeduction(int id)
-        {
-            var deduction = await _context.Deductions.FindAsync(id);
-
-            if (deduction == null)
-            {
-                return NotFound();
-            }
-
-            return deduction;
-        }
-
-        // PUT: api/Deductions/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDeduction(int id, Deduction deduction)
-        {
-            if (id != deduction.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(deduction).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DeductionExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Deductions
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // CREATE - Método POST
         [HttpPost]
-        public async Task<ActionResult<Deduction>> PostDeduction(Deduction deduction)
+        public IActionResult CreateDeduction([FromBody] DeductionDTO deductionDTO)
         {
-            _context.Deductions.Add(deduction);
-            try
+            // Mapear DeductionDTO para a entidade Deduction
+            var newDeduction = new Deduction
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (DeductionExists(deduction.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                Id = deductionDTO.Id,
+                Name = deductionDTO.Name,
+                Amount = deductionDTO.Amount,
+                Description = deductionDTO.Description
+            };
 
-            return CreatedAtAction("GetDeduction", new { id = deduction.Id }, deduction);
+            // Adicionar a nova dedução ao contexto
+            _context.Deductions.Add(newDeduction);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar a nova dedução criada
+            return Ok(newDeduction);
         }
 
-        // DELETE: api/Deductions/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDeduction(int id)
+        // READ - Método GET (Todos)
+        [HttpGet]
+        public IActionResult GetAllDeductions()
         {
-            var deduction = await _context.Deductions.FindAsync(id);
+            // Obter todas as deduções
+            var deductions = _context.Deductions.ToList();
+
+            // Mapear Deduction para DeductionDTO
+            var deductionsDto = deductions.Select(d => new DeductionDTO
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Amount = d.Amount,
+                Description = d.Description
+            }).ToList();
+
+            return Ok(deductionsDto);
+        }
+
+        // READ - Método GET por ID
+        [HttpGet("{id}")]
+        public IActionResult GetDeductionById(int id)
+        {
+            // Obter a dedução com o ID fornecido
+            var deduction = _context.Deductions.Find(id);
+
             if (deduction == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se a dedução não for encontrada
             }
 
-            _context.Deductions.Remove(deduction);
-            await _context.SaveChangesAsync();
+            // Mapear Deduction para DeductionDTO
+            var deductionDto = new DeductionDTO
+            {
+                Id = deduction.Id,
+                Name = deduction.Name,
+                Amount = deduction.Amount,
+                Description = deduction.Description
+            };
 
-            return NoContent();
+            return Ok(deductionDto);
         }
 
-        private bool DeductionExists(int id)
+        // UPDATE - Método PUT
+        [HttpPut("{id}")]
+        public IActionResult UpdateDeduction(int id, [FromBody] DeductionDTO deductionDTO)
         {
-            return _context.Deductions.Any(e => e.Id == id);
+            // Obter a dedução com o ID fornecido
+            var deduction = _context.Deductions.Find(id);
+
+            if (deduction == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se a dedução não for encontrada
+            }
+
+            // Atualizar propriedades da dedução
+            deduction.Name = deductionDTO.Name;
+            deduction.Amount = deductionDTO.Amount;
+            deduction.Description = deductionDTO.Description;
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(deduction);
+        }
+
+        // DELETE - Método DELETE
+        [HttpDelete("{id}")]
+        public IActionResult DeleteDeduction(int id)
+        {
+            // Obter a dedução com o ID fornecido
+            var deduction = _context.Deductions.Find(id);
+
+            if (deduction == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se a dedução não for encontrada
+            }
+
+            // Remover a dedução do contexto
+            _context.Deductions.Remove(deduction);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

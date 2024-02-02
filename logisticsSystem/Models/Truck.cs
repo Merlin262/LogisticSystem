@@ -17,6 +17,8 @@ public partial class Truck
 
     public string? Color { get; set; }
 
+    public int? TruckAxles { get; set; }
+
     public virtual ICollection<Maintenance> Maintenances { get; set; } = new List<Maintenance>();
 
     public virtual ICollection<TruckDriver> TruckDrivers { get; set; } = new List<TruckDriver>();

@@ -7,5 +7,5 @@ public class EmployeeWageDTO
     public decimal? Amount { get; set; }
     public int? FkEmployeeId { get; set; }
 
-    public EmployeeDTO FkEmployee { get; set; }
+    //public EmployeeDTO FkEmployee { get; set; }
 }
