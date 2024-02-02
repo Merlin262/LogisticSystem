@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -29,10 +30,10 @@ namespace logisticsSystem.Controllers
         }
 
         // GET: api/Trucks/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Truck>> GetTruck(int id)
+        [HttpGet("{chassis}")]
+        public async Task<ActionResult<Truck>> GetTruck(int chassis)
         {
-            var truck = await _context.Trucks.FindAsync(id);
+            var truck = await _context.Trucks.FindAsync(chassis);
 
             if (truck == null)
             {
@@ -44,23 +45,31 @@ namespace logisticsSystem.Controllers
 
         // PUT: api/Trucks/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTruck(int id, Truck truck)
+        [HttpPut("{chassis}")]
+        public async Task<IActionResult> PutTruck(int chassis, [FromBody] TruckDTO truckDTO)
         {
-            if (id != truck.Chassis)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(truck).State = EntityState.Modified;
-
             try
             {
+                var truck = await _context.Trucks.FindAsync(chassis);
+
+                if (truck == null)
+                {
+                    return NotFound();
+                }
+
+                truck.Chassis = truckDTO.Chassis;
+                truck.MaximumWeight = truckDTO.MaximumWeight;
+                truck.KilometerCount = truckDTO.KilometerCount;
+                truck.Model = truckDTO.Model;
+                truck.Year = truckDTO.Year;
+                truck.Color = truckDTO.Color;
+
+                _context.Entry(truck).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TruckExists(id))
+                if (!TruckExists(chassis))
                 {
                     return NotFound();
                 }
@@ -73,19 +82,29 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        // POST: api/Trucks
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Truck>> PostTruck(Truck truck)
+        public async Task<ActionResult<TruckDTO>> PostTruck([FromBody] TruckDTO truckDTO)
         {
-            _context.Trucks.Add(truck);
             try
             {
-                await _context.SaveChangesAsync();
+                var truck = new Truck
+                {
+                    Chassis = truckDTO.Chassis,
+                    MaximumWeight = truckDTO.MaximumWeight,
+                    KilometerCount = truckDTO.KilometerCount,
+                    Model = truckDTO.Model,
+                    Year = truckDTO.Year,
+                    Color = truckDTO.Color,
+                };
+
+                _context.Trucks.Add(truck);
+                _context.SaveChanges();
             }
+
             catch (DbUpdateException)
+
             {
-                if (TruckExists(truck.Chassis))
+                if (TruckExists(truckDTO.Chassis))
                 {
                     return Conflict();
                 }
@@ -95,14 +114,14 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetTruck", new { id = truck.Chassis }, truck);
+            return CreatedAtAction("GetTruck", new { Chassis = truckDTO.Chassis }, truckDTO);
         }
 
         // DELETE: api/Trucks/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTruck(int id)
+        [HttpDelete("{chassis}")]
+        public async Task<IActionResult> DeleteTruck(int chassis)
         {
-            var truck = await _context.Trucks.FindAsync(id);
+            var truck = await _context.Trucks.FindAsync(chassis);
             if (truck == null)
             {
                 return NotFound();
@@ -114,9 +133,9 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        private bool TruckExists(int id)
+        private bool TruckExists(int chassis)
         {
-            return _context.Trucks.Any(e => e.Chassis == id);
+            return _context.Trucks.Any(e => e.Chassis == chassis);
         }
     }
 }

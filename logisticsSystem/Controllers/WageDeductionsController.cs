@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -45,31 +46,26 @@ namespace logisticsSystem.Controllers
         // PUT: api/WageDeductions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, [FromBody] AddressDTO addressDTO)
+        public async Task<IActionResult> PutWageDeduction(int id, [FromBody] WageDeductionDTO wageDeductionDTO)
         {
             try
             {
-                var address = await _context.Addresses.FindAsync(id);
+                var wageDeduction = await _context.WageDeductions.FindAsync(id);
 
-                if (address == null)
+                if (wageDeduction == null)
                 {
                     return NotFound();
                 }
 
-                address.Country = addressDTO.Country;
-                address.State = addressDTO.State;
-                address.City = addressDTO.City;
-                address.Street = addressDTO.Street;
-                address.Number = addressDTO.Number;
-                address.ComplementoComplement = addressDTO.ComplementoComplement;
-                address.Zipcode = addressDTO.Zipcode;
+                wageDeduction.FkDeductionsId = wageDeductionDTO.FkDeductionsId;
+                wageDeduction.FkWageId = wageDeductionDTO.FkWageId;
 
-                _context.Entry(address).State = EntityState.Modified;
+                _context.Entry(wageDeduction).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
+                if (!WageDeductionExists(id))
                 {
                     return NotFound();
                 }
@@ -83,30 +79,24 @@ namespace logisticsSystem.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<AddressDTO>> PostAddress([FromBody] AddressDTO addressDTO)
+        public async Task<ActionResult<WageDeductionDTO>> PostWageDeduction([FromBody] WageDeductionDTO wageDeductionDTO)
         {
             try
             {
-                var address = new Address
+                var wageDeduction = new WageDeduction
                 {
-                    Id = addressDTO.Id,
-                    Country = addressDTO.Country,
-                    State = addressDTO.State,
-                    City = addressDTO.City,
-                    Street = addressDTO.Street,
-                    Number = addressDTO.Number,
-                    ComplementoComplement = addressDTO.ComplementoComplement,
-                    Zipcode = addressDTO.Zipcode,
+                    FkDeductionsId = wageDeductionDTO.FkDeductionsId,
+                    FkWageId = wageDeductionDTO.FkWageId,
                 };
 
-                _context.Addresses.Add(address);
+                _context.WageDeductions.Add(wageDeduction);
                 _context.SaveChanges();
             }
 
             catch (DbUpdateException)
 
             {
-                if (AddressExists(addressDTO.Id))
+                if (WageDeductionExists(wageDeductionDTO.Id))
                 {
                     return Conflict();
                 }
@@ -116,7 +106,7 @@ namespace logisticsSystem.Controllers
                 }
             }
 
-            return CreatedAtAction("GetAddress", new { id = addressDTO.Id }, addressDTO);
+            return CreatedAtAction("GetWageDeduction", new { id = wageDeductionDTO.Id }, wageDeductionDTO);
         }
 
         // DELETE: api/WageDeductions/5
