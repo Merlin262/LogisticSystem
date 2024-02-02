@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using logisticsSystem.Models;
 using logisticsSystem.Data;
+using logisticsSystem.Models;
 
 namespace logisticsSystem.Controllers
 {

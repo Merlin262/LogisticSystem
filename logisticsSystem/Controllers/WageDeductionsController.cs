@@ -7,42 +7,43 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
-using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddressesController : ControllerBase
+    public class WageDeductionsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
 
-        public AddressesController(LogisticsSystemContext context)
+        public WageDeductionsController(LogisticsSystemContext context)
         {
             _context = context;
         }
 
-        // GET: api/Addresses
+        // GET: api/WageDeductions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+        public async Task<ActionResult<IEnumerable<WageDeduction>>> GetWageDeductions()
         {
-            return await _context.Addresses.ToListAsync();
+            return await _context.WageDeductions.ToListAsync();
         }
 
-        // GET: api/Addresses/5
+        // GET: api/WageDeductions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+        public async Task<ActionResult<WageDeduction>> GetWageDeduction(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            var wageDeduction = await _context.WageDeductions.FindAsync(id);
 
-            if (address == null)
+            if (wageDeduction == null)
             {
                 return NotFound();
             }
 
-            return address;
+            return wageDeduction;
         }
 
+        // PUT: api/WageDeductions/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAddress(int id, [FromBody] AddressDTO addressDTO)
         {
@@ -85,7 +86,7 @@ namespace logisticsSystem.Controllers
         public async Task<ActionResult<AddressDTO>> PostAddress([FromBody] AddressDTO addressDTO)
         {
             try
-            { 
+            {
                 var address = new Address
                 {
                     Id = addressDTO.Id,
@@ -103,7 +104,7 @@ namespace logisticsSystem.Controllers
             }
 
             catch (DbUpdateException)
-            
+
             {
                 if (AddressExists(addressDTO.Id))
                 {
@@ -117,27 +118,26 @@ namespace logisticsSystem.Controllers
 
             return CreatedAtAction("GetAddress", new { id = addressDTO.Id }, addressDTO);
         }
-    
 
-        // DELETE: api/Addresses/5
+        // DELETE: api/WageDeductions/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        public async Task<IActionResult> DeleteWageDeduction(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
-            if (address == null)
+            var wageDeduction = await _context.WageDeductions.FindAsync(id);
+            if (wageDeduction == null)
             {
                 return NotFound();
             }
 
-            _context.Addresses.Remove(address);
+            _context.WageDeductions.Remove(wageDeduction);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AddressExists(int id)
+        private bool WageDeductionExists(int id)
         {
-            return _context.Addresses.Any(e => e.Id == id);
+            return _context.WageDeductions.Any(e => e.Id == id);
         }
     }
 }
