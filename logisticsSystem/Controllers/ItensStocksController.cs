@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,102 +22,114 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/ItensStocks
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItensStock>>> GetItensStocks()
-        {
-            return await _context.ItensStocks.ToListAsync();
-        }
-
-        // GET: api/ItensStocks/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ItensStock>> GetItensStock(int id)
-        {
-            var itensStock = await _context.ItensStocks.FindAsync(id);
-
-            if (itensStock == null)
-            {
-                return NotFound();
-            }
-
-            return itensStock;
-        }
-
-        // PUT: api/ItensStocks/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutItensStock(int id, ItensStock itensStock)
-        {
-            if (id != itensStock.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(itensStock).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ItensStockExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/ItensStocks
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // CREATE - Método POST para ItensStock
         [HttpPost]
-        public async Task<ActionResult<ItensStock>> PostItensStock(ItensStock itensStock)
+        public IActionResult CreateItensStock([FromBody] ItensStockDTO itensStockDTO)
         {
-            _context.ItensStocks.Add(itensStock);
-            try
+            // Mapear ItensStockDTO para a entidade ItensStock
+            var newItensStock = new ItensStock
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ItensStockExists(itensStock.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                Id = itensStockDTO.Id,
+                Description = itensStockDTO.Description,
+                Quantity = itensStockDTO.Quantity,
+                Price = itensStockDTO.Price
+            };
 
-            return CreatedAtAction("GetItensStock", new { id = itensStock.Id }, itensStock);
+            // Adicionar o novo item ao estoque ao contexto
+            _context.ItensStocks.Add(newItensStock);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar o novo item ao estoque criado
+            return Ok(newItensStock);
         }
 
-        // DELETE: api/ItensStocks/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItensStock(int id)
+        // READ - Método GET (Todos) para ItensStock
+        [HttpGet]
+        public IActionResult GetAllItensStock()
         {
-            var itensStock = await _context.ItensStocks.FindAsync(id);
+            // Obter todos os itens do estoque
+            var itensStock = _context.ItensStocks.ToList();
+
+            // Mapear ItensStock para ItensStockDTO
+            var itensStockDto = itensStock.Select(isd => new ItensStockDTO
+            {
+                Id = isd.Id,
+                Description = isd.Description,
+                Quantity = isd.Quantity,
+                Price = isd.Price
+            }).ToList();
+
+            return Ok(itensStockDto);
+        }
+
+        // READ - Método GET por Id para ItensStock
+        [HttpGet("{id}")]
+        public IActionResult GetItensStockById(int id)
+        {
+            // Obter o item do estoque com o Id fornecido
+            var itensStock = _context.ItensStocks.FirstOrDefault(isd => isd.Id == id);
+
             if (itensStock == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se o item do estoque não for encontrado
             }
 
-            _context.ItensStocks.Remove(itensStock);
-            await _context.SaveChangesAsync();
+            // Mapear ItensStock para ItensStockDTO
+            var itensStockDto = new ItensStockDTO
+            {
+                Id = itensStock.Id,
+                Description = itensStock.Description,
+                Quantity = itensStock.Quantity,
+                Price = itensStock.Price
+            };
 
-            return NoContent();
+            return Ok(itensStockDto);
         }
 
-        private bool ItensStockExists(int id)
+        // UPDATE - Método PUT para ItensStock
+        [HttpPut("{id}")]
+        public IActionResult UpdateItensStock(int id, [FromBody] ItensStockDTO itensStockDTO)
         {
-            return _context.ItensStocks.Any(e => e.Id == id);
+            // Obter o item do estoque com o Id fornecido
+            var itensStock = _context.ItensStocks.FirstOrDefault(isd => isd.Id == id);
+
+            if (itensStock == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o item do estoque não for encontrado
+            }
+
+            // Atualizar propriedades do item do estoque
+            itensStock.Description = itensStockDTO.Description;
+            itensStock.Quantity = itensStockDTO.Quantity;
+            itensStock.Price = itensStockDTO.Price;
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(itensStock);
+        }
+
+        // DELETE - Método DELETE para ItensStock
+        [HttpDelete("{id}")]
+        public IActionResult DeleteItensStock(int id)
+        {
+            // Obter o item do estoque com o Id fornecido
+            var itensStock = _context.ItensStocks.FirstOrDefault(isd => isd.Id == id);
+
+            if (itensStock == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o item do estoque não for encontrado
+            }
+
+            // Remover o item do estoque do contexto
+            _context.ItensStocks.Remove(itensStock);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

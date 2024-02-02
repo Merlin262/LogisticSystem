@@ -2,6 +2,7 @@
 {
     public class ShippingDTO
     {
+        public int Id { get; set; }
         public DateOnly? SendDate { get; set; }
 
         public DateOnly? EstimatedDate { get; set; }
@@ -14,8 +15,6 @@
 
         public DateOnly? RegistrationDate { get; set; }
 
-        public int Id { get; set; }
-
         public decimal? ShippingPrice { get; set; }
 
         public int? FkClientId { get; set; }
@@ -24,11 +23,13 @@
 
         public int? FkAddressId { get; set; }
 
-        public virtual AddressDTO? FkAddress { get; set; }
-
-        public virtual ClientDTO? FkClient { get; set; }
-
-        public virtual EmployeeDTO? FkEmployee { get; set; }
     }
 
 }
+
+
+//public virtual AddressDTO? FkAddress { get; set; }
+
+//public virtual ClientDTO? FkClient { get; set; }
+
+//public virtual EmployeeDTO? FkEmployee { get; set; }

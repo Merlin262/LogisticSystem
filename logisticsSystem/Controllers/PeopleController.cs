@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,102 +22,141 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/People
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPeople()
-        {
-            return await _context.People.ToListAsync();
-        }
-
-        // GET: api/People/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Person>> GetPerson(int id)
-        {
-            var person = await _context.People.FindAsync(id);
-
-            if (person == null)
-            {
-                return NotFound();
-            }
-
-            return person;
-        }
-
-        // PUT: api/People/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPerson(int id, Person person)
-        {
-            if (id != person.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(person).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PersonExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/People
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // CREATE - Método POST para Person
         [HttpPost]
-        public async Task<ActionResult<Person>> PostPerson(Person person)
+        public IActionResult CreatePerson([FromBody] PersonDTO personDTO)
         {
-            _context.People.Add(person);
-            try
+            // Mapear PersonDTO para a entidade Person
+            var newPerson = new Person
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (PersonExists(person.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                Id = personDTO.Id,
+                Name = personDTO.Name,
+                Email = personDTO.Email,
+                //FkAddressId = personDTO.FkAddressId
+            };
 
-            return CreatedAtAction("GetPerson", new { id = person.Id }, person);
+            // Adicionar a nova pessoa ao contexto
+            _context.People.Add(newPerson);
+
+            // Mapear AddressDTO para a entidade Address e adicionar ao contexto
+            
+
+            
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar a nova pessoa criada
+            return Ok(newPerson);
         }
 
-        // DELETE: api/People/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePerson(int id)
+        // READ - Método GET (Todos) para Person
+        [HttpGet]
+        public IActionResult GetAllPersons()
         {
-            var person = await _context.People.FindAsync(id);
+            // Obter todas as pessoas
+            var persons = _context.People.ToList();
+
+            // Mapear Person para PersonDTO
+            var personDtoList = persons.Select(p => new PersonDTO
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Email = p.Email,
+                //FkAddressId = p.FkAddressId,
+                // Mapear Address para AddressDTO se existir
+                
+            }).ToList();
+
+            return Ok(personDtoList);
+        }
+
+        // READ - Método GET por Id para Person
+        [HttpGet("{id}")]
+        public IActionResult GetPersonById(int id)
+        {
+            // Obter a pessoa com o Id fornecido
+            var person = _context.People.FirstOrDefault(p => p.Id == id);
+
             if (person == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se a pessoa não for encontrada
             }
 
-            _context.People.Remove(person);
-            await _context.SaveChangesAsync();
+            // Mapear Person para PersonDTO
+            var personDto = new PersonDTO
+            {
+                Id = person.Id,
+                Name = person.Name,
+                Email = person.Email,
+                //FkAddressId = person.FkAddressId,
+                // Mapear Address para AddressDTO se existir
+               
+                // Mapear Phones para PhoneDTO
+                
+            };
 
-            return NoContent();
+            return Ok(personDto);
         }
 
-        private bool PersonExists(int id)
+        // UPDATE - Método PUT para Person
+        [HttpPut("{id}")]
+        public IActionResult UpdatePerson(int id, [FromBody] PersonDTO personDTO)
         {
-            return _context.People.Any(e => e.Id == id);
+            // Obter a pessoa com o Id fornecido
+            var person = _context.People.FirstOrDefault(p => p.Id == id);
+
+            if (person == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se a pessoa não for encontrada
+            }
+
+            // Atualizar propriedades da pessoa
+            person.Name = personDTO.Name;
+            person.Email = personDTO.Email;
+            //person.FkAddressId = personDTO.FkAddressId;
+
+            
+
+            // Remover todos os telefones associados à pessoa
+            _context.Phones.RemoveRange(person.Phones);
+
+            
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(person);
+        }
+
+        // DELETE - Método DELETE para Person
+        [HttpDelete("{id}")]
+        public IActionResult DeletePerson(int id)
+        {
+            // Obter a pessoa com o Id fornecido
+            var person = _context.People.FirstOrDefault(p => p.Id == id);
+
+            if (person == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se a pessoa não for encontrada
+            }
+
+            // Remover a pessoa do contexto
+            _context.People.Remove(person);
+
+            // Remover o endereço associado se existir
+            if (person.FkAddress != null)
+            {
+                _context.Addresses.Remove(person.FkAddress);
+            }
+
+            // Remover todos os telefones associados à pessoa
+            _context.Phones.RemoveRange(person.Phones);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

@@ -15,7 +15,7 @@ public partial class Address
 
     public string? Number { get; set; }
 
-    public string? ComplementoComplement { get; set; }
+    public string? Complement { get; set; }
 
     public string? Zipcode { get; set; }
 

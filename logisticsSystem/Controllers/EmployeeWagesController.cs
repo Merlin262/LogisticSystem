@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,102 +22,131 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/EmployeeWages
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EmployeeWage>>> GetEmployeeWages()
+        public IActionResult GetAllRecords()
         {
-            return await _context.EmployeeWages.ToListAsync();
+            // Obter todos os registros de EmployeeWage
+            var employeeWages = _context.EmployeeWages.ToList();
+
+            // Mapear EmployeeWage para objeto dinâmico
+            var result = employeeWages.Select(ew => new
+            {
+                Id = ew.Id,
+                PayDay = ew.PayDay,
+                Amount = ew.Amount,
+                FkEmployeeId = ew.FkEmployeeId
+            }).ToList();
+
+            return Ok(result);
         }
 
-        // GET: api/EmployeeWages/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<EmployeeWage>> GetEmployeeWage(int id)
+        // CREATE - Método POST para EmployeeWage
+        [HttpPost("{fkPersonId}/employeewages")]
+        public IActionResult CreateEmployeeWage(int fkPersonId, [FromBody] EmployeeWageDTO employeeWageDTO)
         {
-            var employeeWage = await _context.EmployeeWages.FindAsync(id);
+            // Obter o funcionário com o FkPersonId fornecido
+            var employee = _context.Employees.FirstOrDefault(e => e.FkPersonId == fkPersonId);
+
+            if (employee == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o funcionário não for encontrado
+            }
+
+            // Mapear EmployeeWageDTO para a entidade EmployeeWage
+            var newEmployeeWage = new EmployeeWage
+            {
+                Id = employeeWageDTO.Id,
+                PayDay = employeeWageDTO.PayDay,
+                Amount = employeeWageDTO.Amount,
+                FkEmployeeId = employee.FkPersonId
+            };
+
+            // Adicionar a nova remuneração ao contexto
+            _context.EmployeeWages.Add(newEmployeeWage);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar a nova remuneração criada
+            return Ok(new
+            {
+                newEmployeeWage.Id,
+                newEmployeeWage.PayDay,
+                newEmployeeWage.Amount,
+                newEmployeeWage.FkEmployeeId
+            });
+        }
+
+        // READ - Método GET (Todos) para EmployeeWage
+        [HttpGet("{fkPersonId}/employeewages")]
+        public IActionResult GetEmployeeWages(int fkPersonId)
+        {
+            // Obter as remunerações do funcionário com o FkPersonId fornecido
+            var employeeWages = _context.EmployeeWages
+                .Where(ew => ew.FkEmployee.FkPersonId == fkPersonId)
+                .ToList();
+
+            // Mapear EmployeeWage para EmployeeWageDTO
+            var employeeWagesDto = employeeWages.Select(ew => new
+            {
+                ew.Id,
+                ew.PayDay,
+                ew.Amount,
+                ew.FkEmployeeId
+            }).ToList();
+
+            return Ok(employeeWagesDto);
+        }
+
+        // UPDATE - Método PUT para EmployeeWage
+        [HttpPut("{fkPersonId}/employeewages/{employeeWageId}")]
+        public IActionResult UpdateEmployeeWage(int fkPersonId, int employeeWageId, [FromBody] EmployeeWageDTO employeeWageDTO)
+        {
+            // Obter a remuneração do funcionário com o FkPersonId e Id fornecidos
+            var employeeWage = _context.EmployeeWages
+                .FirstOrDefault(ew => ew.FkEmployee.FkPersonId == fkPersonId && ew.Id == employeeWageId);
 
             if (employeeWage == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se a remuneração não for encontrada
             }
 
-            return employeeWage;
+            // Atualizar propriedades da remuneração
+            employeeWage.PayDay = employeeWageDTO.PayDay;
+            employeeWage.Amount = employeeWageDTO.Amount;
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(new
+            {
+                employeeWage.Id,
+                employeeWage.PayDay,
+                employeeWage.Amount,
+                employeeWage.FkEmployeeId
+            });
         }
 
-        // PUT: api/EmployeeWages/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployeeWage(int id, EmployeeWage employeeWage)
+        // DELETE - Método DELETE para EmployeeWage
+        [HttpDelete("{fkPersonId}/employeewages/{employeeWageId}")]
+        public IActionResult DeleteEmployeeWage(int fkPersonId, int employeeWageId)
         {
-            if (id != employeeWage.Id)
-            {
-                return BadRequest();
-            }
+            // Obter a remuneração do funcionário com o FkPersonId e Id fornecidos
+            var employeeWage = _context.EmployeeWages
+                .FirstOrDefault(ew => ew.FkEmployee.FkPersonId == fkPersonId && ew.Id == employeeWageId);
 
-            _context.Entry(employeeWage).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EmployeeWageExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/EmployeeWages
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<EmployeeWage>> PostEmployeeWage(EmployeeWage employeeWage)
-        {
-            _context.EmployeeWages.Add(employeeWage);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (EmployeeWageExists(employeeWage.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetEmployeeWage", new { id = employeeWage.Id }, employeeWage);
-        }
-
-        // DELETE: api/EmployeeWages/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployeeWage(int id)
-        {
-            var employeeWage = await _context.EmployeeWages.FindAsync(id);
             if (employeeWage == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se a remuneração não for encontrada
             }
 
+            // Remover a remuneração do contexto
             _context.EmployeeWages.Remove(employeeWage);
-            await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
 
-        private bool EmployeeWageExists(int id)
-        {
-            return _context.EmployeeWages.Any(e => e.Id == id);
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

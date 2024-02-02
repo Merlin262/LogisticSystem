@@ -22,140 +22,106 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/ItensShippeds
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItensShippedDTO>>> GetItensShippeds()
-        {
-            try
-            {
-                var itensShippeds = await _context.ItensShippeds.ToListAsync();
-
-                var itensShippedDTOs = itensShippeds.Select(itensShipped => new ItensShippedDTO
-                {
-                    FkItensStockId = itensShipped.FkItensStockId,
-                    FkShippingId = itensShipped.FkShippingId,
-                    // Mapeie outras propriedades conforme necessário
-                });
-
-                return Ok(itensShippedDTOs);
-            }
-            catch (Exception ex)
-            {
-                // Trate os erros adequadamente e retorne uma resposta apropriada
-                return StatusCode(500, "Erro interno do servidor");
-            }
-        }
-
-
-        // GET: api/ItensShippeds/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ItensShippedDTO>> GetItensShipped(int id)
-        {
-            try
-            {
-                var itensShipped = await _context.ItensShippeds.FindAsync(id);
-
-                if (itensShipped == null)
-                {
-                    return NotFound();
-                }
-
-                var itensShippedDTO = new ItensShippedDTO
-                {
-                    FkItensStockId = itensShipped.FkItensStockId,
-                    FkShippingId = itensShipped.FkShippingId,
-                    // Mapeie outras propriedades conforme necessário
-                };
-
-                return Ok(itensShippedDTO);
-            }
-            catch (Exception ex)
-            {
-                // Trate os erros adequadamente e retorne uma resposta apropriada
-                return StatusCode(500, "Erro interno do servidor");
-            }
-        }
-
-
-        // PUT: api/ItensShippeds/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutItensShipped(int id, ItensShippedDTO itensShippedDTO)
-        {
-            if (id != itensShippedDTO.FkItensStockId)
-            {
-                return BadRequest();
-            }
-
-            var itensShipped = new ItensShipped
-            {
-                FkItensStockId = itensShippedDTO.FkItensStockId,
-                FkShippingId = itensShippedDTO.FkShippingId,
-            };
-
-            _context.Entry(itensShipped).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ItensShippedExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-
-        // POST: api/ItensShippeds
+        // CREATE - Método POST para ItensShipped
         [HttpPost]
-        public async Task<ActionResult<ItensShippedDTO>> PostItensShipped([FromBody]ItensShippedDTO itensShippedDTO)
+        public IActionResult CreateItensShipped([FromBody] ItensShippedDTO itensShippedDTO)
         {
-            var itensShipped = new ItensShipped
+            // Mapear ItensShippedDTO para a entidade ItensShipped
+            var newItensShipped = new ItensShipped
             {
                 FkItensStockId = itensShippedDTO.FkItensStockId,
-                FkShippingId = itensShippedDTO.FkShippingId,
+                FkShippingId = itensShippedDTO.FkShippingId
             };
 
-            _context.ItensShippeds.Add(itensShipped);
-            await _context.SaveChangesAsync();
+            // Adicionar o novo item enviado ao contexto
+            _context.ItensShippeds.Add(newItensShipped);
 
-            var createdDTO = new ItensShippedDTO
-            {
-                FkItensStockId = itensShipped.FkItensStockId,
-                FkShippingId = itensShipped.FkShippingId,
-            };
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
 
-            return CreatedAtAction("GetItensShipped", new { id = itensShipped.FkItensStockId }, createdDTO);
+            // Retornar o novo item enviado criado
+            return Ok(newItensShipped);
         }
 
-
-        // DELETE: api/ItensShippeds/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItensShipped(int id)
+        // READ - Método GET (Todos) para ItensShipped
+        [HttpGet]
+        public IActionResult GetAllItensShipped()
         {
-            var itensShipped = await _context.ItensShippeds.FindAsync(id);
+            // Obter todos os itens enviados
+            var itensShipped = _context.ItensShippeds.ToList();
+
+            // Mapear ItensShipped para ItensShippedDTO
+            var itensShippedDto = itensShipped.Select(isd => new ItensShippedDTO
+            {
+                FkItensStockId = isd.FkItensStockId,
+                FkShippingId = isd.FkShippingId
+            }).ToList();
+
+            return Ok(itensShippedDto);
+        }
+
+        // READ - Método GET por FkItensStockId para ItensShipped
+        [HttpGet("{fkItensStockId}")]
+        public IActionResult GetItensShippedByFkItensStockId(int fkItensStockId)
+        {
+            // Obter os itens enviados com o FkItensStockId fornecido
+            var itensShipped = _context.ItensShippeds
+                .Where(isd => isd.FkItensStockId == fkItensStockId)
+                .ToList();
+
+            // Mapear ItensShipped para ItensShippedDTO
+            var itensShippedDto = itensShipped.Select(isd => new ItensShippedDTO
+            {
+                FkItensStockId = isd.FkItensStockId,
+                FkShippingId = isd.FkShippingId
+            }).ToList();
+
+            return Ok(itensShippedDto);
+        }
+
+        // UPDATE - Método PUT para ItensShipped
+        [HttpPut("{fkItensStockId}")]
+        public IActionResult UpdateItensShipped(int fkItensStockId, [FromBody] ItensShippedDTO itensShippedDTO)
+        {
+            // Obter o item enviado com o FkItensStockId fornecido
+            var itensShipped = _context.ItensShippeds
+                .FirstOrDefault(isd => isd.FkItensStockId == fkItensStockId);
+
             if (itensShipped == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se o item enviado não for encontrado
             }
 
-            _context.ItensShippeds.Remove(itensShipped);
-            await _context.SaveChangesAsync();
+            // Atualizar propriedades do item enviado
+            itensShipped.FkItensStockId = itensShippedDTO.FkItensStockId;
+            itensShipped.FkShippingId = itensShippedDTO.FkShippingId;
 
-            return NoContent();
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(itensShipped);
         }
 
-        private bool ItensShippedExists(int id)
+        // DELETE - Método DELETE para ItensShipped
+        [HttpDelete("{fkItensStockId}")]
+        public IActionResult DeleteItensShipped(int fkItensStockId)
         {
-            return _context.ItensShippeds.Any(e => e.Id == id);
+            // Obter o item enviado com o FkItensStockId fornecido
+            var itensShipped = _context.ItensShippeds
+                .FirstOrDefault(isd => isd.FkItensStockId == fkItensStockId);
+
+            if (itensShipped == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o item enviado não for encontrado
+            }
+
+            // Remover o item enviado do contexto
+            _context.ItensShippeds.Remove(itensShipped);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

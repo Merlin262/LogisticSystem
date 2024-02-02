@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,102 +22,113 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/Maintenances
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Maintenance>>> GetMaintenances()
-        {
-            return await _context.Maintenances.ToListAsync();
-        }
-
-        // GET: api/Maintenances/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Maintenance>> GetMaintenance(int id)
-        {
-            var maintenance = await _context.Maintenances.FindAsync(id);
-
-            if (maintenance == null)
-            {
-                return NotFound();
-            }
-
-            return maintenance;
-        }
-
-        // PUT: api/Maintenances/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMaintenance(int id, Maintenance maintenance)
-        {
-            if (id != maintenance.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(maintenance).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MaintenanceExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Maintenances
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // CREATE - Método POST para Maintenance
         [HttpPost]
-        public async Task<ActionResult<Maintenance>> PostMaintenance(Maintenance maintenance)
+        public IActionResult CreateMaintenance([FromBody] MaintenanceDTO maintenanceDTO)
         {
-            _context.Maintenances.Add(maintenance);
-            try
+            // Mapear MaintenanceDTO para a entidade Maintenance
+            var newMaintenance = new Maintenance
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (MaintenanceExists(maintenance.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                MaintenanceDate = maintenanceDTO.MaintenanceDate,
+                FkEmployee = maintenanceDTO.FkEmployee,
+                FkTruckChassis = maintenanceDTO.FkTruckChassis
+            };
 
-            return CreatedAtAction("GetMaintenance", new { id = maintenance.Id }, maintenance);
+            // Adicionar a nova manutenção ao contexto
+            _context.Maintenances.Add(newMaintenance);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar a nova manutenção criada
+            return Ok(newMaintenance);
         }
 
-        // DELETE: api/Maintenances/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMaintenance(int id)
+        // READ - Método GET (Todos) para Maintenance
+        [HttpGet]
+        public IActionResult GetAllMaintenance()
         {
-            var maintenance = await _context.Maintenances.FindAsync(id);
+            // Obter todas as manutenções
+            var maintenances = _context.Maintenances.ToList();
+
+            // Mapear Maintenance para MaintenanceDTO
+            var maintenanceDtoList = maintenances.Select(m => new MaintenanceDTO
+            {
+                Id = m.Id,
+                MaintenanceDate = m.MaintenanceDate,
+                FkEmployee = m.FkEmployee,
+                FkTruckChassis = m.FkTruckChassis 
+            }).ToList();
+
+            return Ok(maintenanceDtoList);
+        }
+
+        // READ - Método GET por Id para Maintenance
+        [HttpGet("{id}")]
+        public IActionResult GetMaintenanceById(int id)
+        {
+            // Obter a manutenção com o Id fornecido
+            var maintenance = _context.Maintenances.FirstOrDefault(m => m.Id == id);
+
             if (maintenance == null)
             {
-                return NotFound();
+                return NotFound(); // Retorna 404 Not Found se a manutenção não for encontrada
             }
 
-            _context.Maintenances.Remove(maintenance);
-            await _context.SaveChangesAsync();
+            // Mapear Maintenance para MaintenanceDTO
+            var maintenanceDto = new MaintenanceDTO
+            {
+                Id = maintenance.Id,
+                MaintenanceDate = maintenance.MaintenanceDate,
+                FkEmployee = maintenance.FkEmployee,
+                FkTruckChassis = maintenance.FkTruckChassis
+            };
 
-            return NoContent();
+            return Ok(maintenanceDto);
         }
 
-        private bool MaintenanceExists(int id)
+        // UPDATE - Método PUT para Maintenance
+        [HttpPut("{id}")]
+        public IActionResult UpdateMaintenance(int id, [FromBody] MaintenanceDTO maintenanceDTO)
         {
-            return _context.Maintenances.Any(e => e.Id == id);
+            // Obter a manutenção com o Id fornecido
+            var maintenance = _context.Maintenances.FirstOrDefault(m => m.Id == id);
+
+            if (maintenance == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se a manutenção não for encontrada
+            }
+
+            // Atualizar propriedades da manutenção
+            maintenance.MaintenanceDate = maintenanceDTO.MaintenanceDate;
+            maintenance.FkEmployee = maintenanceDTO.FkEmployee;
+            maintenance.FkTruckChassis = maintenanceDTO.FkTruckChassis;
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return Ok(maintenance);
+        }
+
+        // DELETE - Método DELETE para Maintenance
+        [HttpDelete("{id}")]
+        public IActionResult DeleteMaintenance(int id)
+        {
+            // Obter a manutenção com o Id fornecido
+            var maintenance = _context.Maintenances.FirstOrDefault(m => m.Id == id);
+
+            if (maintenance == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se a manutenção não for encontrada
+            }
+
+            // Remover a manutenção do contexto
+            _context.Maintenances.Remove(maintenance);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
     }
 }

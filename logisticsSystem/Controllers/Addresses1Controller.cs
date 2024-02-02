@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
 
 namespace logisticsSystem.Controllers
 {
@@ -22,14 +23,14 @@ namespace logisticsSystem.Controllers
         }
 
         // GET: api/Addresses
-        [HttpGet]
+        [HttpGet("getAll")]
         public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
         {
             return await _context.Addresses.ToListAsync();
         }
 
         // GET: api/Addresses/5
-        [HttpGet("{id}")]
+        [HttpGet("getById/{id}")]
         public async Task<ActionResult<Address>> GetAddress(int id)
         {
             var address = await _context.Addresses.FindAsync(id);
@@ -42,74 +43,64 @@ namespace logisticsSystem.Controllers
             return address;
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> PutAddress(int id, [FromBody] AddressDTO addressDTO)
         {
-            if (id != addressDTO.Id)
-            {
-                return BadRequest();
-            }
-
-            var existingAddress = await _context.Addresses.FindAsync(id);
-
-            if (existingAddress == null)
-            {
-                return NotFound();
-            }
-
-            // Atualizar os campos necessários com base no DTO
-            existingAddress.Country = addressDTO.Country;
-            existingAddress.State = addressDTO.State;
-            existingAddress.City = addressDTO.City;
-            existingAddress.Street = addressDTO.Street;
-            existingAddress.Number = addressDTO.Number;
-            existingAddress.ComplementoComplement = addressDTO.ComplementoComplement;
-            existingAddress.Zipcode = addressDTO.Zipcode;
-
-            _context.Entry(existingAddress).State = EntityState.Modified;
-
             try
             {
+                var wageDeduction = await _context.WageDeductions.FindAsync(id);
+
+                if (wageDeduction == null)
+                {
+                    return NotFound();
+                }
+
+                address.Country = addressDTO.Country;
+                address.State = addressDTO.State;
+                address.City = addressDTO.City;
+                address.Street = addressDTO.Street;
+                address.Number = addressDTO.Number;
+                address.Complement = addressDTO.Complement;
+                address.Zipcode = addressDTO.Zipcode;
+
+                _context.Entry(wageDeduction).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AddressExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
             }
 
             return NoContent();
         }
 
-        // POST: api/Addresses
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Address>> PostAddress(Address address)
+        [HttpPost("create")]
+        public async Task<ActionResult<AddressDTO>> PostAddress([FromBody] AddressDTO addressDTO)
         {
-            _context.Addresses.Add(address);
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (AddressExists(address.Id))
+                var wageDeduction = new WageDeduction
                 {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                    Id = addressDTO.Id,
+                    Country = addressDTO.Country,
+                    State = addressDTO.State,
+                    City = addressDTO.City,
+                    Street = addressDTO.Street,
+                    Number = addressDTO.Number,
+                    Complement = addressDTO.Complement,
+                    Zipcode = addressDTO.Zipcode,
+                };
+
+                _context.WageDeductions.Add(wageDeduction);
+                _context.SaveChanges();
             }
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            catch (DbUpdateException)
+
+            {
+                
+            }
+
+            return CreatedAtAction("GetWageDeduction", new { id = wageDeductionDTO.Id }, wageDeductionDTO);
         }
 
         // DELETE: api/Addresses/5
@@ -128,9 +119,8 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        private bool AddressExists(int id)
-        {
-            return _context.Addresses.Any(e => e.Id == id);
-        }
+
+
+
     }
 }
