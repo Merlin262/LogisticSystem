@@ -245,7 +245,7 @@ public partial class LogisticsSystemContext : DbContext
             entity.ToTable("Person");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.Email)
                 .HasMaxLength(255)

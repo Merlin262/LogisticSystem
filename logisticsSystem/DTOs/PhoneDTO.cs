@@ -1,4 +1,6 @@
-﻿namespace logisticsSystem.DTOs;
+﻿using logisticsSystem.Models;
+
+namespace logisticsSystem.DTOs;
 
 public class PhoneDTO
 {
