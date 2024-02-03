@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -16,14 +17,16 @@ namespace logisticsSystem.Controllers
     public class ShippingsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        //Injeção de dependência do serviço TruckService
+        private readonly TruckService _truckService;
 
-        public ShippingsController(LogisticsSystemContext context)
+        public ShippingsController(LogisticsSystemContext context, TruckService truckService)
         {
             _context = context;
+            _truckService = truckService;
         }
 
-        // CREATE - Método POST para Shipping
-        [HttpPost]
+        [HttpPost("create-shipping")]
         public IActionResult CreateShipping([FromBody] ShippingDTO shippingDTO)
         {
             // Mapear ShippingDTO para a entidade Shipping
@@ -38,8 +41,15 @@ namespace logisticsSystem.Controllers
                 ShippingPrice = shippingDTO.ShippingPrice,
                 FkClientId = shippingDTO.FkClientId,
                 FkEmployeeId = shippingDTO.FkEmployeeId,
-                FkAddressId = shippingDTO.FkAddressId
+                FkAddressId = shippingDTO.FkAddressId,
+                FkTruckId = shippingDTO.FkTruckId // Adicione esta propriedade se não existir
             };
+
+            // Verificar se o caminhão pode lidar com o peso do pedido
+            if (!_truckService.CanTruckHandleShipping(shippingDTO))
+            {
+                return BadRequest("O caminhão não pode lidar com o peso do pedido.");
+            }
 
             // Adicionar o novo envio ao contexto
             _context.Shippings.Add(newShipping);
@@ -50,9 +60,10 @@ namespace logisticsSystem.Controllers
             // Retornar o novo envio criado
             return Ok(newShipping);
         }
+    
 
-        // READ - Método GET (Todos) para Shipping
-        [HttpGet]
+    // READ - Método GET (Todos) para Shipping
+    [HttpGet]
         public IActionResult GetAllShippings()
         {
             // Obter todos os envios

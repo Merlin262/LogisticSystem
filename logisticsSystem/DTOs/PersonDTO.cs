@@ -1,5 +1,7 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
+
 using logisticsSystem.Models;
+
 namespace logisticsSystem.DTOs;
 
 public class PersonDTO

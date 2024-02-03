@@ -11,7 +11,7 @@ public partial class Shipping
 
     public DateOnly? DeliveryDate { get; set; }
 
-    public decimal? TotalWeight { get; set; }
+    public decimal TotalWeight { get; set; }
 
     public decimal? DistanceKm { get; set; }
 
@@ -27,11 +27,15 @@ public partial class Shipping
 
     public int? FkAddressId { get; set; }
 
+    public int? FkTruckId { get; set; }
+
     public virtual Address? FkAddress { get; set; }
 
     public virtual Client? FkClient { get; set; }
 
     public virtual Employee? FkEmployee { get; set; }
+
+    public virtual Truck? FkTruck { get; set; }
 
     public virtual ICollection<ItensShipped> ItensShippeds { get; set; } = new List<ItensShipped>();
 

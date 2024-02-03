@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
-using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using System.Text.Json.Serialization;
 using System.Text.Json;
@@ -101,7 +100,7 @@ namespace logisticsSystem.Controllers
         }
 
 
-
+        /*
         [HttpPost("api/clients")]
         public IActionResult CreateClient([FromBody] ClientDTO request)
         {
@@ -145,7 +144,7 @@ namespace logisticsSystem.Controllers
             return Ok(jsonResult);
         }
 
-
+        */
 
 
         [HttpPut("api/clients/{id}")]
