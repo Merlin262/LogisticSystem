@@ -1,7 +1,10 @@
-﻿namespace logisticsSystem.DTOs
+﻿using System.Text.Json.Serialization;
+
+namespace logisticsSystem.DTOs
 {
     public class ShippingDTO
     {
+        [JsonIgnore]
         public int Id { get; set; }
         public DateOnly? SendDate { get; set; }
 
@@ -9,7 +12,7 @@
 
         public DateOnly? DeliveryDate { get; set; }
 
-        public decimal? TotalWeight { get; set; }
+        public decimal TotalWeight { get; set; }
 
         public decimal? DistanceKm { get; set; }
 
@@ -22,6 +25,8 @@
         public int? FkEmployeeId { get; set; }
 
         public int? FkAddressId { get; set; }
+
+        public int? FkTruckId { get; set; }
 
     }
 

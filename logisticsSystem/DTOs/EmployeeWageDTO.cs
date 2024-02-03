@@ -1,7 +1,11 @@
-﻿namespace logisticsSystem.DTOs;
+﻿using System.Text.Json.Serialization;
+
+
+namespace logisticsSystem.DTOs;
 
 public class EmployeeWageDTO
 {
+    [JsonIgnore]
     public int Id { get; set; }
     public DateOnly? PayDay { get; set; }
     public decimal? Amount { get; set; }

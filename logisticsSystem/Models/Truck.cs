@@ -7,8 +7,6 @@ public partial class Truck
 {
     public int Chassis { get; set; }
 
-    public decimal? MaximumWeight { get; set; }
-
     public int? KilometerCount { get; set; }
 
     public string? Model { get; set; }
@@ -20,6 +18,8 @@ public partial class Truck
     public int? TruckAxles { get; set; }
 
     public virtual ICollection<Maintenance> Maintenances { get; set; } = new List<Maintenance>();
+
+    public virtual ICollection<Shipping> Shippings { get; set; } = new List<Shipping>();
 
     public virtual ICollection<TruckDriver> TruckDrivers { get; set; } = new List<TruckDriver>();
 }

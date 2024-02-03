@@ -1,4 +1,6 @@
-﻿namespace logisticsSystem.DTOs;
+﻿using System.Text.Json.Serialization;
+
+namespace logisticsSystem.DTOs;
 
 public class TruckDriverDTO
 {

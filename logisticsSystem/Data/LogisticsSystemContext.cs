@@ -58,12 +58,12 @@ public partial class LogisticsSystemContext : DbContext
     {
         modelBuilder.Entity<Address>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Address__3214EC27AF280A49");
+            entity.HasKey(e => e.Id).HasName("PK__Address__3214EC272031328E");
 
             entity.ToTable("Address");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.City)
                 .HasMaxLength(255)
@@ -91,7 +91,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Client>(entity =>
         {
-            entity.HasKey(e => e.FkPersonId).HasName("PK__Client__25ADBC31BA59AFF7");
+            entity.HasKey(e => e.FkPersonId).HasName("PK__Client__25ADBC3137B64DA8");
 
             entity.ToTable("Client");
 
@@ -106,10 +106,10 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Deduction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Deductio__3214EC2707E5726A");
+            entity.HasKey(e => e.Id).HasName("PK__Deductio__3214EC270F9421FA");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.Description)
@@ -122,7 +122,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Employee>(entity =>
         {
-            entity.HasKey(e => e.FkPersonId).HasName("PK__Employee__25ADBC31E33417F5");
+            entity.HasKey(e => e.FkPersonId).HasName("PK__Employee__25ADBC31389823DE");
 
             entity.ToTable("Employee");
 
@@ -142,12 +142,12 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<EmployeeWage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Employee__3214EC2784D10DD9");
+            entity.HasKey(e => e.Id).HasName("PK__Employee__3214EC27B15B36E6");
 
             entity.ToTable("Employee_Wage");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.FkEmployeeId).HasColumnName("fk_Employee_ID");
@@ -160,33 +160,35 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<ItensShipped>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ItensShi__3214EC27AFF8FB5F");
+            entity.HasKey(e => e.Id).HasName("PK__ItensShi__3214EC27122E2D02");
 
             entity.ToTable("ItensShipped");
 
-            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("ID");
             entity.Property(e => e.FkItensStockId).HasColumnName("fk_ItensStock_ID");
             entity.Property(e => e.FkShippingId).HasColumnName("fk_Shipping_ID");
 
             entity.HasOne(d => d.FkItensStock).WithMany(p => p.ItensShippeds)
                 .HasForeignKey(d => d.FkItensStockId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__ItensShip__fk_It__74AE54BC");
+                .HasConstraintName("FK__ItensShip__fk_It__75A278F5");
 
             entity.HasOne(d => d.FkShipping).WithMany(p => p.ItensShippeds)
                 .HasForeignKey(d => d.FkShippingId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__ItensShip__fk_Sh__75A278F5");
+                .HasConstraintName("FK__ItensShip__fk_Sh__76969D2E");
         });
 
         modelBuilder.Entity<ItensStock>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ItensSto__3214EC27E3EC10FD");
+            entity.HasKey(e => e.Id).HasName("PK__ItensSto__3214EC277926F0EA");
 
             entity.ToTable("ItensStock");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
@@ -196,12 +198,12 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Maintenance>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Maintena__3214EC276FD39D37");
+            entity.HasKey(e => e.Id).HasName("PK__Maintena__3214EC273E767060");
 
             entity.ToTable("Maintenance");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.FkEmployee).HasColumnName("fk_Employee");
             entity.Property(e => e.FkTruckChassis).HasColumnName("fk_Truck_Chassis");
@@ -219,33 +221,35 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<MaitenanceTruckPart>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Maitenan__3214EC27619E5C12");
+            entity.HasKey(e => e.Id).HasName("PK__Maitenan__3214EC2729F86B88");
 
             entity.ToTable("MaitenanceTruckPart");
 
-            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("ID");
             entity.Property(e => e.FkMaintenanceId).HasColumnName("fk_Maintenance_ID");
             entity.Property(e => e.FkTruckPartId).HasColumnName("fk_TruckPart_ID");
 
             entity.HasOne(d => d.FkMaintenance).WithMany(p => p.MaitenanceTruckParts)
                 .HasForeignKey(d => d.FkMaintenanceId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__Maitenanc__fk_Ma__71D1E811");
+                .HasConstraintName("FK__Maitenanc__fk_Ma__72C60C4A");
 
             entity.HasOne(d => d.FkTruckPart).WithMany(p => p.MaitenanceTruckParts)
                 .HasForeignKey(d => d.FkTruckPartId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Maitenanc__fk_Tr__70DDC3D8");
+                .HasConstraintName("FK__Maitenanc__fk_Tr__71D1E811");
         });
 
         modelBuilder.Entity<Person>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Person__3214EC27EA597017");
+            entity.HasKey(e => e.Id).HasName("PK__Person__3214EC274F7714D1");
 
             entity.ToTable("Person");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
@@ -262,12 +266,12 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Phone>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Phone__3214EC275877BB38");
+            entity.HasKey(e => e.Id).HasName("PK__Phone__3214EC27B09F41A1");
 
             entity.ToTable("Phone");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.AreaCode)
                 .HasMaxLength(10)
@@ -285,17 +289,18 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Shipping>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Shipping__3214EC27B5E52C00");
+            entity.HasKey(e => e.Id).HasName("PK__Shipping__3214EC2711E9F345");
 
             entity.ToTable("Shipping");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.DistanceKm).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.FkAddressId).HasColumnName("fk_Address_ID");
             entity.Property(e => e.FkClientId).HasColumnName("fk_Client_ID");
             entity.Property(e => e.FkEmployeeId).HasColumnName("fk_Employee_ID");
+            entity.Property(e => e.FkTruckId).HasColumnName("fk_Truck_ID");
             entity.Property(e => e.ShippingPrice).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.TotalWeight).HasColumnType("decimal(18, 0)");
 
@@ -313,28 +318,33 @@ public partial class LogisticsSystemContext : DbContext
                 .HasForeignKey(d => d.FkEmployeeId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK__Shipping__fk_Emp__66603565");
+
+            entity.HasOne(d => d.FkTruck).WithMany(p => p.Shippings)
+                .HasForeignKey(d => d.FkTruckId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK__Shipping__fk_Tru__68487DD7");
         });
 
         modelBuilder.Entity<ShippingPayment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Shipping__3214EC27878F2F70");
+            entity.HasKey(e => e.Id).HasName("PK__Shipping__3214EC274750FEB2");
 
             entity.ToTable("ShippingPayment");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.FkShippingId).HasColumnName("fk_Shipping_ID");
 
             entity.HasOne(d => d.FkShipping).WithMany(p => p.ShippingPayments)
                 .HasForeignKey(d => d.FkShippingId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__ShippingP__fk_Sh__6A30C649");
+                .HasConstraintName("FK__ShippingP__fk_Sh__6B24EA82");
         });
 
         modelBuilder.Entity<Truck>(entity =>
         {
-            entity.HasKey(e => e.Chassis).HasName("PK__Truck__9C351ECECADABAF8");
+            entity.HasKey(e => e.Chassis).HasName("PK__Truck__9C351ECE22FEB77E");
 
             entity.ToTable("Truck");
 
@@ -343,9 +353,6 @@ public partial class LogisticsSystemContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.KilometerCount).HasColumnName("kilometerCount");
-            entity.Property(e => e.MaximumWeight)
-                .HasColumnType("decimal(18, 0)")
-                .HasColumnName("MaximumWeight_");
             entity.Property(e => e.Model)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -353,33 +360,35 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<TruckDriver>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TruckDri__3214EC27E16FE400");
+            entity.HasKey(e => e.Id).HasName("PK__TruckDri__3214EC2738FABC94");
 
             entity.ToTable("TruckDriver");
 
-            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("ID");
             entity.Property(e => e.FkEmployeeId).HasColumnName("fk_Employee_ID");
             entity.Property(e => e.FkTruckChassis).HasColumnName("fk_Truck_Chassis");
 
             entity.HasOne(d => d.FkEmployee).WithMany(p => p.TruckDrivers)
                 .HasForeignKey(d => d.FkEmployeeId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__TruckDriv__fk_Em__6E01572D");
+                .HasConstraintName("FK__TruckDriv__fk_Em__6EF57B66");
 
             entity.HasOne(d => d.FkTruckChassisNavigation).WithMany(p => p.TruckDrivers)
                 .HasForeignKey(d => d.FkTruckChassis)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__TruckDriv__fk_Tr__6D0D32F4");
+                .HasConstraintName("FK__TruckDriv__fk_Tr__6E01572D");
         });
 
         modelBuilder.Entity<TruckPart>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TruckPar__3214EC27EA409E8F");
+            entity.HasKey(e => e.Id).HasName("PK__TruckPar__3214EC2730E956DB");
 
             entity.ToTable("TruckPart");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
@@ -388,21 +397,23 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<WageDeduction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__WageDedu__3214EC27231F4578");
+            entity.HasKey(e => e.Id).HasName("PK__WageDedu__3214EC27A32193C6");
 
-            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("ID");
             entity.Property(e => e.FkDeductionsId).HasColumnName("fk_Deductions_ID");
             entity.Property(e => e.FkWageId).HasColumnName("fk_Wage_ID");
 
             entity.HasOne(d => d.FkDeductions).WithMany(p => p.WageDeductions)
                 .HasForeignKey(d => d.FkDeductionsId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__WageDeduc__fk_De__787EE5A0");
+                .HasConstraintName("FK__WageDeduc__fk_De__797309D9");
 
             entity.HasOne(d => d.FkWage).WithMany(p => p.WageDeductions)
                 .HasForeignKey(d => d.FkWageId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__WageDeduc__fk_Wa__797309D9");
+                .HasConstraintName("FK__WageDeduc__fk_Wa__7A672E12");
         });
 
         OnModelCreatingPartial(modelBuilder);

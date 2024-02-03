@@ -61,7 +61,7 @@ namespace logisticsSystem.Controllers
                     }
 
                     truck.Chassis = truckDTO.Chassis;
-                    truck.MaximumWeight = truckDTO.MaximumWeight;
+                    truck.TruckAxles = truckDTO.TruckAxles;
                     truck.KilometerCount = truckDTO.KilometerCount;
                     truck.Model = truckDTO.Model;
                     truck.Year = truckDTO.Year;
@@ -93,7 +93,7 @@ namespace logisticsSystem.Controllers
                     var truck = new Truck
                     {
                         Chassis = truckDTO.Chassis,
-                        MaximumWeight = truckDTO.MaximumWeight,
+                        TruckAxles = truckDTO.TruckAxles,
                         KilometerCount = truckDTO.KilometerCount,
                         Model = truckDTO.Model,
                         Year = truckDTO.Year,

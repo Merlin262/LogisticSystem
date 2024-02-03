@@ -1,7 +1,10 @@
-﻿namespace logisticsSystem.DTOs;
+﻿using System.Text.Json.Serialization;
+
+namespace logisticsSystem.DTOs;
 
 public class PersonDTO
 {
+    [JsonIgnore]
     public int Id { get; set; }
 
     public string? Name { get; set; }
