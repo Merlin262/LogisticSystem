@@ -101,7 +101,7 @@ public partial class LogisticsSystemContext : DbContext
 
             entity.HasOne(d => d.FkPerson).WithOne(p => p.Client)
                 .HasForeignKey<Client>(d => d.FkPersonId)
-                .HasConstraintName("FK__Client__fk_Perso__5165187F");
+                .HasConstraintName("FK__Client__fk_Perso__3F466844");
         });
 
         modelBuilder.Entity<Deduction>(entity =>
@@ -137,7 +137,7 @@ public partial class LogisticsSystemContext : DbContext
             entity.HasOne(d => d.FkPerson).WithOne(p => p.Employee)
                 .HasForeignKey<Employee>(d => d.FkPersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Employee__fk_Per__5441852A");
+                .HasConstraintName("FK__Employee__fk_Per__4222D4EF");
         });
 
         modelBuilder.Entity<EmployeeWage>(entity =>
@@ -155,7 +155,7 @@ public partial class LogisticsSystemContext : DbContext
             entity.HasOne(d => d.FkEmployee).WithMany(p => p.EmployeeWages)
                 .HasForeignKey(d => d.FkEmployeeId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__Employee___fk_Em__571DF1D5");
+                .HasConstraintName("FK__Employee___fk_Em__44FF419A");
         });
 
         modelBuilder.Entity<ItensShipped>(entity =>
@@ -211,12 +211,12 @@ public partial class LogisticsSystemContext : DbContext
             entity.HasOne(d => d.FkEmployeeNavigation).WithMany(p => p.Maintenances)
                 .HasForeignKey(d => d.FkEmployee)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Maintenan__fk_Em__5DCAEF64");
+                .HasConstraintName("FK__Maintenan__fk_Em__4BAC3F29");
 
             entity.HasOne(d => d.FkTruckChassisNavigation).WithMany(p => p.Maintenances)
                 .HasForeignKey(d => d.FkTruckChassis)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__Maintenan__fk_Tr__5EBF139D");
+                .HasConstraintName("FK__Maintenan__fk_Tr__4CA06362");
         });
 
         modelBuilder.Entity<MaitenanceTruckPart>(entity =>
@@ -261,7 +261,7 @@ public partial class LogisticsSystemContext : DbContext
 
             entity.HasOne(d => d.FkAddress).WithMany(p => p.People)
                 .HasForeignKey(d => d.FkAddressId)
-                .HasConstraintName("FK__Person__fk_Addre__4BAC3F29");
+                .HasConstraintName("FK__Person__fk_Addre__398D8EEE");
         });
 
         modelBuilder.Entity<Phone>(entity =>
@@ -284,7 +284,7 @@ public partial class LogisticsSystemContext : DbContext
             entity.HasOne(d => d.FkPerson).WithMany(p => p.Phones)
                 .HasForeignKey(d => d.FkPersonId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__Phone__fk_Person__4E88ABD4");
+                .HasConstraintName("FK__Phone__fk_Person__3C69FB99");
         });
 
         modelBuilder.Entity<Shipping>(entity =>
@@ -307,12 +307,12 @@ public partial class LogisticsSystemContext : DbContext
             entity.HasOne(d => d.FkAddress).WithMany(p => p.Shippings)
                 .HasForeignKey(d => d.FkAddressId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Shipping__fk_Add__6754599E");
+                .HasConstraintName("FK__Shipping__fk_Add__5535A963");
 
             entity.HasOne(d => d.FkClient).WithMany(p => p.Shippings)
                 .HasForeignKey(d => d.FkClientId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Shipping__fk_Cli__656C112C");
+                .HasConstraintName("FK__Shipping__fk_Cli__534D60F1");
 
             entity.HasOne(d => d.FkEmployee).WithMany(p => p.Shippings)
                 .HasForeignKey(d => d.FkEmployeeId)
