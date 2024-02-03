@@ -1,4 +1,8 @@
+
+﻿using logisticsSystem.Models;
+
 ﻿using System.Text.Json.Serialization;
+
 
 namespace logisticsSystem.DTOs;
 

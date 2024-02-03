@@ -29,9 +29,11 @@ namespace logisticsSystem.Controllers
             // Mapear PersonDTO para a entidade Person
             var newPerson = new Person
             {
-                Id = personDTO.Id,
                 Name = personDTO.Name,
                 Email = personDTO.Email,
+                BirthDate = personDTO.BirthDate,
+                FkAddressId = personDTO.FkAddressId,
+                //Phones = personDTO.Phones
                 //FkAddressId = personDTO.FkAddressId
             };
 
