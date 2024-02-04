@@ -1,4 +1,6 @@
+using logisticsSystem.Controllers;
 using logisticsSystem.Data;
+using logisticsSystem.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<LogisticsSystemContext>();
+builder.Services.AddScoped<TruckService>();
+builder.Services.AddScoped<ItensShippedService>();
+
+
 
 var app = builder.Build();
 

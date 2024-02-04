@@ -165,7 +165,6 @@ public partial class LogisticsSystemContext : DbContext
             entity.ToTable("ItensShipped");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
             entity.Property(e => e.FkItensStockId).HasColumnName("fk_ItensStock_ID");
             entity.Property(e => e.FkShippingId).HasColumnName("fk_Shipping_ID");
@@ -194,6 +193,7 @@ public partial class LogisticsSystemContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.Weight).HasColumnType("decimal(18, 0)");
         });
 
         modelBuilder.Entity<Maintenance>(entity =>

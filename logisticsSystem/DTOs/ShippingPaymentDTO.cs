@@ -9,5 +9,5 @@ public class ShippingPaymentDTO
     public DateOnly? PaymentDate { get; set; }
     public int? FkShippingId { get; set; }
 
-    public ShippingDTO FkShipping { get; set; }
+    //public ShippingDTO FkShipping { get; set; }
 }

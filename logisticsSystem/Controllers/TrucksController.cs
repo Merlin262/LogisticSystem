@@ -25,25 +25,45 @@ namespace logisticsSystem.Controllers
                 _context = context;
             }
 
-            // GET: api/Trucks
             [HttpGet]
-            public async Task<ActionResult<IEnumerable<Truck>>> GetTrucks()
+            public IActionResult GetTrucks()
             {
-                return await _context.Trucks.ToListAsync();
+                var trucks = _context.Trucks.ToList();
+                var truckDTOs = trucks.Select(t => new TruckDTO
+                {
+                    Chassis = t.Chassis,
+                    KilometerCount = t.KilometerCount,
+                    Model = t.Model,
+                    Year = t.Year,
+                    Color = t.Color,
+                    TruckAxles = t.TruckAxles
+                });
+
+                return Ok(truckDTOs);
             }
 
-            // GET: api/Trucks/5
+            // GET: api/trucks/{chassis}
             [HttpGet("{chassis}")]
-            public async Task<ActionResult<Truck>> GetTruck(int chassis)
+            public IActionResult GetTruckByChassis(int chassis)
             {
-                var truck = await _context.Trucks.FindAsync(chassis);
+                var truck = _context.Trucks.FirstOrDefault(t => t.Chassis == chassis);
 
                 if (truck == null)
                 {
-                    return NotFound();
+                    return NotFound("Caminhão não encontrado.");
                 }
 
-                return truck;
+                var truckDTO = new TruckDTO
+                {
+                    Chassis = truck.Chassis,
+                    KilometerCount = truck.KilometerCount,
+                    Model = truck.Model,
+                    Year = truck.Year,
+                    Color = truck.Color,
+                    TruckAxles = truck.TruckAxles
+                };
+
+                return Ok(truckDTO);
             }
 
             // PUT: api/Trucks/5
