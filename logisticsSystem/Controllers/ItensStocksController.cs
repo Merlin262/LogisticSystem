@@ -22,114 +22,113 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // CREATE - Método POST para ItensStock
-        [HttpPost]
-        public IActionResult CreateItensStock([FromBody] ItensStockDTO itensStockDTO)
-        {
-            // Mapear ItensStockDTO para a entidade ItensStock
-            var newItensStock = new ItensStock
-            {
-                Id = itensStockDTO.Id,
-                Description = itensStockDTO.Description,
-                Quantity = itensStockDTO.Quantity,
-                Price = itensStockDTO.Price
-            };
-
-            // Adicionar o novo item ao estoque ao contexto
-            _context.ItensStocks.Add(newItensStock);
-
-            // Salvar as alterações no banco de dados
-            _context.SaveChanges();
-
-            // Retornar o novo item ao estoque criado
-            return Ok(newItensStock);
-        }
-
-        // READ - Método GET (Todos) para ItensStock
         [HttpGet]
-        public IActionResult GetAllItensStock()
+        public IActionResult GetItensStock()
         {
-            // Obter todos os itens do estoque
+            // Obter os itens de estoque
             var itensStock = _context.ItensStocks.ToList();
 
-            // Mapear ItensStock para ItensStockDTO
-            var itensStockDto = itensStock.Select(isd => new ItensStockDTO
+            // Mapear para DTO manualmente
+            var itensStockDTOs = itensStock.Select(item => new ItensStockDTO
             {
-                Id = isd.Id,
-                Description = isd.Description,
-                Quantity = isd.Quantity,
-                Price = isd.Price
+                Id = item.Id,
+                Description = item.Description,
+                Quantity = item.Quantity,
+                Price = item.Price,
+                Weight = item.Weight // Certifique-se de que Weight seja do tipo decimal
             }).ToList();
 
-            return Ok(itensStockDto);
+            // Retornar a lista formatada como JSON
+            return Ok(itensStockDTOs);
         }
 
-        // READ - Método GET por Id para ItensStock
+        // GET: api/itensstock/{id}
         [HttpGet("{id}")]
         public IActionResult GetItensStockById(int id)
         {
-            // Obter o item do estoque com o Id fornecido
-            var itensStock = _context.ItensStocks.FirstOrDefault(isd => isd.Id == id);
+            var itensStock = _context.ItensStocks.FirstOrDefault(i => i.Id == id);
 
             if (itensStock == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o item do estoque não for encontrado
+                return NotFound("Item de estoque não encontrado.");
             }
 
-            // Mapear ItensStock para ItensStockDTO
-            var itensStockDto = new ItensStockDTO
+            var itensStockDTO = new ItensStockDTO
             {
                 Id = itensStock.Id,
                 Description = itensStock.Description,
                 Quantity = itensStock.Quantity,
-                Price = itensStock.Price
+                Price = itensStock.Price,
+                Weight = itensStock.Weight
             };
 
-            return Ok(itensStockDto);
+            return Ok(itensStockDTO);
         }
 
-        // UPDATE - Método PUT para ItensStock
+        // POST: api/itensstock
+        [HttpPost]
+        public IActionResult CreateItensStock([FromBody] ItensStockDTO itensStockDTO)
+        {
+            if (itensStockDTO == null)
+            {
+                return BadRequest("Dados inválidos para o item de estoque.");
+            }
+
+            var itensStock = new ItensStock
+            {
+                Description = itensStockDTO.Description,
+                Quantity = itensStockDTO.Quantity ,
+                Price = itensStockDTO.Price,
+                Weight = itensStockDTO.Weight
+            };
+
+            _context.ItensStocks.Add(itensStock);
+            _context.SaveChanges();
+
+            return CreatedAtAction(nameof(GetItensStockById), new { id = itensStock.Id }, itensStockDTO);
+        }
+
+        // PUT: api/itensstock/{id}
         [HttpPut("{id}")]
         public IActionResult UpdateItensStock(int id, [FromBody] ItensStockDTO itensStockDTO)
         {
-            // Obter o item do estoque com o Id fornecido
-            var itensStock = _context.ItensStocks.FirstOrDefault(isd => isd.Id == id);
+            var itensStock = _context.ItensStocks.FirstOrDefault(i => i.Id == id);
 
             if (itensStock == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o item do estoque não for encontrado
+                return NotFound("Item de estoque não encontrado.");
             }
 
-            // Atualizar propriedades do item do estoque
+            if (itensStockDTO == null)
+            {
+                return BadRequest("Dados inválidos para o item de estoque.");
+            }
+
             itensStock.Description = itensStockDTO.Description;
             itensStock.Quantity = itensStockDTO.Quantity;
             itensStock.Price = itensStockDTO.Price;
+            itensStock.Weight = itensStockDTO.Weight;
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
 
-            return Ok(itensStock);
+            return Ok(itensStockDTO);
         }
 
-        // DELETE - Método DELETE para ItensStock
+        // DELETE: api/itensstock/{id}
         [HttpDelete("{id}")]
         public IActionResult DeleteItensStock(int id)
         {
-            // Obter o item do estoque com o Id fornecido
-            var itensStock = _context.ItensStocks.FirstOrDefault(isd => isd.Id == id);
+            var itensStock = _context.ItensStocks.FirstOrDefault(i => i.Id == id);
 
             if (itensStock == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o item do estoque não for encontrado
+                return NotFound("Item de estoque não encontrado.");
             }
 
-            // Remover o item do estoque do contexto
             _context.ItensStocks.Remove(itensStock);
-
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
 
-            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
+            return NoContent();
         }
     }
 }

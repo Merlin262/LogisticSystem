@@ -13,21 +13,21 @@ public partial class Shipping
 
     public decimal TotalWeight { get; set; }
 
-    public decimal? DistanceKm { get; set; }
+    public decimal DistanceKm { get; set; }
 
     public DateOnly? RegistrationDate { get; set; }
 
     public int Id { get; set; }
 
-    public decimal? ShippingPrice { get; set; }
+    public decimal ShippingPrice { get; set; }
 
-    public int? FkClientId { get; set; }
+    public int FkClientId { get; set; }
 
-    public int? FkEmployeeId { get; set; }
+    public int FkEmployeeId { get; set; }
 
-    public int? FkAddressId { get; set; }
+    public int FkAddressId { get; set; }
 
-    public int? FkTruckId { get; set; }
+    public int FkTruckId { get; set; }
 
     public virtual Address? FkAddress { get; set; }
 

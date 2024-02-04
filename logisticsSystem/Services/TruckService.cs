@@ -1,38 +1,30 @@
-﻿using logisticsSystem.Data;
+﻿using logisticsSystem.Controllers.logisticsSystem.Controllers;
+using logisticsSystem.Data;
 using logisticsSystem.DTOs;
+using logisticsSystem.Controllers;
+using logisticsSystem.Models;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Services
 {
     public class TruckService
     {
-        private readonly LogisticsSystemContext _context; // Substitua por seu DbContext real
+        private readonly LogisticsSystemContext _context;
 
-        public TruckService(LogisticsSystemContext context)
+        public TruckService(LogisticsSystemContext context, ItensShippedService itensShippedService)
         {
             _context = context;
         }
 
-        public bool CanTruckHandleShipping(ShippingDTO shippingDTO)
+        public int GetTruckAxlesWeight(int fkShippingId)
         {
-            var truck = _context.Trucks.FirstOrDefault(t => t.Chassis == shippingDTO.FkTruckId);
+            var truckAxles = _context.Shippings
+                .Where(s => s.Id == fkShippingId)
+                .Select(s => s.FkTruck.TruckAxles)
+                .FirstOrDefault();
 
-            if (truck == null)
-            {
-                // Caminhão não encontrado
-                return false;
-            }
-
-            // Verificar se o número de eixos do caminhão é suficiente para o peso do pedido
-            return truck.TruckAxles >= CalculateRequiredAxles(shippingDTO.TotalWeight);
+            return truckAxles * 2000;
         }
 
-        private int CalculateRequiredAxles(decimal totalWeight)
-        {
-            // Lógica para calcular o número de eixos necessário com base no peso total
-            // Pode ser uma lógica simples ou mais complexa dependendo dos requisitos específicos do seu sistema
-            // Neste exemplo, assumimos que cada eixo pode suportar até 5 toneladas
-            const decimal maxWeightPerAxle = 5.0m;
-            return (int)Math.Ceiling(totalWeight / maxWeightPerAxle);
-        }
     }
 }

@@ -19,16 +19,19 @@ namespace logisticsSystem.Controllers
         private readonly LogisticsSystemContext _context;
         //Injeção de dependência do serviço TruckService
         private readonly TruckService _truckService;
+        private readonly ItensShippedService _itensShippedService;
 
-        public ShippingsController(LogisticsSystemContext context, TruckService truckService)
+        public ShippingsController(LogisticsSystemContext context, TruckService truckService, ItensShippedService itensShippedService)
         {
             _context = context;
             _truckService = truckService;
+            _itensShippedService = itensShippedService;
         }
 
         [HttpPost("create-shipping")]
         public IActionResult CreateShipping([FromBody] ShippingDTO shippingDTO)
         {
+
             // Mapear ShippingDTO para a entidade Shipping
             var newShipping = new Shipping
             {
@@ -45,25 +48,21 @@ namespace logisticsSystem.Controllers
                 FkTruckId = shippingDTO.FkTruckId // Adicione esta propriedade se não existir
             };
 
-            // Verificar se o caminhão pode lidar com o peso do pedido
-            if (!_truckService.CanTruckHandleShipping(shippingDTO))
-            {
-                return BadRequest("O caminhão não pode lidar com o peso do pedido.");
-            }
-
             // Adicionar o novo envio ao contexto
             _context.Shippings.Add(newShipping);
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
 
-            // Retornar o novo envio criado
-            return Ok(newShipping);
+            // Retornar o novo envio criado, evitando referências circulares
+            return Ok("Pedido criado");
         }
-    
 
-    // READ - Método GET (Todos) para Shipping
-    [HttpGet]
+
+
+
+        // READ - Método GET (Todos) para Shipping
+        [HttpGet]
         public IActionResult GetAllShippings()
         {
             // Obter todos os envios
@@ -82,7 +81,8 @@ namespace logisticsSystem.Controllers
                 ShippingPrice = s.ShippingPrice,
                 FkClientId = s.FkClientId,
                 FkEmployeeId = s.FkEmployeeId,
-                FkAddressId = s.FkAddressId
+                FkAddressId = s.FkAddressId,
+                FkTruckId = s.FkTruckId 
             }).ToList();
 
             return Ok(shippingDtoList);
@@ -119,35 +119,52 @@ namespace logisticsSystem.Controllers
             return Ok(shippingDto);
         }
 
-        // UPDATE - Método PUT para Shipping
-        [HttpPut("{id}")]
-        public IActionResult UpdateShipping(int id, [FromBody] ShippingDTO shippingDTO)
-        {
-            // Obter o envio com o Id fornecido
-            var shipping = _context.Shippings.FirstOrDefault(s => s.Id == id);
 
-            if (shipping == null)
-            {
-                return NotFound(); // Retorna 404 Not Found se o envio não for encontrado
-            }
+        [HttpPut("update-shipping/{id}")]
+           public IActionResult UpdateShipping(int id, [FromBody] ShippingDTO updatedShippingDTO)
+           {
+               // Verificar se o envio com o id fornecido existe
+               var existingShipping = _context.Shippings.Find(id);
+           
+               if (existingShipping == null)
+               {
+                   return NotFound();
+               }
+           
+               // Atualizar as propriedades do envio existente com base no DTO fornecido
+               existingShipping.SendDate = updatedShippingDTO.SendDate;
+               existingShipping.EstimatedDate = updatedShippingDTO.EstimatedDate;
+               existingShipping.DeliveryDate = updatedShippingDTO.DeliveryDate;
+               existingShipping.TotalWeight = updatedShippingDTO.TotalWeight;
+               existingShipping.DistanceKm = updatedShippingDTO.DistanceKm;
+               existingShipping.RegistrationDate = updatedShippingDTO.RegistrationDate;
+               existingShipping.ShippingPrice = updatedShippingDTO.ShippingPrice;
+               existingShipping.FkClientId = updatedShippingDTO.FkClientId;
+               existingShipping.FkEmployeeId = updatedShippingDTO.FkEmployeeId;
+               existingShipping.FkAddressId = updatedShippingDTO.FkAddressId;
+               existingShipping.FkTruckId = updatedShippingDTO.FkTruckId; // Adicione esta propriedade se não existir
+           
+               // Salvar as alterações no banco de dados
+               _context.SaveChanges();
+           
+               // Retornar o envio atualizado, evitando referências circulares
+               return Ok(new
+               {
+                   existingShipping.Id,
+                   existingShipping.SendDate,
+                   // Adicione outras propriedades relevantes de Shipping
+                   // ...
+           
+                   FkTruck = new
+                   {
+                       existingShipping.FkTruck.Chassis,
+                       existingShipping.FkTruck.TruckAxles,
+                       // Adicione outras propriedades relevantes de Truck
+                       // ...
+                   }
+               });
+           }
 
-            // Atualizar propriedades do envio
-            shipping.SendDate = shippingDTO.SendDate;
-            shipping.EstimatedDate = shippingDTO.EstimatedDate;
-            shipping.DeliveryDate = shippingDTO.DeliveryDate;
-            shipping.TotalWeight = shippingDTO.TotalWeight;
-            shipping.DistanceKm = shippingDTO.DistanceKm;
-            shipping.RegistrationDate = shippingDTO.RegistrationDate;
-            shipping.ShippingPrice = shippingDTO.ShippingPrice;
-            shipping.FkClientId = shippingDTO.FkClientId;
-            shipping.FkEmployeeId = shippingDTO.FkEmployeeId;
-            shipping.FkAddressId = shippingDTO.FkAddressId;
-
-            // Salvar as alterações no banco de dados
-            _context.SaveChanges();
-
-            return Ok(shipping);
-        }
 
         // DELETE - Método DELETE para Shipping
         [HttpDelete("{id}")]

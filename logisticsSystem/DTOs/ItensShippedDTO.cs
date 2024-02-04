@@ -1,13 +1,15 @@
-﻿using System.Text.Json.Serialization;
+﻿using logisticsSystem.Models;
+using System.Text.Json.Serialization;
 
 
 namespace logisticsSystem.DTOs;
 
 public class ItensShippedDTO
 {
-    public int? FkItensStockId { get; set; }
-    public int? FkShippingId { get; set; }
+    public int Id { get; set; }
+    public int FkItensStockId { get; set; }
+    public int FkShippingId { get; set; }
 
-    public ItensStockDTO FkItensStock { get; set; }
-    public ShippingDTO FkShipping { get; set; }
+    public int QuantityItens { get; set; }
+
 }
