@@ -1,5 +1,8 @@
 ﻿using System.Net;
+using logisticsSystem.Data;
 using logisticsSystem.Exceptions;
+using logisticsSystem.Services;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -14,7 +17,7 @@ namespace logisticsSystem.MiddleWares
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, ErrorLoggerService errorLogger)
         {
             try
             {
@@ -23,42 +26,52 @@ namespace logisticsSystem.MiddleWares
             catch (InvalidDataTypeException ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (TruckOverloadedException ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (InternalServerException ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (InsufficientQuantityException ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (InvalidEmployeeException ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (NotFoundException ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (UnregisteredObject ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (DatabaseConnectionException ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (NullRequestException ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(context, ex);
+                errorLogger.WriteLog($"{ex}");
             }
             
         }

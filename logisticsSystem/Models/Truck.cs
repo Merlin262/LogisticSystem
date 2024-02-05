@@ -7,7 +7,7 @@ public partial class Truck
 {
     public int Chassis { get; set; }
 
-    public int? KilometerCount { get; set; }
+    public int KilometerCount { get; set; }
 
     public string? Model { get; set; }
 
@@ -15,11 +15,7 @@ public partial class Truck
 
     public string? Color { get; set; }
 
-    public int? TruckAxles { get; set; }
-
-    public int? LastMaintenanceKilometers { get; set; }
-
-    public bool? InMaintenance { get; set; }
+    public int TruckAxles { get; set; }
 
     public int LastMaintenanceKilometers { get; set; }
 

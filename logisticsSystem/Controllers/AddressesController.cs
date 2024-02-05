@@ -11,6 +11,7 @@ using logisticsSystem.DTOs;
 using Microsoft.Data.SqlClient;
 using logisticsSystem.Exceptions;
 using System.Text.RegularExpressions;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -19,10 +20,12 @@ namespace logisticsSystem.Controllers
     public class AddressesController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly ErrorLoggerService _logger;
 
-        public AddressesController(LogisticsSystemContext context)
+        public AddressesController(LogisticsSystemContext context, ErrorLoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Addresses
@@ -82,6 +85,7 @@ namespace logisticsSystem.Controllers
 
             _context.Addresses.Add(address);
             await _context.SaveChangesAsync();
+            _logger.WriteLogData($"Endereço de ID {address.Id} registrado com sucesso.");
 
             return CreatedAtAction("GetAddress", new { id = address.Id }, addressDTO);
         }
