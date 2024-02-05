@@ -150,7 +150,7 @@ namespace logisticsSystem.Controllers
                     InMaintenance = truckDTO.InMaintenance
                 };
 
-                return CreatedAtAction("GetTruck", new { Chassis = createdTruckDTO.Chassis }, createdTruckDTO);
+                return Ok(createdTruckDTO);
             }
 
 

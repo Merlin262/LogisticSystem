@@ -11,5 +11,4 @@ public class ItensShippedDTO
     public int FkShippingId { get; set; }
 
     public int QuantityItens { get; set; }
-
 }

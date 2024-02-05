@@ -26,7 +26,7 @@ namespace logisticsSystem.Services
             return truckAxles * 2000;
         }
 
-        public bool UpdateTruckMaintenanceStatus(int truckId)
+        public bool UpdateTruckMaintenanceStatus(int truckId, decimal distance)
         {
             // 50000 km é o limite para manutenção
             const int maintenanceThreshold = 50000;
@@ -44,7 +44,7 @@ namespace logisticsSystem.Services
                 }
 
                 // Verificar se LastMaintenanceKilometers é superior ao limite
-                if (truck.LastMaintenanceKilometers  >= maintenanceThreshold)
+                if (truck.LastMaintenanceKilometers + distance  >= maintenanceThreshold)
                 {
                     // Atualizar o booleano InMaintenance para true
                     truck.InMaintenance = true;

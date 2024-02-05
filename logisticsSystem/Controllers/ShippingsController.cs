@@ -34,9 +34,9 @@ namespace logisticsSystem.Controllers
         [HttpPost("create-shipping")]
         public IActionResult CreateShipping([FromBody] ShippingDTO shippingDTO)
         {
-            if (_truckService.UpdateTruckMaintenanceStatus(shippingDTO.FkTruckId))
+            if (_truckService.UpdateTruckMaintenanceStatus(shippingDTO.FkTruckId, shippingDTO.DistanceKm))
             { 
-                throw new InvalidTruckException("Caminhão não está disponível para envio, ele esta em manutenção");
+                throw new InvalidTruckException("Caminhão não está disponível para envio, ele necessita de manutenção antes de realizar o envio");
             }
             
             // Verificar se o cargo do funcionário é "Driver"
@@ -163,7 +163,7 @@ namespace logisticsSystem.Controllers
                 throw new NotFoundException($"Envio com ID {id} não encontrado.");
             }
 
-            if (_truckService.UpdateTruckMaintenanceStatus(updatedShippingDTO.FkTruckId))
+            if (_truckService.UpdateTruckMaintenanceStatus(updatedShippingDTO.FkTruckId, updatedShippingDTO.DistanceKm))
             {
                 throw new InvalidTruckException("Caminhão não está disponível para envio, ele esta em manutenção");
             }

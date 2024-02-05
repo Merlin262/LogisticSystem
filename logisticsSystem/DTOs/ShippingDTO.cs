@@ -4,17 +4,17 @@ namespace logisticsSystem.DTOs
 {
     public class ShippingDTO
     {
-        public DateOnly SendDate { get; set; }
+        public DateOnly? SendDate { get; set; }
 
-        public DateOnly EstimatedDate { get; set; }
+        public DateOnly? EstimatedDate { get; set; }
 
-        public DateOnly DeliveryDate { get; set; }
+        public DateOnly? DeliveryDate { get; set; }
 
         public decimal TotalWeight { get; set; }
 
         public decimal DistanceKm { get; set; }
 
-        public DateOnly RegistrationDate { get; set; }
+        public DateOnly? RegistrationDate { get; set; }
 
         //[JsonIgnore]
         //public int Id { get; set; }
