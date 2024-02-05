@@ -27,226 +27,66 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        [HttpGet("api/clients")]
-        public IActionResult GetAllClients()
+        [HttpGet("/clients")]
+        public IActionResult GetClients()
         {
-            // Obter todos os clientes
-            var clients = _context.Clients
-                .Include(c => c.FkPerson)
-                .ThenInclude(p => p.FkAddress)
-                .ToList();
+            // Obter todos os ClientDTOs do contexto
+            var clients = _context.Clients.ToList();
 
-            // Verificar se a lista de clientes está vazia
-            if (clients.Count == 0)
+            var clientsDto = clients.Select(e => new ClientDTO
             {
-                throw new NotFoundException("Nenhum cliente cadastrado no banco de dados.");
-            }
-
-            // Mapear os clientes para o formato desejado
-            var clientsDto = clients.Select(client => new
-            {
-                Id = client.FkPerson.Id, // Ajuste aqui conforme necessário
-                client.FkPerson.Name,
-                client.FkPerson.Email,
-                FkAddress = new
-                {
-                    client.FkPerson.FkAddress.Country,
-                    client.FkPerson.FkAddress.State,
-                    client.FkPerson.FkAddress.City,
-                    client.FkPerson.FkAddress.Street,
-                    client.FkPerson.FkAddress.Number,
-                    client.FkPerson.FkAddress.Complement,
-                    client.FkPerson.FkAddress.Zipcode,
-                    Id = client.FkPerson.FkAddress.Id // Ajuste aqui conforme necessário
-                }
+                FkPersonId = e.FkPersonId,
             }).ToList();
 
-            // Converta a lista para JSON e imprima no console
-            var jsonResult = JsonSerializer.Serialize(clientsDto, new JsonSerializerOptions { WriteIndented = true });
-            Console.WriteLine(jsonResult);
-
-            return Ok(clientsDto); // Retorna 200 OK com os dados dos clientes no formato desejado
+            // Retornar a lista de ClientDTOs
+            return Ok(clientsDto);
         }
 
-
-        [HttpGet("api/clients/{id}")]
+        [HttpGet("/clients/{id}")]
         public IActionResult GetClientById(int id)
         {
-            // Obter o cliente com o ID fornecido
-            var client = _context.Clients
-                .Include(c => c.FkPerson)
-                .ThenInclude(p => p.FkAddress)
-                .FirstOrDefault(c => c.FkPerson.Id == id);
+            // Obter o cliente pelo ID do contexto
+            var client = _context.Clients.FirstOrDefault(c => c.FkPersonId == id);
 
             if (client == null)
             {
-                throw new NotFoundException("Cliente não encontrado, verifique se o ID esta correto");
+                throw new NotFoundException("Client não encontrado no banco de daods.");
             }
 
-            // Mapear a entidade Client para o formato desejado
-            var clientDto = new
+            // Mapear o cliente para um ClientDTO
+            var clientDto = new ClientDTO
             {
-                Id = client.FkPerson.Id, // Ajuste aqui conforme necessário
-                client.FkPerson.Name,
-                client.FkPerson.Email,
-                FkAddress = new
-                {
-                    client.FkPerson.FkAddress.Country,
-                    client.FkPerson.FkAddress.State,
-                    client.FkPerson.FkAddress.City,
-                    client.FkPerson.FkAddress.Street,
-                    client.FkPerson.FkAddress.Number,
-                    client.FkPerson.FkAddress.Complement,
-                    client.FkPerson.FkAddress.Zipcode,
-                    Id = client.FkPerson.FkAddress.Id // Ajuste aqui conforme necessário
-                }
+                FkPersonId = client.FkPersonId,
             };
 
-            // Converta o objeto para JSON e imprima no console
-            var jsonResult =
-                JsonSerializer.Serialize(clientDto, new JsonSerializerOptions { WriteIndented = true });
-            Console.WriteLine(jsonResult);
-
-            return Ok(clientDto); // Retorna 200 OK com os dados do cliente no formato desejado
+            // Retornar o ClientDTO específico pelo ID
+            return Ok(clientDto);
         }
 
-        [HttpPost("api/clients")]
-        public IActionResult CreateClient([FromBody] ClientDTO request)
+
+        [HttpPut("/clients/{id}")]
+        public IActionResult UpdateClient(int id, [FromBody] ClientDTO updatedClientDTO)
         {
-            // Verifique se a solicitação é nula
-            if (request == null)
+            
+            // Obter o cliente pelo ID do contexto
+            var existingClient = _context.Clients.FirstOrDefault(c => c.FkPersonId == id);
+
+            if (existingClient == null)
             {
-                throw new NullRequestException("A solicitação é nula.");
+                throw new NotFoundException("Client não encontrado no banco de daods.");
             }
 
-            // Verifique os tipos de dados esperados
-            if (request.Id <= 0 || string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.Email)
-                || request.FkAddress == null || request.FkAddress.Id <= 0
-                || string.IsNullOrEmpty(request.FkAddress.Country) || string.IsNullOrEmpty(request.FkAddress.State)
-                || string.IsNullOrEmpty(request.FkAddress.City) || string.IsNullOrEmpty(request.FkAddress.Street)
-                || string.IsNullOrEmpty(request.FkAddress.Number))
-            {
-                throw new InvalidDataTypeException("Alguns campos têm tipos de dados inválidos ou estão ausentes.");
-            }
-
-            // Verifique se o nome contém apenas letras
-            if (!IsAlpha(request.Name))
-            {
-                throw new InvalidDataTypeException("O nome deve conter apenas letras.");
-            }
-
-            if (!IsAlpha(request.FkAddress.Country))
-            {
-                throw new InvalidDataTypeException("O país deve conter apenas letras.");
-            }
-
-            if (!IsAlpha(request.FkAddress.State))
-            {
-                throw new InvalidDataTypeException("O estado deve conter apenas letras.");
-            }
-
-            if (!IsAlpha(request.FkAddress.City))
-            {
-                throw new InvalidDataTypeException("A cidade deve conter apenas letras.");
-            }
-
-            // Crie uma nova instância de Client e relacione-a com Person e Address conforme necessário
-            var newClient = new Client
-            {
-                FkPerson = new Person
-                {
-                    Id = request.Id,
-                    Name = request.Name,
-                    Email = request.Email,
-                    FkAddress = new Address
-                    {
-                        Id = request.FkAddress.Id,
-                        Country = request.FkAddress.Country,
-                        State = request.FkAddress.State,
-                        City = request.FkAddress.City,
-                        Street = request.FkAddress.Street,
-                        Number = request.FkAddress.Number
-                    }
-                }
-            };
-
-            // Adicione o novo cliente ao contexto
-            _context.Clients.Add(newClient);
-
-            // Salve as alterações no banco de dados
-            _context.SaveChanges();
-
-            // Configure as opções para lidar com referências cíclicas
-            var jsonOptions = new JsonSerializerOptions
-            {
-                ReferenceHandler = ReferenceHandler.Preserve,
-                MaxDepth = 32 // Defina um valor adequado para a profundidade máxima, se necessário
-            };
-
-            // Converta o novo cliente para JSON
-            var jsonResult = JsonSerializer.Serialize(newClient, jsonOptions);
-
-            // Retorne o novo cliente criado
-            return Ok(jsonResult);
-        }
-
-        [HttpPut("api/clients/{id}")]
-        public IActionResult UpdateClient(int id, [FromBody] ClientDTO request)
-        {
-            // Obter o cliente com o ID fornecido
-            var client = _context.Clients.Find(id);
-
-            if (client == null)
-            {
-                throw new NotFoundException("Cliente não encontrado para fazer a mudança"); // Retorna 404 Not Found se o cliente não for encontrado
-            }
-
-            // Verifique os tipos de dados esperados
-            if (request.Id <= 0 || string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.Email)
-                || request.FkAddress == null || request.FkAddress.Id <= 0
-                || string.IsNullOrEmpty(request.FkAddress.Country) || string.IsNullOrEmpty(request.FkAddress.State)
-                || string.IsNullOrEmpty(request.FkAddress.City) || string.IsNullOrEmpty(request.FkAddress.Street)
-                || string.IsNullOrEmpty(request.FkAddress.Number))
-            {
-                throw new InvalidDataTypeException("Alguns campos têm tipos de dados inválidos ou estão ausentes.");
-            }
-
-            // Verifique se o nome contém apenas letras
-            if (!IsAlpha(request.Name))
-            {
-                throw new InvalidDataTypeException("O nome deve conter apenas letras.");
-            }
-
-            if (!IsAlpha(request.FkAddress.Country))
-            {
-                throw new InvalidDataTypeException("O país deve conter apenas letras.");
-            }
-
-            if (!IsAlpha(request.FkAddress.State))
-            {
-                throw new InvalidDataTypeException("O estado deve conter apenas letras.");
-            }
-
-            if (!IsAlpha(request.FkAddress.City))
-            {
-                throw new InvalidDataTypeException("A cidade deve conter apenas letras.");
-            }
-
-            // Atualizar propriedades do cliente
-            client.FkPerson.Name = request.Name;
-            client.FkPerson.Email = request.Email;
-
-            // Atualizar propriedades do endereço
-            client.FkPerson.FkAddress.Country = request.FkAddress.Country;
-            client.FkPerson.FkAddress.State = request.FkAddress.State;
-            client.FkPerson.FkAddress.City = request.FkAddress.City;
-            client.FkPerson.FkAddress.Street = request.FkAddress.Street;
-            client.FkPerson.FkAddress.Number = request.FkAddress.Number;
+            // Atualizar as propriedades do cliente existente com base no DTO fornecido
+            existingClient.FkPersonId = updatedClientDTO.FkPersonId;
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
 
-            return Ok(client); // Retorna 200 OK com os dados atualizados do cliente
+            // Retornar o cliente atualizado
+            return Ok(new
+            {
+                FkPersonId = existingClient.FkPersonId,
+            });
         }
 
         // DELETE: api/Clients/5
@@ -256,19 +96,13 @@ namespace logisticsSystem.Controllers
             var client = await _context.Clients.FindAsync(id);
             if (client == null)
             {
-                throw new NotFoundException("Cliente não encontrado");
+                throw new NotFoundException("Client não encontrado no banco de daods.");
             }
 
             _context.Clients.Remove(client);
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool IsAlpha(string value)
-        {
-            // Use uma expressão regular para verificar se a string contém apenas letras
-            return Regex.IsMatch(value, @"^[a-zA-Z]+$");
         }
     }
 }

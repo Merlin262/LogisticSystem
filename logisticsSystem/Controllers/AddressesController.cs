@@ -25,26 +25,59 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // GET: api/Addresses
-        [HttpGet("getAll")]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddresses()
+
+
+        [HttpGet("/addresses")]
+        public IActionResult GetAddresses()
         {
-            return await _context.Addresses.ToListAsync();
+            // Obter todos os AddressDTOs do contexto
+            var addresses = _context.Addresses.ToList();
+
+            var addressesDto = addresses.Select(a => new AddressDTO
+            {
+                Id = a.Id,
+                Country = a.Country,
+                State = a.State,
+                City = a.City,
+                Street = a.Street,
+                Number = a.Number,
+                Complement = a.Complement,
+                Zipcode = a.Zipcode,
+            }).ToList();
+
+            // Retornar a lista de AddressDTOs
+            return Ok(addressesDto);
         }
 
-        // GET: api/Addresses/5
-        [HttpGet("getById/{id}")]
-        public async Task<ActionResult<Address>> GetAddress(int id)
+
+        [HttpGet("/addresses/{id}")]
+        public IActionResult GetAddressById(int id)
         {
-            var address = await _context.Addresses.FindAsync(id);
+            // Obter o AddressDTO com o ID fornecido do contexto
+            var address = _context.Addresses.FirstOrDefault(a => a.Id == id);
 
             if (address == null)
             {
-                throw new NotFoundException($"Endereço de id: {id} não encontrado no banco de dados ");
+                return NotFound("Endereço não encontrado.");
             }
 
-            return address;
+            // Mapear o Address para AddressDTO
+            var addressDto = new AddressDTO
+            {
+                Id = address.Id,
+                Country = address.Country,
+                State = address.State,
+                City = address.City,
+                Street = address.Street,
+                Number = address.Number,
+                Complement = address.Complement,
+                Zipcode = address.Zipcode,
+            };
+
+            // Retornar o AddressDTO encontrado
+            return Ok(addressDto);
         }
+
 
 
         // POST: api/Addresses/create

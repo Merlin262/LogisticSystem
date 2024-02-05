@@ -44,6 +44,10 @@ namespace logisticsSystem.MiddleWares
             {
                 await HandleExceptionAsync(context, ex);
             }
+            catch (InvalidTruckException ex)
+            {
+                await HandleExceptionAsync(context, ex);
+            }
             catch (UnregisteredObject ex)
             {
                 await HandleExceptionAsync(context, ex);
@@ -93,6 +97,12 @@ namespace logisticsSystem.MiddleWares
                 case nameof(InternalServerException):
                     message = exception.Message;
                     status = HttpStatusCode.InternalServerError;
+                    stackTrace = exception.StackTrace;
+                    break;
+
+                case nameof(InvalidTruckException):
+                    message = exception.Message;
+                    status = HttpStatusCode.BadRequest;
                     stackTrace = exception.StackTrace;
                     break;
 

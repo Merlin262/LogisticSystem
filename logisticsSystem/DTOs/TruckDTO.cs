@@ -10,4 +10,6 @@ public class TruckDTO
     public int? Year { get; set; }
     public string? Color { get; set; }
     public int TruckAxles { get; set; }
+    public int LastMaintenanceKilometers { get; set; }
+    public bool InMaintenance { get; set; }
 }
