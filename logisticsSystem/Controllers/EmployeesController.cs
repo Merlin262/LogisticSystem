@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
 
 namespace logisticsSystem.Controllers
 {
@@ -31,7 +32,6 @@ namespace logisticsSystem.Controllers
             {
                 FkPersonId = employeeDTO.FkPersonId,
                 Position = employeeDTO.Position,
-                //Commission = employeeDTO.Commission
             };
 
             // Adicionar o novo funcionário ao contexto
@@ -56,7 +56,6 @@ namespace logisticsSystem.Controllers
             {
                 FkPersonId = e.FkPersonId,
                 Position = e.Position,
-                //Commission = e.Commission
             }).ToList();
 
             return Ok(employeesDto);
@@ -71,7 +70,7 @@ namespace logisticsSystem.Controllers
 
             if (employee == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o funcionário não for encontrado
+                throw new NotFoundException("Employee não encontrado no banco");
             }
 
             // Mapear Employee para EmployeeDTO
@@ -79,7 +78,6 @@ namespace logisticsSystem.Controllers
             {
                 FkPersonId = employee.FkPersonId,
                 Position = employee.Position,
-                //Commission = employee.Commission
             };
 
             return Ok(employeeDto);
@@ -94,7 +92,7 @@ namespace logisticsSystem.Controllers
 
             if (employee == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o funcionário não for encontrado
+                throw new NotFoundException("Employee não encontrado no banco");
             }
 
             // Atualizar propriedades do funcionário
@@ -116,7 +114,7 @@ namespace logisticsSystem.Controllers
 
             if (employee == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o funcionário não for encontrado
+                throw new NotFoundException("Employee não encontrado no banco"); 
             }
 
             // Remover o funcionário do contexto

@@ -44,7 +44,7 @@ namespace logisticsSystem.Controllers
 
             if (deductionDTO.Description.Length > 255)
             {
-                throw new InvalidDataTypeException("A descrição da dedução deve ter no máximo 100 caracteres.");
+                throw new InvalidDataTypeException("A descrição da dedução deve ter no máximo 255 caracteres.");
             }
 
             // Mapear DeductionDTO para a entidade Deduction
@@ -98,7 +98,7 @@ namespace logisticsSystem.Controllers
 
             if (deduction == null)
             {
-                throw new NotFoundException($"Nenhuma dedução encontrada com o ID {id}.");
+                throw new NotFoundException($"Nenhuma Deduction encontrada com o ID {id}.");
             }
 
             // Mapear Deduction para DeductionDTO
@@ -126,7 +126,7 @@ namespace logisticsSystem.Controllers
 
             if (deduction == null)
             {
-                return NotFound(); // Retorna 404 Not Found se a dedução não for encontrada
+                throw new NotFoundException($"Nenhuma Deduction encontrada com o ID {id}.");
             }
 
             // Atualizar propriedades da dedução
@@ -151,7 +151,7 @@ namespace logisticsSystem.Controllers
 
             if (deduction == null)
             {
-                return NotFound(); // Retorna 404 Not Found se a dedução não for encontrada
+                throw new NotFoundException($"Nenhuma Deduction encontrada com o ID {id}.");
             }
 
             // Remover a dedução do contexto

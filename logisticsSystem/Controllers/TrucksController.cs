@@ -43,7 +43,9 @@ namespace logisticsSystem.Controllers
                     Model = t.Model,
                     Year = t.Year,
                     Color = t.Color,
-                    TruckAxles = t.TruckAxles
+                    TruckAxles = t.TruckAxles,
+                    LastMaintenanceKilometers = t.LastMaintenanceKilometers,
+                    InMaintenance = t.InMaintenance
                 });
 
                 return Ok(truckDTOs);
@@ -67,7 +69,9 @@ namespace logisticsSystem.Controllers
                     Model = truck.Model,
                     Year = truck.Year,
                     Color = truck.Color,
-                    TruckAxles = truck.TruckAxles
+                    TruckAxles = truck.TruckAxles,
+                    LastMaintenanceKilometers = truck.LastMaintenanceKilometers,
+                    InMaintenance = truck.InMaintenance
                 };
 
                 return Ok(truckDTO);
@@ -98,6 +102,8 @@ namespace logisticsSystem.Controllers
                 truck.Model = truckDTO.Model;
                 truck.Year = truckDTO.Year;
                 truck.Color = truckDTO.Color;
+                truck.LastMaintenanceKilometers = truckDTO.LastMaintenanceKilometers;
+                truck.InMaintenance = truckDTO.InMaintenance;
 
                 _context.Entry(truck).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
@@ -125,6 +131,8 @@ namespace logisticsSystem.Controllers
                     Model = truckDTO.Model,
                     Year = truckDTO.Year,
                     Color = truckDTO.Color,
+                    LastMaintenanceKilometers = truckDTO.LastMaintenanceKilometers,
+                    InMaintenance = truckDTO.InMaintenance
                 };
 
                 _context.Trucks.Add(truck);
@@ -138,6 +146,8 @@ namespace logisticsSystem.Controllers
                     Model = truck.Model,
                     Year = truck.Year,
                     Color = truck.Color,
+                    LastMaintenanceKilometers = truckDTO.LastMaintenanceKilometers,
+                    InMaintenance = truckDTO.InMaintenance
                 };
 
                 return CreatedAtAction("GetTruck", new { Chassis = createdTruckDTO.Chassis }, createdTruckDTO);

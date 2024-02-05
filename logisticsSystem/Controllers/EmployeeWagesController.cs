@@ -44,16 +44,15 @@ namespace logisticsSystem.Controllers
             return Ok(result);
         }
 
-        // CREATE - Método POST para EmployeeWage
-        [HttpPost("{fkPersonId}/employeewages")]
-        public IActionResult CreateEmployeeWage(int fkPersonId, [FromBody] EmployeeWageDTO employeeWageDTO)
+        [HttpPost("/employeewages")]
+        public IActionResult CreateEmployeeWage([FromBody] EmployeeWageDTO employeeWageDTO)
         {
-            // Obter o funcionário com o FkPersonId fornecido
-            var employee = _context.Employees.FirstOrDefault(e => e.FkPersonId == fkPersonId);
-
-            if (employee == null)
+            
+            // Verificar se o FkEmployeeId é válido
+            var existingEmployee = _context.Employees.Find(employeeWageDTO.FkEmployeeId);
+            if (existingEmployee == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o funcionário não for encontrado
+                throw new NotFoundException($"Funcionário com ID {employeeWageDTO.FkEmployeeId} não encontrado.");
             }
 
             // Mapear EmployeeWageDTO para a entidade EmployeeWage
@@ -62,7 +61,7 @@ namespace logisticsSystem.Controllers
                 Id = employeeWageDTO.Id,
                 PayDay = employeeWageDTO.PayDay,
                 Amount = employeeWageDTO.Amount,
-                FkEmployeeId = employee.FkPersonId
+                FkEmployeeId = employeeWageDTO.FkEmployeeId
             };
 
             // Adicionar a nova remuneração ao contexto
@@ -79,7 +78,9 @@ namespace logisticsSystem.Controllers
                 newEmployeeWage.Amount,
                 newEmployeeWage.FkEmployeeId
             });
+            
         }
+
 
         // READ - Método GET (Todos) para EmployeeWage
         [HttpGet("{fkPersonId}/employeewages")]
@@ -103,7 +104,7 @@ namespace logisticsSystem.Controllers
         }
 
         // UPDATE - Método PUT para EmployeeWage
-        [HttpPut("{fkPersonId}/employeewages/{employeeWageId}")]
+        [HttpPut("/employeewages/{employeeWageId}")]
         public IActionResult UpdateEmployeeWage(int fkPersonId, int employeeWageId, [FromBody] EmployeeWageDTO employeeWageDTO)
         {
             // Obter a remuneração do funcionário com o FkPersonId e Id fornecidos
@@ -141,7 +142,8 @@ namespace logisticsSystem.Controllers
 
             if (employeeWage == null)
             {
-                return NotFound(); // Retorna 404 Not Found se a remuneração não for encontrada
+                throw new NotFoundException(
+                    "Employeewage não encontrado no banco");
             }
 
             // Remover a remuneração do contexto
