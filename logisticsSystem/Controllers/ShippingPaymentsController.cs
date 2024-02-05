@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
 
 namespace logisticsSystem.Controllers
 {
@@ -27,6 +28,13 @@ namespace logisticsSystem.Controllers
         public IActionResult GetShippingPayments()
         {
             var shippingPayments = _context.ShippingPayments.ToList();
+
+            // Verificar se há pagamentos de envio no banco de dados
+            if (shippingPayments == null || shippingPayments.Count == 0)
+            {
+                throw new NotFoundException("Nenhum pagamento de envio encontrado.");
+            }
+
             var shippingPaymentDTOs = shippingPayments.Select(sp => new ShippingPaymentDTO
             {
                 Id = sp.Id,
@@ -35,17 +43,20 @@ namespace logisticsSystem.Controllers
             });
 
             return Ok(shippingPaymentDTOs);
+
         }
+
 
         // GET: api/shipping-payments/{id}
         [HttpGet("{id}")]
         public IActionResult GetShippingPaymentById(int id)
         {
+
             var shippingPayment = _context.ShippingPayments.FirstOrDefault(sp => sp.Id == id);
 
             if (shippingPayment == null)
             {
-                return NotFound("Pagamento de envio não encontrado.");
+                throw new NotFoundException("Pagamento de envio não encontrado.");
             }
 
             var shippingPaymentDTO = new ShippingPaymentDTO
@@ -56,12 +67,32 @@ namespace logisticsSystem.Controllers
             };
 
             return Ok(shippingPaymentDTO);
+
         }
+
 
         // POST: api/shipping-payments
         [HttpPost]
         public IActionResult CreateShippingPayment([FromBody] ShippingPaymentDTO shippingPaymentDTO)
         {
+
+            if (shippingPaymentDTO == null)
+            {
+                throw new NullRequestException("Confira se não deixou nenhum campo em branco");
+            }
+
+            // Verificar se a data de pagamento é uma data válida
+            if (shippingPaymentDTO.PaymentDate == default(DateOnly))
+            {
+                throw new InvalidDataException("A data de pagamento é inválida.");
+            }
+
+            // Verificar se o FkShippingId é um número positivo
+            if (shippingPaymentDTO.FkShippingId <= 0)
+            {
+                throw new InvalidDataException("FkShippingId deve ser um número positivo.");
+            }
+
             var shippingPayment = new ShippingPayment
             {
                 PaymentDate = shippingPaymentDTO.PaymentDate,
@@ -74,15 +105,33 @@ namespace logisticsSystem.Controllers
             return CreatedAtAction(nameof(GetShippingPaymentById), new { id = shippingPayment.Id }, shippingPaymentDTO);
         }
 
+
+
+
+
+
         // PUT: api/shipping-payments/{id}
         [HttpPut("{id}")]
         public IActionResult UpdateShippingPayment(int id, [FromBody] ShippingPaymentDTO updatedShippingPaymentDTO)
         {
+
             var existingShippingPayment = _context.ShippingPayments.FirstOrDefault(sp => sp.Id == id);
 
             if (existingShippingPayment == null)
             {
-                return NotFound("Pagamento de envio não encontrado.");
+                throw new NotFoundException("Pagamento de envio não encontrado.");
+            }
+
+            // Verificar se a data de pagamento é uma data válida
+            if (updatedShippingPaymentDTO.PaymentDate == default(DateOnly))
+            {
+                throw new InvalidDataException("A data de pagamento é inválida.");
+            }
+
+            // Verificar se o FkShippingId é um número positivo
+            if (updatedShippingPaymentDTO.FkShippingId <= 0)
+            {
+                throw new InvalidDataException("FkShippingId deve ser um número positivo.");
             }
 
             existingShippingPayment.PaymentDate = updatedShippingPaymentDTO.PaymentDate;
@@ -98,7 +147,9 @@ namespace logisticsSystem.Controllers
             };
 
             return Ok(updatedShippingPaymentResponse);
+
         }
+
 
         // DELETE: api/shipping-payments/{id}
         [HttpDelete("{id}")]
@@ -108,7 +159,7 @@ namespace logisticsSystem.Controllers
 
             if (shippingPayment == null)
             {
-                return NotFound("Pagamento de envio não encontrado.");
+                throw new NotFoundException("Pagamento de envio não encontrado.");
             }
 
             _context.ShippingPayments.Remove(shippingPayment);
@@ -116,5 +167,7 @@ namespace logisticsSystem.Controllers
 
             return NoContent();
         }
+
     }
+
 }

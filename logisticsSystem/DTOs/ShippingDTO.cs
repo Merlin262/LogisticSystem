@@ -10,7 +10,7 @@ namespace logisticsSystem.DTOs
 
         public DateOnly? DeliveryDate { get; set; }
 
-        public decimal? TotalWeight { get; set; }
+        public decimal TotalWeight { get; set; }
 
         public decimal DistanceKm { get; set; }
 

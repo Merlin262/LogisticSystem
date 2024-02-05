@@ -7,11 +7,11 @@ public partial class TruckDriver
 {
     public int Id { get; set; }
 
-    public int? FkTruckChassis { get; set; }
+    public int FkTruckChassis { get; set; }
 
-    public int? FkEmployeeId { get; set; }
+    public int FkEmployeeId { get; set; }
 
-    public virtual Employee? FkEmployee { get; set; }
+    public virtual Employee FkEmployee { get; set; }
 
-    public virtual Truck? FkTruckChassisNavigation { get; set; }
+    public virtual Truck FkTruckChassisNavigation { get; set; }
 }

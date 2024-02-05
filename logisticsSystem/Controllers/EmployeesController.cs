@@ -30,7 +30,8 @@ namespace logisticsSystem.Controllers
             var newEmployee = new Employee
             {
                 FkPersonId = employeeDTO.FkPersonId,
-                Position = employeeDTO.Position
+                Position = employeeDTO.Position,
+                //Commission = employeeDTO.Commission
             };
 
             // Adicionar o novo funcionário ao contexto
@@ -54,7 +55,8 @@ namespace logisticsSystem.Controllers
             var employeesDto = employees.Select(e => new EmployeeDTO
             {
                 FkPersonId = e.FkPersonId,
-                Position = e.Position
+                Position = e.Position,
+                //Commission = e.Commission
             }).ToList();
 
             return Ok(employeesDto);
@@ -76,7 +78,8 @@ namespace logisticsSystem.Controllers
             var employeeDto = new EmployeeDTO
             {
                 FkPersonId = employee.FkPersonId,
-                Position = employee.Position
+                Position = employee.Position,
+                //Commission = employee.Commission
             };
 
             return Ok(employeeDto);
@@ -96,6 +99,7 @@ namespace logisticsSystem.Controllers
 
             // Atualizar propriedades do funcionário
             employee.Position = employeeDTO.Position;
+            //employee.Commission = employeeDTO.Commission;
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();

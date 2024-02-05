@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace logisticsSystem.Controllers
 {
@@ -22,10 +24,29 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // CREATE - Método POST
         [HttpPost]
         public IActionResult CreateDeduction([FromBody] DeductionDTO deductionDTO)
         {
+            if (deductionDTO == null)
+            {
+                throw new NullRequestException("A solicitação é nula.");
+            }
+
+            if (!IsAlpha(deductionDTO.Name))
+            {
+                throw new InvalidDataTypeException("O nome da dedução deve conter apenas letras.");
+            }
+
+            if (deductionDTO.Amount < 0)
+            {
+                throw new InvalidDataTypeException("O valor da dedução deve ser maior ou igual a zero.");
+            }
+
+            if (deductionDTO.Description.Length > 255)
+            {
+                throw new InvalidDataTypeException("A descrição da dedução deve ter no máximo 100 caracteres.");
+            }
+
             // Mapear DeductionDTO para a entidade Deduction
             var newDeduction = new Deduction
             {
@@ -45,12 +66,16 @@ namespace logisticsSystem.Controllers
             return Ok(newDeduction);
         }
 
-        // READ - Método GET (Todos)
         [HttpGet]
         public IActionResult GetAllDeductions()
         {
             // Obter todas as deduções
             var deductions = _context.Deductions.ToList();
+
+            if (deductions == null)
+            {
+                throw new NotFoundException("Nenhuma dedução encontrada.");
+            }
 
             // Mapear Deduction para DeductionDTO
             var deductionsDto = deductions.Select(d => new DeductionDTO
@@ -64,7 +89,7 @@ namespace logisticsSystem.Controllers
             return Ok(deductionsDto);
         }
 
-        // READ - Método GET por ID
+
         [HttpGet("{id}")]
         public IActionResult GetDeductionById(int id)
         {
@@ -73,7 +98,7 @@ namespace logisticsSystem.Controllers
 
             if (deduction == null)
             {
-                return NotFound(); // Retorna 404 Not Found se a dedução não for encontrada
+                throw new NotFoundException($"Nenhuma dedução encontrada com o ID {id}.");
             }
 
             // Mapear Deduction para DeductionDTO
@@ -88,10 +113,14 @@ namespace logisticsSystem.Controllers
             return Ok(deductionDto);
         }
 
+
+
+
         // UPDATE - Método PUT
         [HttpPut("{id}")]
         public IActionResult UpdateDeduction(int id, [FromBody] DeductionDTO deductionDTO)
         {
+
             // Obter a dedução com o ID fornecido
             var deduction = _context.Deductions.Find(id);
 
@@ -110,6 +139,8 @@ namespace logisticsSystem.Controllers
 
             return Ok(deduction);
         }
+
+
 
         // DELETE - Método DELETE
         [HttpDelete("{id}")]
@@ -130,6 +161,12 @@ namespace logisticsSystem.Controllers
             _context.SaveChanges();
 
             return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
+        }
+
+        private bool IsAlpha(string value)
+        {
+            // Use uma expressão regular para verificar se a string contém apenas letras
+            return Regex.IsMatch(value, @"^[a-zA-Z]+$");
         }
     }
 }

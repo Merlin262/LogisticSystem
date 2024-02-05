@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
 
 namespace logisticsSystem.Controllers
 {
@@ -30,14 +31,11 @@ namespace logisticsSystem.Controllers
             {
                 FkTruckChassis = td.FkTruckChassis,
                 FkEmployeeId = td.FkEmployeeId,
-                
-                
             });
 
             return Ok(truckDriverDTOs);
         }
 
-        // GET: api/truck-drivers/{id}
         [HttpGet("{id}")]
         public IActionResult GetTruckDriverById(int id)
         {
@@ -45,7 +43,7 @@ namespace logisticsSystem.Controllers
 
             if (truckDriver == null)
             {
-                return NotFound("Motorista de caminhão não encontrado.");
+                throw new NotFoundException("Motorista de caminhão não encontrado.");
             }
 
             var truckDriverDTO = new TruckDriverDTO
@@ -57,10 +55,29 @@ namespace logisticsSystem.Controllers
             return Ok(truckDriverDTO);
         }
 
-        // POST: api/truck-drivers
+
         [HttpPost]
         public IActionResult CreateTruckDriver([FromBody] TruckDriverDTO truckDriverDTO)
         {
+            if (truckDriverDTO == null)
+            {
+                throw new NullRequestException("Solicitação inválida para criação de motorista de caminhão.");
+            }
+
+            // Verificar se FkTruckChassis é válido
+            var truckChassisExists = _context.Trucks.Any(tc => tc.Chassis == truckDriverDTO.FkTruckChassis);
+            if (!truckChassisExists)
+            {
+                throw new NotFoundException("Chassi do caminhão associado ao motorista não encontrado.");
+            }
+
+            // Verificar se FkEmployeeId é válido
+            var employeeExists = _context.Employees.Any(e => e.FkPersonId == truckDriverDTO.FkEmployeeId);
+            if (!employeeExists)
+            {
+                throw new NotFoundException("Funcionário associado ao motorista não encontrado.");
+            }
+
             var truckDriver = new TruckDriver
             {
                 FkTruckChassis = truckDriverDTO.FkTruckChassis,
@@ -73,7 +90,8 @@ namespace logisticsSystem.Controllers
             return CreatedAtAction(nameof(GetTruckDriverById), new { id = truckDriver.Id }, truckDriverDTO);
         }
 
-        // PUT: api/truck-drivers/{id}
+
+
         [HttpPut("{id}")]
         public IActionResult UpdateTruckDriver(int id, [FromBody] TruckDriverDTO updatedTruckDriverDTO)
         {
@@ -81,7 +99,21 @@ namespace logisticsSystem.Controllers
 
             if (existingTruckDriver == null)
             {
-                return NotFound("Motorista de caminhão não encontrado.");
+                throw new NotFoundException("Motorista de caminhão não encontrado.");
+            }
+
+            // Verificar se FkTruckChassis é válido
+            var truckChassisExists = _context.Trucks.Any(tc => tc.Chassis == updatedTruckDriverDTO.FkTruckChassis);
+            if (!truckChassisExists)
+            {
+                throw new NotFoundException("Chassi do caminhão associado ao motorista não encontrado.");
+            }
+
+            // Verificar se FkEmployeeId é válido
+            var employeeExists = _context.Employees.Any(e => e.FkPersonId == updatedTruckDriverDTO.FkEmployeeId);
+            if (!employeeExists)
+            {
+                throw new NotFoundException("Funcionário associado ao motorista não encontrado.");
             }
 
             existingTruckDriver.FkTruckChassis = updatedTruckDriverDTO.FkTruckChassis;
@@ -98,7 +130,7 @@ namespace logisticsSystem.Controllers
             return Ok(updatedTruckDriverResponse);
         }
 
-        // DELETE: api/truck-drivers/{id}
+
         [HttpDelete("{id}")]
         public IActionResult DeleteTruckDriver(int id)
         {
@@ -106,7 +138,7 @@ namespace logisticsSystem.Controllers
 
             if (truckDriver == null)
             {
-                return NotFound("Motorista de caminhão não encontrado.");
+                throw new NotFoundException("Motorista de caminhão não encontrado.");
             }
 
             _context.TruckDrivers.Remove(truckDriver);

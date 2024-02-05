@@ -36,6 +36,10 @@ namespace logisticsSystem.MiddleWares
             {
                 await HandleExceptionAsync(context, ex);
             }
+            catch (InvalidEmployeeException ex)
+            {
+                await HandleExceptionAsync(context, ex);
+            }
             catch (NotFoundException ex)
             {
                 await HandleExceptionAsync(context, ex);
@@ -58,8 +62,6 @@ namespace logisticsSystem.MiddleWares
             }
             
         }
-
-
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
@@ -94,6 +96,12 @@ namespace logisticsSystem.MiddleWares
                     stackTrace = exception.StackTrace;
                     break;
 
+                case nameof(InvalidEmployeeException):
+                    message = exception.Message;
+                    status = HttpStatusCode.BadRequest;
+                    stackTrace = exception.StackTrace;
+                    break;
+
                 case nameof(InsufficientQuantityException):
                     message = exception.Message;
                     status = HttpStatusCode.InsufficientStorage;
@@ -118,8 +126,6 @@ namespace logisticsSystem.MiddleWares
                     stackTrace = exception.StackTrace;
                     break;
             }
-
-
 
             var result = JsonSerializer.Serialize(new {status, message, stackTrace });
             context.Response.ContentType = "application/json";

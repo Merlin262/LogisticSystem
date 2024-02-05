@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
 
 namespace logisticsSystem.Controllers
 {
@@ -26,6 +27,26 @@ namespace logisticsSystem.Controllers
         [HttpPost]
         public IActionResult CreateMaintenanceTruckPart([FromBody] MaintenanceTruckPartDTO maintenanceTruckPartDTO)
         {
+            // Verificar se a solicitação é nula
+            if (maintenanceTruckPartDTO == null)
+            {
+                throw new NullRequestException("Solicitação inválida para criação de relacionamento entre manutenção e peça de caminhão.");
+            }
+
+            // Verificar se a manutenção associada ao relacionamento existe
+            var maintenanceExists = _context.Maintenances.Any(m => m.Id == maintenanceTruckPartDTO.FkMaintenanceId);
+            if (!maintenanceExists)
+            {
+                throw new NotFoundException("Manutenção associada ao relacionamento não encontrada.");
+            }
+
+            // Verificar se a peça de caminhão associada ao relacionamento existe
+            var truckPartExists = _context.TruckParts.Any(tp => tp.Id == maintenanceTruckPartDTO.FkTruckPartId);
+            if (!truckPartExists)
+            {
+                throw new NotFoundException("Peça de caminhão associada ao relacionamento não encontrada.");
+            }
+
             // Mapear MaintenanceTruckPartDTO para a entidade MaintenanceTruckPart
             var newMaintenanceTruckPart = new MaitenanceTruckPart()
             {
@@ -43,12 +64,20 @@ namespace logisticsSystem.Controllers
             return Ok(newMaintenanceTruckPart);
         }
 
+
+
         // READ - Método GET (Todos) para MaintenanceTruckPart
         [HttpGet]
         public IActionResult GetAllMaintenanceTruckPart()
         {
             // Obter todos os relacionamentos
             var maintenanceTruckParts = _context.MaitenanceTruckParts.ToList();
+
+            // Verificar se há relacionamentos no banco de dados
+            if (maintenanceTruckParts == null || maintenanceTruckParts.Count == 0)
+            {
+                throw new NotFoundException("Nenhum relacionamento entre manutenção e peça de caminhão encontrado.");
+            }
 
             // Mapear MaintenanceTruckPart para MaintenanceTruckPartDTO
             var maintenanceTruckPartDtoList = maintenanceTruckParts.Select(mtp => new MaintenanceTruckPartDTO
@@ -59,6 +88,7 @@ namespace logisticsSystem.Controllers
 
             return Ok(maintenanceTruckPartDtoList);
         }
+
 
         // READ - Método GET por FkMaintenanceId para MaintenanceTruckPart
         [HttpGet("{fkMaintenanceId}")]
@@ -69,6 +99,12 @@ namespace logisticsSystem.Controllers
                 .Where(mtp => mtp.FkMaintenanceId == fkMaintenanceId)
                 .ToList();
 
+            // Verificar se há relacionamentos no banco de dados
+            if (maintenanceTruckParts == null || maintenanceTruckParts.Count == 0)
+            {
+                throw new NotFoundException("Nenhum relacionamento entre manutenção e peça de caminhão encontrado para o FkMaintenanceId fornecido.");
+            }
+
             // Mapear MaintenanceTruckPart para MaintenanceTruckPartDTO
             var maintenanceTruckPartDtoList = maintenanceTruckParts.Select(mtp => new MaintenanceTruckPartDTO
             {
@@ -79,17 +115,30 @@ namespace logisticsSystem.Controllers
             return Ok(maintenanceTruckPartDtoList);
         }
 
+
         // UPDATE - Método PUT para MaintenanceTruckPart
-        [HttpPut("{fkMaintenanceId}")]
-        public IActionResult UpdateMaintenanceTruckPart(int fkMaintenanceId, [FromBody] MaintenanceTruckPartDTO maintenanceTruckPartDTO)
+        [HttpPut("{fkMaintenanceTruckPartId}")]
+        public IActionResult UpdateMaintenanceTruckPart(int fkMaintenanceTruckPartId, [FromBody] MaintenanceTruckPartDTO maintenanceTruckPartDTO)
         {
             // Obter o relacionamento com o FkMaintenanceId fornecido
             var maintenanceTruckPart = _context.MaitenanceTruckParts
-                .FirstOrDefault(mtp => mtp.FkMaintenanceId == fkMaintenanceId);
+                .FirstOrDefault(mtp => mtp.FkMaintenanceId == fkMaintenanceTruckPartId);
 
+            // Verificar se o relacionamento foi encontrado
             if (maintenanceTruckPart == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o relacionamento não for encontrado
+                throw new NotFoundException("Relacionamento entre manutenção e peça de caminhão não encontrado.");
+            }
+
+            // Validar FkTruckPartId e FkMaintenanceId antes da atualização
+            if (maintenanceTruckPartDTO.FkTruckPartId <= 0)
+            {
+                throw new InvalidDataException("ID de peça de caminhão inválido.");
+            }
+
+            if (maintenanceTruckPartDTO.FkMaintenanceId <= 0)
+            {
+                throw new InvalidDataException("ID de manutenção inválido.");
             }
 
             // Atualizar propriedades do relacionamento
@@ -102,17 +151,19 @@ namespace logisticsSystem.Controllers
             return Ok(maintenanceTruckPart);
         }
 
+
         // DELETE - Método DELETE para MaintenanceTruckPart
-        [HttpDelete("{fkMaintenanceId}")]
-        public IActionResult DeleteMaintenanceTruckPart(int fkMaintenanceId)
+        [HttpDelete("{fkMaintenanceTruckPartId}")]
+        public IActionResult DeleteMaintenanceTruckPart(int fkMaintenanceTruckPartId)
         {
             // Obter o relacionamento com o FkMaintenanceId fornecido
             var maintenanceTruckPart = _context.MaitenanceTruckParts
-                .FirstOrDefault(mtp => mtp.FkMaintenanceId == fkMaintenanceId);
+                .FirstOrDefault(mtp => mtp.FkMaintenanceId == fkMaintenanceTruckPartId);
 
+            // Verificar se o relacionamento foi encontrado
             if (maintenanceTruckPart == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o relacionamento não for encontrado
+                throw new NotFoundException("Relacionamento entre manutenção e peça de caminhão não encontrado.");
             }
 
             // Remover o relacionamento do contexto
