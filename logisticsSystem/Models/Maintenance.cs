@@ -13,9 +13,7 @@ public partial class Maintenance
 
     public int FkTruckChassis { get; set; }
 
-    public virtual Employee FkEmployeeNavigation { get; set; }
+    public virtual Employee? FkEmployeeNavigation { get; set; }
 
-    public virtual Truck FkTruckChassisNavigation { get; set; }
-
-    public virtual ICollection<MaitenanceTruckPart> MaitenanceTruckParts { get; set; } = new List<MaitenanceTruckPart>();
+    public virtual Truck? FkTruckChassisNavigation { get; set; }
 }

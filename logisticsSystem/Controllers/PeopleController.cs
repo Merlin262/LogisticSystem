@@ -149,9 +149,6 @@ namespace logisticsSystem.Controllers
             person.Email = personDTO.Email;
             //person.FkAddressId = personDTO.FkAddressId;
 
-            // Remover todos os telefones associados à pessoa
-            _context.Phones.RemoveRange(person.Phones);
-
             // Adicionar lógica para mapear e adicionar novos telefones, se necessário
 
             // Salvar as alterações no banco de dados
@@ -183,9 +180,6 @@ namespace logisticsSystem.Controllers
             {
                 _context.Addresses.Remove(person.FkAddress);
             }
-
-            // Remover todos os telefones associados à pessoa
-            _context.Phones.RemoveRange(person.Phones);
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();

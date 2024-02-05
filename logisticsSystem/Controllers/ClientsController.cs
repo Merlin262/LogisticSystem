@@ -63,6 +63,33 @@ namespace logisticsSystem.Controllers
             return Ok(clientDto);
         }
 
+        [HttpPost("/clients")]
+        public IActionResult CreateClient([FromBody] ClientDTO clientDTO)
+        {
+            // Validar se FkPersonId é maior que 0
+            if (clientDTO.FkPersonId <= 0)
+            {
+                throw new InvalidDataException("FkPersonId deve ser maior que zero.");
+            }
+
+            // Mapear ClientDTO para a entidade Client
+            var newClient = new Client
+            {
+                FkPersonId = clientDTO.FkPersonId
+                // Adicione outras propriedades conforme necessário
+            };
+
+            // Adicionar o novo cliente ao contexto
+            _context.Clients.Add(newClient);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar o novo cliente criado
+            return CreatedAtAction("GetClient", new { FkPersonId = newClient.FkPersonId }, clientDTO);
+        }
+
+
 
         [HttpPut("/clients/{id}")]
         public IActionResult UpdateClient(int id, [FromBody] ClientDTO updatedClientDTO)

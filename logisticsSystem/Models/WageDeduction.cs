@@ -7,11 +7,11 @@ public partial class WageDeduction
 {
     public int Id { get; set; }
 
-    public int FkDeductionsId { get; set; }
+    public int? FkDeductionsId { get; set; }
 
-    public int FkWageId { get; set; }
+    public int? FkWageId { get; set; }
 
-    public virtual Deduction FkDeductions { get; set; }
+    public virtual Deduction? FkDeductions { get; set; }
 
-    public virtual EmployeeWage FkWage { get; set; }
+    public virtual EmployeeWage? FkWage { get; set; }
 }

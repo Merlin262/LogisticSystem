@@ -27,7 +27,7 @@ namespace logisticsSystem.Services
                 )
                 .FirstOrDefault();
 
-            return employee;
+            return (decimal)employee;
         }
     }
 }
