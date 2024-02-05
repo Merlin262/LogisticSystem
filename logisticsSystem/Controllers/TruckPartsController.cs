@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
 
 namespace logisticsSystem.Controllers
 {
@@ -36,7 +37,6 @@ namespace logisticsSystem.Controllers
             return Ok(truckPartDTOs);
         }
 
-        // GET: api/truckparts/{id}
         [HttpGet("{id}")]
         public IActionResult GetTruckPartById(int id)
         {
@@ -44,7 +44,7 @@ namespace logisticsSystem.Controllers
 
             if (truckPart == null)
             {
-                return NotFound("Peça de caminhão não encontrada.");
+                throw new NotFoundException("Peça de caminhão não encontrada.");
             }
 
             var truckPartDTO = new TruckPartDTO
@@ -56,13 +56,13 @@ namespace logisticsSystem.Controllers
             return Ok(truckPartDTO);
         }
 
-        // POST: api/truckparts
+
         [HttpPost]
         public IActionResult CreateTruckPart([FromBody] TruckPartDTO truckPartDTO)
         {
             if (truckPartDTO == null)
             {
-                return BadRequest("Dados inválidos para a peça de caminhão.");
+                throw new NullRequestException("Dados inválidos para a peça de caminhão.");
             }
 
             var truckPart = new TruckPart
@@ -76,7 +76,7 @@ namespace logisticsSystem.Controllers
             return CreatedAtAction(nameof(GetTruckPartById), new { id = truckPart.Id }, truckPartDTO);
         }
 
-        // PUT: api/truckparts/{id}
+
         [HttpPut("{id}")]
         public IActionResult UpdateTruckPart(int id, [FromBody] TruckPartDTO truckPartDTO)
         {
@@ -84,12 +84,12 @@ namespace logisticsSystem.Controllers
 
             if (truckPart == null)
             {
-                return NotFound("Peça de caminhão não encontrada.");
+                throw new NotFoundException("Peça de caminhão não encontrada.");
             }
 
             if (truckPartDTO == null)
             {
-                return BadRequest("Dados inválidos para a peça de caminhão.");
+                throw new NullRequestException("Dados inválidos para a peça de caminhão.");
             }
 
             truckPart.Description = truckPartDTO.Description;
@@ -99,7 +99,7 @@ namespace logisticsSystem.Controllers
             return Ok(truckPartDTO);
         }
 
-        // DELETE: api/truckparts/{id}
+
         [HttpDelete("{id}")]
         public IActionResult DeleteTruckPart(int id)
         {
@@ -107,7 +107,7 @@ namespace logisticsSystem.Controllers
 
             if (truckPart == null)
             {
-                return NotFound("Peça de caminhão não encontrada.");
+                throw new NotFoundException("Peça de caminhão não encontrada.");
             }
 
             _context.TruckParts.Remove(truckPart);
@@ -115,5 +115,6 @@ namespace logisticsSystem.Controllers
 
             return NoContent();
         }
+
     }
 }

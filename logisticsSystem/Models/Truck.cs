@@ -21,6 +21,10 @@ public partial class Truck
 
     public bool? InMaintenance { get; set; }
 
+    public int LastMaintenanceKilometers { get; set; }
+
+    public bool InMaintenance { get; set; }
+
     public virtual ICollection<Maintenance> Maintenances { get; set; } = new List<Maintenance>();
 
     public virtual ICollection<Shipping> Shippings { get; set; } = new List<Shipping>();

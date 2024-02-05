@@ -9,6 +9,8 @@ using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using Microsoft.Data.SqlClient;
+using logisticsSystem.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace logisticsSystem.Controllers
 {
@@ -38,72 +40,95 @@ namespace logisticsSystem.Controllers
 
             if (address == null)
             {
-                return NotFound();
+                throw new NotFoundException($"Endereço de id: {id} não encontrado no banco de dados ");
             }
 
             return address;
         }
 
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> PutAddress(int id, [FromBody] AddressDTO addressDTO)
-        {
-            try
-            {
-                var address = await _context.Addresses.FindAsync(id);
 
-                if (address == null)
-                {
-                    return NotFound();
-                }
-
-                address.Country = addressDTO.Country;
-                address.State = addressDTO.State;
-                address.City = addressDTO.City;
-                address.Street = addressDTO.Street;
-                address.Number = addressDTO.Number;
-                address.Complement = addressDTO.Complement;
-                address.Zipcode = addressDTO.Zipcode;
-
-                _context.Entry(address).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-            }
-
-            return NoContent();
-        }
-
+        // POST: api/Addresses/create
         [HttpPost("create")]
         public async Task<ActionResult<AddressDTO>> PostAddress([FromBody] AddressDTO addressDTO)
         {
-            try
+            // Validar se Country contém apenas letras
+            if (!Regex.IsMatch(addressDTO.Country, "^[a-zA-Z]+$"))
             {
-                var address = new Address
-                {
-                    //Id = addressDTO.Id,
-                    Country = addressDTO.Country,
-                    State = addressDTO.State,
-                    City = addressDTO.City,
-                    Street = addressDTO.Street,
-                    Number = addressDTO.Number,
-                    Complement = addressDTO.Complement,
-                    Zipcode = addressDTO.Zipcode,
-                };
-
-                _context.Addresses.Add(address);
-                _context.SaveChanges();
+                throw new InvalidDataTypeException("Country deve conter apenas letras.");
             }
 
-            catch (DbUpdateException)
-
+            // Validar se State contém apenas letras
+            if (!Regex.IsMatch(addressDTO.State, "^[a-zA-Z]+$"))
             {
-
+                throw new InvalidDataTypeException("State deve conter apenas letras.");
             }
 
-            return CreatedAtAction("GetAddress", new { id = addressDTO.Id }, addressDTO);
+            // Validar se Zipcode contém apenas números
+            if (!Regex.IsMatch(addressDTO.Zipcode, "^[0-9]+$"))
+            {
+                throw new InvalidDataTypeException("Zipcode deve conter apenas números.");
+            }
+
+            var address = new Address
+            {
+                Country = addressDTO.Country,
+                State = addressDTO.State,
+                City = addressDTO.City,
+                Street = addressDTO.Street,
+                Number = addressDTO.Number,
+                Complement = addressDTO.Complement,
+                Zipcode = addressDTO.Zipcode,
+            };
+
+            _context.Addresses.Add(address);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetAddress", new { id = address.Id }, addressDTO);
         }
 
+        // PUT: api/Addresses/update/{id}
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> PutAddress(int id, [FromBody] AddressDTO addressDTO)
+        {
+            var address = await _context.Addresses.FindAsync(id);
+
+            if (address == null)
+            {
+                throw new NotFoundException($"Endereço de id: {id} não encontrado no banco de dados ");
+            }
+
+            // Validar se Country contém apenas letras
+            if (!Regex.IsMatch(addressDTO.Country, "^[a-zA-Z]+$"))
+            {
+                throw new InvalidDataTypeException("Country deve conter apenas letras.");
+            }
+
+            // Validar se State contém apenas letras
+            if (!Regex.IsMatch(addressDTO.State, "^[a-zA-Z]+$"))
+            {
+                throw new InvalidDataTypeException("State deve conter apenas letras.");
+            }
+
+            // Validar se Zipcode contém apenas números
+            if (!Regex.IsMatch(addressDTO.Zipcode, "^[0-9]+$"))
+            {
+                throw new InvalidDataTypeException("Zipcode deve conter apenas números.");
+            }
+
+
+            address.Country = addressDTO.Country;
+            address.State = addressDTO.State;
+            address.City = addressDTO.City;
+            address.Street = addressDTO.Street;
+            address.Number = addressDTO.Number;
+            address.Complement = addressDTO.Complement;
+            address.Zipcode = addressDTO.Zipcode;
+
+            _context.Entry(address).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
 
         // DELETE: api/Addresses/5
         [HttpDelete("{id}")]
@@ -112,7 +137,7 @@ namespace logisticsSystem.Controllers
             var address = await _context.Addresses.FindAsync(id);
             if (address == null)
             {
-                return NotFound();
+                throw new NotFoundException($"Endereço de id: {id} não encontrado no banco de dados ");
             }
 
             _context.Addresses.Remove(address);
@@ -120,9 +145,5 @@ namespace logisticsSystem.Controllers
 
             return NoContent();
         }
-
-
-
-
     }
 }

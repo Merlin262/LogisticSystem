@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
+using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
 
 namespace logisticsSystem.Controllers
 {
@@ -28,70 +30,78 @@ namespace logisticsSystem.Controllers
             return await _context.WageDeductions.ToListAsync();
         }
 
-        // GET: api/WageDeductions/5
         [HttpGet("{id}")]
         public async Task<ActionResult<WageDeduction>> GetWageDeduction(int id)
         {
+            // Obter a dedução salarial com o Id fornecido
             var wageDeduction = await _context.WageDeductions.FindAsync(id);
 
+            // Verificar se a dedução salarial foi encontrada
             if (wageDeduction == null)
             {
-                return NotFound();
+                throw new NotFoundException("Dedução salarial não encontrada.");
             }
 
             return wageDeduction;
         }
 
+
         // PUT: api/WageDeductions/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWageDeduction(int id, WageDeduction wageDeduction)
         {
+            // Verificar se o ID na solicitação corresponde ao ID da dedução salarial
             if (id != wageDeduction.Id)
             {
-                return BadRequest();
+                throw new NotFoundException("O ID na solicitação não corresponde ao ID da dedução salarial.");
             }
 
             _context.Entry(wageDeduction).State = EntityState.Modified;
 
-            try
+            // Verificar se a dedução salarial existe antes de salvar as alterações no banco de dados
+            if (!WageDeductionExists(id))
             {
-                await _context.SaveChangesAsync();
+                throw new NotFoundException($"WageDeduction com ID: {id} não encontrada no banco de dados");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!WageDeductionExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
+        /*
+
         // POST: api/WageDeductions
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<WageDeduction>> PostWageDeduction(WageDeduction wageDeduction)
+        public async Task<ActionResult<WageDeduction>> PostWageDeduction([FromBody] WageDeductionDTO wageDeductionDTO)
         {
+            if (!wageDeductionDTO.FkDeductionsId || !wageDeductionDTO.FkWageId)
+            {
+                throw new InvalidDataTypeException("FkDeductionsId and FkWageId are required.");
+            }
+
+            var wageDeduction = new WageDeduction
+            {
+                FkDeductionsId = wageDeductionDTO.FkDeductionsId,
+                FkWageId = wageDeductionDTO.FkWageId,
+            };
+
             _context.WageDeductions.Add(wageDeduction);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetWageDeduction", new { id = wageDeduction.Id }, wageDeduction);
         }
 
+        */
         // DELETE: api/WageDeductions/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWageDeduction(int id)
         {
             var wageDeduction = await _context.WageDeductions.FindAsync(id);
+
             if (wageDeduction == null)
             {
-                return NotFound();
+                throw new NotFoundException($"WageDeduction com ID: {id} não encontrada no banco de dados");
             }
 
             _context.WageDeductions.Remove(wageDeduction);
@@ -100,9 +110,11 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
+
         private bool WageDeductionExists(int id)
         {
             return _context.WageDeductions.Any(e => e.Id == id);
         }
     }
 }
+

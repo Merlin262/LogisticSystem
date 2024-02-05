@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
 
 namespace logisticsSystem.Controllers
 {
@@ -22,6 +23,7 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
+        // GET: api/ItensStock
         [HttpGet]
         public IActionResult GetItensStock()
         {
@@ -42,6 +44,7 @@ namespace logisticsSystem.Controllers
             return Ok(itensStockDTOs);
         }
 
+
         // GET: api/itensstock/{id}
         [HttpGet("{id}")]
         public IActionResult GetItensStockById(int id)
@@ -50,7 +53,7 @@ namespace logisticsSystem.Controllers
 
             if (itensStock == null)
             {
-                return NotFound("Item de estoque não encontrado.");
+                throw new NotFoundException("Item de estoque não encontrado.");
             }
 
             var itensStockDTO = new ItensStockDTO
@@ -71,13 +74,37 @@ namespace logisticsSystem.Controllers
         {
             if (itensStockDTO == null)
             {
-                return BadRequest("Dados inválidos para o item de estoque.");
+                throw new InvalidDataTypeException("Dados inválidos para o item de estoque.");
+            }
+
+            // Validar atributo 'Description'
+            if (string.IsNullOrEmpty(itensStockDTO.Description))
+            {
+                throw new InvalidDataTypeException("A descrição do item de estoque é obrigatória.");
+            }
+
+            // Validar atributo 'Quantity'
+            if (itensStockDTO.Quantity <= 0)
+            {
+                throw new InvalidDataTypeException("A quantidade do item de estoque deve ser maior que zero.");
+            }
+
+            // Validar atributo 'Price'
+            if (itensStockDTO.Price <= 0)
+            {
+                throw new InvalidDataTypeException("O preço do item de estoque deve ser maior que zero.");
+            }
+
+            // Validar atributo 'Weight'
+            if (itensStockDTO.Weight <= 0)
+            {
+                throw new InvalidDataTypeException("O peso do item de estoque deve ser maior que zero.");
             }
 
             var itensStock = new ItensStock
             {
                 Description = itensStockDTO.Description,
-                Quantity = itensStockDTO.Quantity ,
+                Quantity = itensStockDTO.Quantity,
                 Price = itensStockDTO.Price,
                 Weight = itensStockDTO.Weight
             };
@@ -96,12 +123,36 @@ namespace logisticsSystem.Controllers
 
             if (itensStock == null)
             {
-                return NotFound("Item de estoque não encontrado.");
+                throw new NotFoundException("Item de estoque não encontrado.");
             }
 
             if (itensStockDTO == null)
             {
-                return BadRequest("Dados inválidos para o item de estoque.");
+                throw new InvalidDataTypeException("Dados inválidos para o item de estoque.");
+            }
+
+            // Validar atributo 'Description'
+            if (string.IsNullOrEmpty(itensStockDTO.Description))
+            {
+                throw new InvalidDataTypeException("A descrição do item de estoque é obrigatória.");
+            }
+
+            // Validar atributo 'Quantity'
+            if (itensStockDTO.Quantity <= 0)
+            {
+                throw new InvalidDataTypeException("A quantidade do item de estoque deve ser maior que zero.");
+            }
+
+            // Validar atributo 'Price'
+            if (itensStockDTO.Price <= 0)
+            {
+                throw new InvalidDataTypeException("O preço do item de estoque deve ser maior que zero.");
+            }
+
+            // Validar atributo 'Weight'
+            if (itensStockDTO.Weight <= 0)
+            {
+                throw new InvalidDataTypeException("O peso do item de estoque deve ser maior que zero.");
             }
 
             itensStock.Description = itensStockDTO.Description;
@@ -114,6 +165,7 @@ namespace logisticsSystem.Controllers
             return Ok(itensStockDTO);
         }
 
+
         // DELETE: api/itensstock/{id}
         [HttpDelete("{id}")]
         public IActionResult DeleteItensStock(int id)
@@ -122,7 +174,7 @@ namespace logisticsSystem.Controllers
 
             if (itensStock == null)
             {
-                return NotFound("Item de estoque não encontrado.");
+                throw new NotFoundException("Item de estoque não encontrado.");
             }
 
             _context.ItensStocks.Remove(itensStock);

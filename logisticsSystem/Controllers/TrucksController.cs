@@ -11,6 +11,7 @@ namespace logisticsSystem.Controllers
     using Microsoft.EntityFrameworkCore;
     using global::logisticsSystem.DTOs;
     using global::logisticsSystem.Models;
+    using global::logisticsSystem.Exceptions;
 
     namespace logisticsSystem.Controllers
     {
@@ -29,6 +30,12 @@ namespace logisticsSystem.Controllers
             public IActionResult GetTrucks()
             {
                 var trucks = _context.Trucks.ToList();
+
+                if (trucks == null || !trucks.Any())
+                {
+                    throw new NotFoundException("Nenhum caminhão encontrado.");
+                }
+
                 var truckDTOs = trucks.Select(t => new TruckDTO
                 {
                     Chassis = t.Chassis,
@@ -42,7 +49,7 @@ namespace logisticsSystem.Controllers
                 return Ok(truckDTOs);
             }
 
-            // GET: api/trucks/{chassis}
+
             [HttpGet("{chassis}")]
             public IActionResult GetTruckByChassis(int chassis)
             {
@@ -50,7 +57,7 @@ namespace logisticsSystem.Controllers
 
                 if (truck == null)
                 {
-                    return NotFound("Caminhão não encontrado.");
+                    throw new NotFoundException($"Caminhão com chassi {chassis} não encontrado.");
                 }
 
                 var truckDTO = new TruckDTO
@@ -66,100 +73,98 @@ namespace logisticsSystem.Controllers
                 return Ok(truckDTO);
             }
 
-            // PUT: api/Trucks/5
-            // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
             [HttpPut("{chassis}")]
             public async Task<IActionResult> PutTruck(int chassis, [FromBody] TruckDTO truckDTO)
             {
-                try
-                {
-                    var truck = await _context.Trucks.FindAsync(chassis);
-
-                    if (truck == null)
-                    {
-                        return NotFound();
-                    }
-
-                    truck.Chassis = truckDTO.Chassis;
-                    truck.TruckAxles = truckDTO.TruckAxles;
-                    truck.KilometerCount = truckDTO.KilometerCount;
-                    truck.Model = truckDTO.Model;
-                    truck.Year = truckDTO.Year;
-                    truck.Color = truckDTO.Color;
-
-                    _context.Entry(truck).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TruckExists(chassis))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                return NoContent();
-            }
-
-            [HttpPost]
-            public async Task<ActionResult<TruckDTO>> PostTruck([FromBody] TruckDTO truckDTO)
-            {
-                try
-                {
-                    var truck = new Truck
-                    {
-                        Chassis = truckDTO.Chassis,
-                        TruckAxles = truckDTO.TruckAxles,
-                        KilometerCount = truckDTO.KilometerCount,
-                        Model = truckDTO.Model,
-                        Year = truckDTO.Year,
-                        Color = truckDTO.Color,
-                    };
-
-                    _context.Trucks.Add(truck);
-                    _context.SaveChanges();
-                }
-
-                catch (DbUpdateException)
-
-                {
-                    if (TruckExists(truckDTO.Chassis))
-                    {
-                        return Conflict();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                return CreatedAtAction("GetTruck", new { Chassis = truckDTO.Chassis }, truckDTO);
-            }
-
-            // DELETE: api/Trucks/5
-            [HttpDelete("{chassis}")]
-            public async Task<IActionResult> DeleteTruck(int chassis)
-            {
                 var truck = await _context.Trucks.FindAsync(chassis);
+
                 if (truck == null)
                 {
-                    return NotFound();
+                    throw new NotFoundException($"Caminhão com chassi {chassis} não encontrado.");
                 }
 
-                _context.Trucks.Remove(truck);
+                // Verificar se os atributos estão presentes e não nulos
+                if (truckDTO.Chassis == 0 || string.IsNullOrWhiteSpace(truckDTO.Model) || truckDTO.Year == 0)
+                {
+                    throw new InvalidDataTypeException("Os atributos do caminhão são inválidos.");
+                }
+
+                // Adicione mais verificações conforme necessário para outros atributos
+
+                truck.Chassis = truckDTO.Chassis;
+                truck.TruckAxles = truckDTO.TruckAxles;
+                truck.KilometerCount = truckDTO.KilometerCount;
+                truck.Model = truckDTO.Model;
+                truck.Year = truckDTO.Year;
+                truck.Color = truckDTO.Color;
+
+                _context.Entry(truck).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
 
                 return NoContent();
             }
 
-            private bool TruckExists(int chassis)
+
+            [HttpPost]
+            public async Task<ActionResult<TruckDTO>> PostTruck([FromBody] TruckDTO truckDTO)
             {
-                return _context.Trucks.Any(e => e.Chassis == chassis);
+                // Verificar se os atributos estão presentes e não nulos
+                if (truckDTO.Chassis == 0 || string.IsNullOrWhiteSpace(truckDTO.Model) || truckDTO.Year == 0)
+                {
+                    throw new InvalidDataTypeException("Os atributos do caminhão são inválidos.");
+                }
+
+                // Adicione mais verificações conforme necessário para outros atributos
+
+                var truck = new Truck
+                {
+                    Chassis = truckDTO.Chassis,
+                    TruckAxles = truckDTO.TruckAxles,
+                    KilometerCount = truckDTO.KilometerCount,
+                    Model = truckDTO.Model,
+                    Year = truckDTO.Year,
+                    Color = truckDTO.Color,
+                };
+
+                _context.Trucks.Add(truck);
+                _context.SaveChanges();
+
+                var createdTruckDTO = new TruckDTO
+                {
+                    Chassis = truck.Chassis,
+                    TruckAxles = truck.TruckAxles,
+                    KilometerCount = truck.KilometerCount,
+                    Model = truck.Model,
+                    Year = truck.Year,
+                    Color = truck.Color,
+                };
+
+                return CreatedAtAction("GetTruck", new { Chassis = createdTruckDTO.Chassis }, createdTruckDTO);
+            }
+
+
+            [HttpDelete("{chassis}")]
+            public async Task<IActionResult> DeleteTruck(int chassis)
+            {
+                // Verificar se o caminhão existe
+                var truck = await _context.Trucks.FindAsync(chassis);
+                if (truck == null)
+                {
+                    throw new NotFoundException("Caminhão não encontrado.");
+                }
+
+                // Adicione mais verificações conforme necessário antes de excluir
+
+                // Remover o caminhão do contexto
+                _context.Trucks.Remove(truck);
+
+                // Salvar as alterações no banco de dados
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
         }
     }
 }
+

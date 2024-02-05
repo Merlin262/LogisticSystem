@@ -47,7 +47,7 @@ namespace logisticsSystem.Controllers
                 FkClientId = shippingDTO.FkClientId,
                 FkEmployeeId = shippingDTO.FkEmployeeId,
                 FkAddressId = shippingDTO.FkAddressId,
-                FkTruckId = shippingDTO.FkTruckId // Adicione esta propriedade se não existir
+                FkTruckId = shippingDTO.FkTruckId// Adicione esta propriedade se não existir
             };
 
             // Adicionar o novo envio ao contexto
@@ -96,7 +96,7 @@ namespace logisticsSystem.Controllers
                 FkClientId = s.FkClientId,
                 FkEmployeeId = s.FkEmployeeId,
                 FkAddressId = s.FkAddressId,
-                FkTruckId = s.FkTruckId 
+                FkTruckId = s.FkTruckId
             }).ToList();
 
             return Ok(shippingDtoList);
@@ -135,49 +135,49 @@ namespace logisticsSystem.Controllers
 
 
         [HttpPut("update-shipping/{id}")]
-           public IActionResult UpdateShipping(int id, [FromBody] ShippingDTO updatedShippingDTO)
-           {
-               // Verificar se o envio com o id fornecido existe
-               var existingShipping = _context.Shippings.Find(id);
-           
-               if (existingShipping == null)
-               {
-                   return NotFound();
-               }
-           
-               // Atualizar as propriedades do envio existente com base no DTO fornecido
-               existingShipping.SendDate = updatedShippingDTO.SendDate;
-               existingShipping.EstimatedDate = updatedShippingDTO.EstimatedDate;
-               existingShipping.DeliveryDate = updatedShippingDTO.DeliveryDate;
-               existingShipping.TotalWeight = updatedShippingDTO.TotalWeight;
-               existingShipping.DistanceKm = updatedShippingDTO.DistanceKm;
-               existingShipping.RegistrationDate = updatedShippingDTO.RegistrationDate;
-               existingShipping.ShippingPrice = updatedShippingDTO.ShippingPrice;
-               existingShipping.FkClientId = updatedShippingDTO.FkClientId;
-               existingShipping.FkEmployeeId = updatedShippingDTO.FkEmployeeId;
-               existingShipping.FkAddressId = updatedShippingDTO.FkAddressId;
-               existingShipping.FkTruckId = updatedShippingDTO.FkTruckId; // Adicione esta propriedade se não existir
-           
-               // Salvar as alterações no banco de dados
-               _context.SaveChanges();
-           
-               // Retornar o envio atualizado, evitando referências circulares
-               return Ok(new
-               {
-                   existingShipping.Id,
-                   existingShipping.SendDate,
-                   // Adicione outras propriedades relevantes de Shipping
-                   // ...
-           
-                   FkTruck = new
-                   {
-                       existingShipping.FkTruck.Chassis,
-                       existingShipping.FkTruck.TruckAxles,
-                       // Adicione outras propriedades relevantes de Truck
-                       // ...
-                   }
-               });
-           }
+        public IActionResult UpdateShipping(int id, [FromBody] ShippingDTO updatedShippingDTO)
+        {
+            // Verificar se o envio com o id fornecido existe
+            var existingShipping = _context.Shippings.Find(id);
+
+            if (existingShipping == null)
+            {
+                return NotFound();
+            }
+
+            // Atualizar as propriedades do envio existente com base no DTO fornecido
+            existingShipping.SendDate = updatedShippingDTO.SendDate;
+            existingShipping.EstimatedDate = updatedShippingDTO.EstimatedDate;
+            existingShipping.DeliveryDate = updatedShippingDTO.DeliveryDate;
+            existingShipping.TotalWeight = updatedShippingDTO.TotalWeight;
+            existingShipping.DistanceKm = updatedShippingDTO.DistanceKm;
+            existingShipping.RegistrationDate = updatedShippingDTO.RegistrationDate;
+            existingShipping.ShippingPrice = updatedShippingDTO.ShippingPrice;
+            existingShipping.FkClientId = updatedShippingDTO.FkClientId;
+            existingShipping.FkEmployeeId = updatedShippingDTO.FkEmployeeId;
+            existingShipping.FkAddressId = updatedShippingDTO.FkAddressId;
+            existingShipping.FkTruckId = updatedShippingDTO.FkTruckId; // Adicione esta propriedade se não existir
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Retornar o envio atualizado, evitando referências circulares
+            return Ok(new
+            {
+                existingShipping.Id,
+                existingShipping.SendDate,
+                // Adicione outras propriedades relevantes de Shipping
+                // ...
+
+                FkTruck = new
+                {
+                    existingShipping.FkTruck.Chassis,
+                    existingShipping.FkTruck.TruckAxles,
+                    // Adicione outras propriedades relevantes de Truck
+                    // ...
+                }
+            });
+        }
 
 
         // DELETE - Método DELETE para Shipping

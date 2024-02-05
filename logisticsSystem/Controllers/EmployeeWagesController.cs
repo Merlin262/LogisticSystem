@@ -9,6 +9,7 @@ using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using logisticsSystem.Services;
+using logisticsSystem.Exceptions;
 
 namespace logisticsSystem.Controllers
 {

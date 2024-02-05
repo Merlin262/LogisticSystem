@@ -13,7 +13,7 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
-        public decimal? GetTotalItemWeight(int fkItensShippedId)
+        public decimal GetTotalItemWeight(int fkItensShippedId)
         {
             var totalWeight = _context.ItensShippeds
                 .Where(i => i.Id == fkItensShippedId)

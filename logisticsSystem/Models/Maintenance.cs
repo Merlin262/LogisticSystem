@@ -7,15 +7,15 @@ public partial class Maintenance
 {
     public int Id { get; set; }
 
-    public DateOnly? MaintenanceDate { get; set; }
+    public DateOnly MaintenanceDate { get; set; }
 
-    public int? FkEmployee { get; set; }
+    public int FkEmployee { get; set; }
 
-    public int? FkTruckChassis { get; set; }
+    public int FkTruckChassis { get; set; }
 
-    public virtual Employee? FkEmployeeNavigation { get; set; }
+    public virtual Employee FkEmployeeNavigation { get; set; }
 
-    public virtual Truck? FkTruckChassisNavigation { get; set; }
+    public virtual Truck FkTruckChassisNavigation { get; set; }
 
     public virtual ICollection<MaitenanceTruckPart> MaitenanceTruckParts { get; set; } = new List<MaitenanceTruckPart>();
 }
