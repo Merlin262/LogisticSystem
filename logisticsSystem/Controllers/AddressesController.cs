@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using Microsoft.Data.SqlClient;
 
 namespace logisticsSystem.Controllers
 {
@@ -80,6 +81,7 @@ namespace logisticsSystem.Controllers
             {
                 var address = new Address
                 {
+                    //Id = addressDTO.Id,
                     Country = addressDTO.Country,
                     State = addressDTO.State,
                     City = addressDTO.City,
@@ -101,6 +103,7 @@ namespace logisticsSystem.Controllers
 
             return CreatedAtAction("GetAddress", new { id = addressDTO.Id }, addressDTO);
         }
+
 
         // DELETE: api/Addresses/5
         [HttpDelete("{id}")]

@@ -1,5 +1,6 @@
 using logisticsSystem.Controllers;
 using logisticsSystem.Data;
+using logisticsSystem.Exceptions;
 using logisticsSystem.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<LogisticsSystemContext>();
 builder.Services.AddScoped<TruckService>();
 builder.Services.AddScoped<ItensShippedService>();
+builder.Services.AddScoped<EmployeeWageService>();
+builder.Services.AddScoped<HandleException>();
 
 
 

@@ -5,19 +5,19 @@ namespace logisticsSystem.Models;
 
 public partial class Shipping
 {
+    public int Id { get; set; }
+
     public DateOnly? SendDate { get; set; }
 
     public DateOnly? EstimatedDate { get; set; }
 
     public DateOnly? DeliveryDate { get; set; }
 
-    public decimal TotalWeight { get; set; }
+    public decimal? TotalWeight { get; set; }
 
     public decimal DistanceKm { get; set; }
 
     public DateOnly? RegistrationDate { get; set; }
-
-    public int Id { get; set; }
 
     public decimal ShippingPrice { get; set; }
 

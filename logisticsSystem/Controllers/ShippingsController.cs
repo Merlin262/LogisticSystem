@@ -20,12 +20,14 @@ namespace logisticsSystem.Controllers
         //Injeção de dependência do serviço TruckService
         private readonly TruckService _truckService;
         private readonly ItensShippedService _itensShippedService;
+        private readonly EmployeeWageService _employeeWageService;
 
-        public ShippingsController(LogisticsSystemContext context, TruckService truckService, ItensShippedService itensShippedService)
+        public ShippingsController(LogisticsSystemContext context, TruckService truckService, ItensShippedService itensShippedService, EmployeeWageService employeeWageService)
         {
             _context = context;
             _truckService = truckService;
             _itensShippedService = itensShippedService;
+            _employeeWageService = employeeWageService;
         }
 
         [HttpPost("create-shipping")]
@@ -52,6 +54,18 @@ namespace logisticsSystem.Controllers
             _context.Shippings.Add(newShipping);
 
             // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            decimal employeeComission = _employeeWageService.GetEmployeeComission(newShipping.Id);
+
+            var employeeToUpdate = _context.EmployeeWages.FirstOrDefault(e => e.FkEmployeeId == shippingDTO.FkEmployeeId);
+            if (employeeToUpdate == null)
+            {
+                return NotFound("Employee not found");
+            }
+
+            employeeToUpdate.Commission = employeeToUpdate.Commission + employeeComission;
+
             _context.SaveChanges();
 
             // Retornar o novo envio criado, evitando referências circulares

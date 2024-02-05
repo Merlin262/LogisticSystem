@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -16,10 +17,12 @@ namespace logisticsSystem.Controllers
     public class EmployeeWagesController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly EmployeeWageService _employeeWageService;
 
-        public EmployeeWagesController(LogisticsSystemContext context)
+        public EmployeeWagesController(LogisticsSystemContext context, EmployeeWageService employeeWageService)
         {
             _context = context;
+            _employeeWageService = employeeWageService;
         }
 
         [HttpGet]
@@ -147,6 +150,33 @@ namespace logisticsSystem.Controllers
             _context.SaveChanges();
 
             return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
+        }
+
+        // READ - Método GET (Todos) para EmployeeWage
+        [HttpGet(("netSalary/{EmployeeWageId}"))]
+        public IActionResult GetEmployeeNetSalary(int EmployeeWageId)
+        {
+            var netSalary = _context.EmployeeWages
+                .Where(ew => ew.Id == EmployeeWageId)
+                .Join(
+                    _context.WageDeductions,
+                    ew => ew.Id,
+                    wd => wd.FkWageId,
+                    (ew, wd) => new { Wage = ew, Deduction = wd }
+                )
+                .Join(
+                    _context.Deductions,
+                    joined => joined.Deduction.FkDeductionsId,
+                    d => d.Id,
+                    (joined, d) => new { ew = joined.Wage, deduction = joined.Deduction, DeductionDetail = d }
+                )
+                .Select(
+                    result => result.ew.Amount + result.ew.Commission - result.DeductionDetail.Amount
+                )
+                .FirstOrDefault();
+
+
+            return Ok(netSalary);
         }
     }
 }

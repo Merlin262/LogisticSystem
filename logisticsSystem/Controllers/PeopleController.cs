@@ -65,7 +65,7 @@ namespace logisticsSystem.Controllers
                 Id = p.Id,
                 Name = p.Name,
                 Email = p.Email,
-                //FkAddressId = p.FkAddressId,
+                FkAddressId = p.FkAddressId,
                 // Mapear Address para AddressDTO se existir
                 
             }).ToList();
@@ -91,7 +91,7 @@ namespace logisticsSystem.Controllers
                 Id = person.Id,
                 Name = person.Name,
                 Email = person.Email,
-                //FkAddressId = person.FkAddressId,
+                FkAddressId = person.FkAddressId,
                 // Mapear Address para AddressDTO se existir
                
                 // Mapear Phones para PhoneDTO

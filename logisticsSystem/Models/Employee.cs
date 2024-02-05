@@ -9,8 +9,6 @@ public partial class Employee
 
     public string? Position { get; set; }
 
-    public decimal? Commission { get; set; }
-
     public virtual ICollection<EmployeeWage> EmployeeWages { get; set; } = new List<EmployeeWage>();
 
     public virtual Person FkPerson { get; set; } = null!;

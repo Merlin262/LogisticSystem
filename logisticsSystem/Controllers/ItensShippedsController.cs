@@ -56,7 +56,7 @@ namespace logisticsSystem.Controllers
                 _context.SaveChanges();
 
                 // Calcular totalItemWeight
-                decimal totalItemWeight = _itensShippedService.GetTotalItemWeight(itensShippedDTO.Id);
+                decimal? totalItemWeight = _itensShippedService.GetTotalItemWeight(itensShippedDTO.Id);
 
                 // Calcular o peso dos eixos do caminhão
                 decimal truckAxlesWeight = _truckService.GetTruckAxlesWeight(itensShippedDTO.FkShippingId);
@@ -69,7 +69,7 @@ namespace logisticsSystem.Controllers
                 }
 
                 // Somar totalItemWeight ao TotalWeight
-                decimal updatedTotalWeight = shippingToUpdate.TotalWeight + totalItemWeight;
+                decimal? updatedTotalWeight = shippingToUpdate.TotalWeight + totalItemWeight;
 
                 // Validar se o resultado da soma é maior que truckAxlesWeight
                 if (updatedTotalWeight > truckAxlesWeight)
@@ -171,7 +171,7 @@ namespace logisticsSystem.Controllers
                 _context.SaveChanges();
 
                 // Calcular totalItemWeight
-                decimal totalItemWeight = _itensShippedService.GetTotalItemWeight(existingItensShipped.Id);
+                decimal? totalItemWeight = _itensShippedService.GetTotalItemWeight(existingItensShipped.Id);
 
                 // Calcular o peso dos eixos do caminhão
                 decimal truckAxlesWeight = _truckService.GetTruckAxlesWeight(existingItensShipped.FkShippingId);
@@ -184,7 +184,7 @@ namespace logisticsSystem.Controllers
                 }
 
                 // Somar totalItemWeight ao TotalWeight
-                decimal updatedTotalWeight = shippingToUpdate.TotalWeight - existingItensShipped.QuantityItens + totalItemWeight;
+                decimal? updatedTotalWeight = shippingToUpdate.TotalWeight - existingItensShipped.QuantityItens + totalItemWeight;
 
                 // Validar se o resultado da soma é maior que truckAxlesWeight
                 if (updatedTotalWeight > truckAxlesWeight)

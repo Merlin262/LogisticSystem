@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers\AddressesController.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="Controllers\NewFile.txt" />
     <None Remove="DTOs\NewFile.txt" />
   </ItemGroup>
