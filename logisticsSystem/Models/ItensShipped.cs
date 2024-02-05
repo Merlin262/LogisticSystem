@@ -7,11 +7,11 @@ public partial class ItensShipped
 {
     public int Id { get; set; }
 
-    public int QuantityItens { get; set; }
+    public int? QuantityItens { get; set; }
 
-    public int FkItensStockId { get; set; }
+    public int? FkItensStockId { get; set; }
 
-    public int FkShippingId { get; set; }
+    public int? FkShippingId { get; set; }
 
     public virtual ItensStock? FkItensStock { get; set; }
 

@@ -58,7 +58,7 @@ public partial class LogisticsSystemContext : DbContext
     {
         modelBuilder.Entity<Address>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Address__3214EC27CB617ADF");
+            entity.HasKey(e => e.Id).HasName("PK__Address__3214EC27D081713B");
 
             entity.ToTable("Address");
 
@@ -89,7 +89,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Client>(entity =>
         {
-            entity.HasKey(e => e.FkPersonId).HasName("PK__Client__25ADBC3152AED92B");
+            entity.HasKey(e => e.FkPersonId).HasName("PK__Client__25ADBC315E315C7F");
 
             entity.ToTable("Client");
 
@@ -104,7 +104,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Deduction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Deductio__3214EC2784914CC7");
+            entity.HasKey(e => e.Id).HasName("PK__Deductio__3214EC2796C048E0");
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Amount).HasColumnType("decimal(10, 2)");
@@ -118,7 +118,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Employee>(entity =>
         {
-            entity.HasKey(e => e.FkPersonId).HasName("PK__Employee__25ADBC31056DFE33");
+            entity.HasKey(e => e.FkPersonId).HasName("PK__Employee__25ADBC3138D6935B");
 
             entity.ToTable("Employee");
 
@@ -137,15 +137,13 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<EmployeeWage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Employee__3214EC27013C97D5");
+            entity.HasKey(e => e.Id).HasName("PK__Employee__3214EC27DBD1E70B");
 
             entity.ToTable("Employee_Wage");
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Amount).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.ComissionPercentage)
-                .HasColumnType("decimal(5, 2)")
-                .HasColumnName("Comission_Percentage");
+            entity.Property(e => e.ComissionPercentage).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.Commission).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.FkEmployeeId).HasColumnName("fk_Employee_ID");
 
@@ -157,7 +155,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<ItensShipped>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ItensShi__3214EC273B45689D");
+            entity.HasKey(e => e.Id).HasName("PK__ItensShi__3214EC27D4B5C92B");
 
             entity.ToTable("ItensShipped");
 
@@ -180,7 +178,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<ItensStock>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ItensSto__3214EC27263EBE10");
+            entity.HasKey(e => e.Id).HasName("PK__ItensSto__3214EC27A65C60B2");
 
             entity.ToTable("ItensStock");
 
@@ -194,7 +192,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Maintenance>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Maintena__3214EC27264746D7");
+            entity.HasKey(e => e.Id).HasName("PK__Maintena__3214EC27375E2753");
 
             entity.ToTable("Maintenance");
 
@@ -215,7 +213,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<MaitenanceTruckPart>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Maitenan__3214EC2705F58D1D");
+            entity.HasKey(e => e.Id).HasName("PK__Maitenan__3214EC27E2CCE34F");
 
             entity.ToTable("MaitenanceTruckPart");
 
@@ -236,7 +234,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Person>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Person__3214EC27D7F9EFCD");
+            entity.HasKey(e => e.Id).HasName("PK__Person__3214EC27CBE5F595");
 
             entity.ToTable("Person");
 
@@ -256,7 +254,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Phone>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Phone__3214EC279532DF40");
+            entity.HasKey(e => e.Id).HasName("PK__Phone__3214EC2702FD4DC7");
 
             entity.ToTable("Phone");
 
@@ -277,9 +275,9 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Shipping>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Shipping__3214EC27681AD2DA");
+            entity.HasKey(e => e.Id).HasName("PK__Shipping__3214EC27FFC34A2A");
 
-            entity.ToTable("Shipping", tb => tb.HasTrigger("comission_calc"));
+            entity.ToTable("Shipping");
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.DistanceKm).HasColumnType("decimal(10, 2)");
@@ -313,7 +311,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<ShippingPayment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Shipping__3214EC27BE71B647");
+            entity.HasKey(e => e.Id).HasName("PK__Shipping__3214EC2777643CB6");
 
             entity.ToTable("ShippingPayment");
 
@@ -328,7 +326,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<Truck>(entity =>
         {
-            entity.HasKey(e => e.Chassis).HasName("PK__Truck__9C351ECE25D9A90C");
+            entity.HasKey(e => e.Chassis).HasName("PK__Truck__9C351ECE75DBB27B");
 
             entity.ToTable("Truck");
 
@@ -336,7 +334,6 @@ public partial class LogisticsSystemContext : DbContext
             entity.Property(e => e.Color)
                 .HasMaxLength(255)
                 .IsUnicode(false);
-            entity.Property(e => e.KilometerCount).HasColumnName("kilometerCount");
             entity.Property(e => e.Model)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -344,7 +341,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<TruckDriver>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TruckDri__3214EC27E0539D99");
+            entity.HasKey(e => e.Id).HasName("PK__TruckDri__3214EC273F74401A");
 
             entity.ToTable("TruckDriver");
 
@@ -365,7 +362,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<TruckPart>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TruckPar__3214EC277409C1A1");
+            entity.HasKey(e => e.Id).HasName("PK__TruckPar__3214EC27D906E059");
 
             entity.ToTable("TruckPart");
 
@@ -377,7 +374,7 @@ public partial class LogisticsSystemContext : DbContext
 
         modelBuilder.Entity<WageDeduction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__WageDedu__3214EC27900C111D");
+            entity.HasKey(e => e.Id).HasName("PK__WageDedu__3214EC2742F0C8EF");
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.FkDeductionsId).HasColumnName("fk_Deductions_ID");

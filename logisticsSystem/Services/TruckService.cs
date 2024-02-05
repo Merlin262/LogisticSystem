@@ -2,7 +2,6 @@
 using logisticsSystem.Data;
 using logisticsSystem.DTOs;
 using logisticsSystem.Controllers;
-using logisticsSystem.Models;
 using logisticsSystem.Services;
 
 namespace logisticsSystem.Services
