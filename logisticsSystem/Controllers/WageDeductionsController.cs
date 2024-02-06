@@ -81,16 +81,19 @@ namespace logisticsSystem.Controllers
                 FkWageId = wageDeductionDTO.FkWageId,
             };
 
-            if (wageDeductionDTO.FkDeductionsId == null || wageDeductionDTO.FkWageId == null)
+            _context.Entry(wageDeduction).State = EntityState.Modified;
+
+
+            await _context.SaveChangesAsync();
+
+
+            // Verificar se a exceção ocorreu devido à inexistência da entidade
+            if (!_context.WageDeductions.Any(w => w.Id == id))
             {
                 throw new InvalidDataTypeException("FkDeductionsId and FkWageId are required.");
             }
 
-            _context.WageDeductions.Add(wageDeduction);
-            await _context.SaveChangesAsync();
-            _logger.WriteLogData($"Wage deduction of wage id {wageDeduction.FkWageId} recorded successfully.");
-
-            return CreatedAtAction("GetWageDeduction", new { id = wageDeduction.Id }, wageDeduction);
+            return NoContent();
         }
 
 
