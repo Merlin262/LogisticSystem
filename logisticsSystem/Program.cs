@@ -16,7 +16,6 @@ builder.Services.AddDbContext<LogisticsSystemContext>();
 builder.Services.AddScoped<TruckService>();
 builder.Services.AddScoped<ItensShippedService>();
 builder.Services.AddScoped<EmployeeWageService>();
-builder.Services.AddScoped<HandleException>();
 builder.Services.AddScoped<LoggerService>();
 builder.Services.AddScoped<ReceiptService>();
 

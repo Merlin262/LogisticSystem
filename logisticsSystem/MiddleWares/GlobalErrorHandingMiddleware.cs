@@ -12,6 +12,7 @@ namespace logisticsSystem.MiddleWares
     {
         private readonly RequestDelegate _next;
 
+
         public GlobalErrorHandingMiddleware(RequestDelegate next)
         {
             _next = next;
@@ -23,68 +24,16 @@ namespace logisticsSystem.MiddleWares
             {
                 await _next(context);
             }
-            catch (InvalidDataTypeException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (TruckOverloadedException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (InternalServerException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (InsufficientQuantityException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (InvalidEmployeeException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (NotFoundException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (InvalidTruckException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (UnregisteredObject ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (DatabaseConnectionException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
-            catch (NullRequestException ex)
-            {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
-            }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, ex);
-                errorLogger.WriteLogError($"{ex}");
+                await HandleExceptionAsync(context, ex, errorLogger); // Passando o objeto LoggerService como parâmetro
             }
-            
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+
+        private static Task HandleExceptionAsync(HttpContext context, Exception exception, LoggerService logger)
         {
             HttpStatusCode status;
-            string stackTrace = string.Empty;
             string message;
             var exceptionType = exception.GetType();
 
@@ -93,71 +42,66 @@ namespace logisticsSystem.MiddleWares
                 case nameof(InvalidDataTypeException):
                     message = exception.Message;
                     status = HttpStatusCode.BadRequest;
-                    stackTrace = exception.StackTrace;
                     break;
 
                 case nameof(NotFoundException):
                     message = exception.Message;
                     status = HttpStatusCode.NotFound;
-                    stackTrace = exception.StackTrace;
                     break;
 
                 case nameof(TruckOverloadedException):
                     message = exception.Message;
                     status = HttpStatusCode.BadRequest;
-                    stackTrace = exception.StackTrace;
                     break;
 
                 case nameof(InternalServerException):
                     message = exception.Message;
                     status = HttpStatusCode.InternalServerError;
-                    stackTrace = exception.StackTrace;
                     break;
 
                 case nameof(InvalidTruckException):
                     message = exception.Message;
                     status = HttpStatusCode.BadRequest;
-                    stackTrace = exception.StackTrace;
                     break;
 
                 case nameof(InvalidEmployeeException):
                     message = exception.Message;
                     status = HttpStatusCode.BadRequest;
-                    stackTrace = exception.StackTrace;
                     break;
 
                 case nameof(InsufficientQuantityException):
                     message = exception.Message;
                     status = HttpStatusCode.InsufficientStorage;
-                    stackTrace = exception.StackTrace;
                     break;
 
-                case nameof(UnregisteredObject):
+                case nameof(UnregisteredObjectException):
                     message = exception.Message;
                     status = HttpStatusCode.NotFound;
-                    stackTrace = exception.StackTrace;
                     break;
 
                 case nameof(DatabaseConnectionException):
                     message = exception.Message;
                     status = HttpStatusCode.InternalServerError;
-                    stackTrace = exception.StackTrace;
                     break;
 
                 default:
                     message = exception.Message;
-                    status = HttpStatusCode.InsufficientStorage;
-                    stackTrace = exception.StackTrace;
+                    status = HttpStatusCode.InternalServerError;
                     break;
             }
 
-            var result = JsonSerializer.Serialize(new {status, message, stackTrace });
+            // Obter o stack trace
+            string stackTrace = exception.StackTrace;
+
+            // Registrar o erro no log
+            logger.WriteLogError($"\nStatus: {status},\n Message: {message},\n StackTrace: {stackTrace}\n");
+
+            // Construir o resultado JSON sem incluir o stack trace
+            var result = JsonSerializer.Serialize(new { status, message });
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)status;
             return context.Response.WriteAsync(result);
-
         }
-
 
     }
 }

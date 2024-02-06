@@ -60,7 +60,7 @@ namespace logisticsSystem.Controllers
 
             if (address == null)
             {
-                throw new NotFoundException("Endereço não encontrado.");
+                throw new NotFoundException($"Endereço de {id} não encontrado.");
             }
 
             // Mapear o Address para AddressDTO

@@ -15,7 +15,7 @@ namespace logisticsSystem.Services
 
         public void GenerateClientReceipt(int shippingPaymentId)
         {
-            string filePath = $"E:\\codes\\logisticsSystem\\logisticsSystem\\Receipts\\ReciboCliente{shippingPaymentId}.txt";
+            string filePath = $"C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\Receipts\\ReciboCliente{shippingPaymentId}.txt";
             if (!File.Exists(filePath))
             {
                 // Cria o arquivo e fecha imediatamente

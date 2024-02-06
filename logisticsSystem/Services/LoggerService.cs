@@ -11,6 +11,7 @@ namespace logisticsSystem.Services
         {
             _context = context;
         }
+
         public void WriteLogError(string message)
         {
             string logDirectory = "C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\erros";
@@ -24,7 +25,9 @@ namespace logisticsSystem.Services
 
             using (StreamWriter writer = new StreamWriter(logPath, true))
             {
-                writer.WriteLine($"{DateTime.Now}: {message} \n ");
+                writer.WriteLine($"{DateTime.Now}: {message}");
+                //writer.WriteLine($"Stack Trace: {exception.StackTrace}");
+                writer.WriteLine(); // Adiciona uma linha em branco para separar os logs
             }
         }
 
@@ -45,4 +48,5 @@ namespace logisticsSystem.Services
             }
         }
     }
+
 }
