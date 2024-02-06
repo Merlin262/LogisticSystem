@@ -20,12 +20,14 @@ namespace logisticsSystem.Controllers
         private readonly LogisticsSystemContext _context;
         private readonly TruckService _truckService;
         private readonly ItensShippedService _itensShippedService;
+        private readonly LoggerService _logger;
 
-        public ItensShippedsController(LogisticsSystemContext context, ItensShippedService itensShippedService, TruckService truckService)
+        public ItensShippedsController(LogisticsSystemContext context, ItensShippedService itensShippedService, TruckService truckService, LoggerService logger)
         {
             _context = context;
             _itensShippedService = itensShippedService;
             _truckService = truckService;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -52,6 +54,7 @@ namespace logisticsSystem.Controllers
             // Adicionar o novo item enviado ao contexto
             _context.ItensShippeds.Add(newItensShipped);
             _context.SaveChanges();
+            _logger.WriteLogData($"Item shipped id {newItensShipped.Id} recorded successfully.");
 
             // Calcular totalItemWeight
             decimal totalItemWeight = _itensShippedService.GetTotalItemWeight(itensShippedDTO.Id);
@@ -162,6 +165,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Item shipped id {id} updated successfully.");
 
             // Calcular totalItemWeight
             decimal totalItemWeight = (decimal)_itensShippedService.GetTotalItemWeight(existingItensShipped.Id);

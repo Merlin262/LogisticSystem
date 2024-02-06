@@ -19,11 +19,13 @@ namespace logisticsSystem.Controllers
     {
         private readonly LogisticsSystemContext _context;
         private readonly EmployeeWageService _employeeWageService;
+        private readonly LoggerService _logger;
 
-        public EmployeeWagesController(LogisticsSystemContext context, EmployeeWageService employeeWageService)
+        public EmployeeWagesController(LogisticsSystemContext context, EmployeeWageService employeeWageService, LoggerService logger)
         {
             _context = context;
             _employeeWageService = employeeWageService;
+            _logger = logger;
         }
 
         [HttpGet("employeewages")]
@@ -72,6 +74,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Employee wage of the employee id '{newEmployeeWage.FkEmployeeId}' recorded successfully.");
 
             // Retornar a nova remuneração criada
             return Ok(newEmployeeWage);
@@ -121,6 +124,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Employee wage id {employeeWageId} updated successfully.");
 
             return Ok(new
             {
@@ -150,33 +154,39 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Employee wage id {employeeWageId} deleted successfully.");
 
             return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }
 
         // READ - Método GET (Todos) para EmployeeWage
-        [HttpGet(("netSalary/{EmployeeWageId}"))]
-        public IActionResult GetEmployeeNetSalary(int EmployeeWageId)
+        [HttpGet("netSalary/{EmployeeId}")]
+        public IActionResult GetEmployeeNetSalary(int EmployeeId)
         {
-            var netSalary = _context.EmployeeWages
-                .Where(ew => ew.Id == EmployeeWageId)
+            var netSalary = _context.Employees
+                .Where(e => e.FkPersonId == EmployeeId)
+                .Join(
+                    _context.EmployeeWages,
+                    e => e.FkPersonId,
+                    ew => ew.FkEmployeeId,
+                    (e, ew) => new { Employee = e, EmployeeWage = ew }
+                )
                 .Join(
                     _context.WageDeductions,
-                    ew => ew.Id,
+                    joined => joined.EmployeeWage.Id,
                     wd => wd.FkWageId,
-                    (ew, wd) => new { Wage = ew, Deduction = wd }
+                    (joined, wd) => new { Employee = joined.Employee, EmployeeWage = joined.EmployeeWage, Deduction = wd }
                 )
                 .Join(
                     _context.Deductions,
                     joined => joined.Deduction.FkDeductionsId,
                     d => d.Id,
-                    (joined, d) => new { ew = joined.Wage, deduction = joined.Deduction, DeductionDetail = d }
+                    (joined, d) => new { Employee = joined.Employee, EmployeeWage = joined.EmployeeWage, Deduction = joined.Deduction, DeductionDetail = d }
                 )
                 .Select(
-                    result => result.ew.Amount + result.ew.Commission - result.DeductionDetail.Amount
+                    result => result.EmployeeWage.Amount + result.EmployeeWage.Commission - result.DeductionDetail.Amount
                 )
                 .FirstOrDefault();
-
 
             return Ok(netSalary);
         }

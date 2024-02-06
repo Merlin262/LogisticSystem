@@ -12,6 +12,7 @@ namespace logisticsSystem.Controllers
     using global::logisticsSystem.DTOs;
     using global::logisticsSystem.Models;
     using global::logisticsSystem.Exceptions;
+    using global::logisticsSystem.Services;
 
     namespace logisticsSystem.Controllers
     {
@@ -20,10 +21,12 @@ namespace logisticsSystem.Controllers
         public class TrucksController : ControllerBase
         {
             private readonly LogisticsSystemContext _context;
+            private readonly LoggerService _logger;
 
-            public TrucksController(LogisticsSystemContext context)
+            public TrucksController(LogisticsSystemContext context, LoggerService logger)
             {
                 _context = context;
+                _logger = logger;
             }
 
             [HttpGet]
@@ -107,6 +110,7 @@ namespace logisticsSystem.Controllers
 
                 _context.Entry(truck).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+                _logger.WriteLogData($"Truck chassis {chassis} updated successfully.");
 
                 return NoContent();
             }
@@ -137,6 +141,7 @@ namespace logisticsSystem.Controllers
 
                 _context.Trucks.Add(truck);
                 _context.SaveChanges();
+                _logger.WriteLogData($"Truck chassis {truck.Chassis} recorded successfully.");
 
                 var createdTruckDTO = new TruckDTO
                 {
@@ -171,6 +176,7 @@ namespace logisticsSystem.Controllers
 
                 // Salvar as alterações no banco de dados
                 await _context.SaveChangesAsync();
+                _logger.WriteLogData($"Truck chassis {chassis} deleted successfully.");
 
                 return NoContent();
             }

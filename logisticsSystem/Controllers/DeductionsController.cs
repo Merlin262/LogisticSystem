@@ -10,6 +10,8 @@ using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using logisticsSystem.Exceptions;
 using System.Text.RegularExpressions;
+using logisticsSystem.Services;
+using System.Net;
 
 namespace logisticsSystem.Controllers
 {
@@ -18,10 +20,12 @@ namespace logisticsSystem.Controllers
     public class DeductionsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly LoggerService _logger;
 
-        public DeductionsController(LogisticsSystemContext context)
+        public DeductionsController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -61,6 +65,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Discount name '{newDeduction.Name}' registered succesfully.");
 
             // Retornar a nova dedução criada
             return Ok(newDeduction);
@@ -136,6 +141,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Deductions id {id} updated successfully.");
 
             return Ok(deduction);
         }
@@ -159,6 +165,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Deduction id {id} deleted successfully.");
 
             return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }

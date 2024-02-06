@@ -3,17 +3,17 @@ using Microsoft.Extensions.Logging;
 
 namespace logisticsSystem.Services
 {
-    public class ErrorLoggerService
+    public class LoggerService
     {
         private readonly LogisticsSystemContext _context;
 
-        public ErrorLoggerService(LogisticsSystemContext context)
+        public LoggerService(LogisticsSystemContext context)
         {
             _context = context;
         }
-        public void WriteLog(string message)
+        public void WriteLogError(string message)
         {
-            string logDirectory = "C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\erros";
+            string logDirectory = "E:\\codes\\logisticsSystem\\logisticsSystem\\Logs\\";
             string logFileName = $"{DateTime.Now.ToString("yyyy-MM-dd")}_ErrorLog.txt";
             string logPath = Path.Combine(logDirectory, logFileName);
 
@@ -30,7 +30,7 @@ namespace logisticsSystem.Services
 
         public void WriteLogData(string message)
         {
-            string logDirectory = "C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\erros";
+            string logDirectory = "E:\\codes\\logisticsSystem\\logisticsSystem\\Logs\\";
             string logFileName = $"{DateTime.Now.ToString("yyyy-MM-dd")}_DataLog.txt";
             string logPath = Path.Combine(logDirectory, logFileName);
 
@@ -41,7 +41,7 @@ namespace logisticsSystem.Services
 
             using (StreamWriter writer = new StreamWriter(logPath, true))
             {
-                writer.WriteLine($"{DateTime.Now}: {message} \n ");
+                writer.WriteLine($"{DateTime.Now}: {message}");
             }
         }
     }

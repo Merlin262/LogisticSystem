@@ -9,6 +9,7 @@ using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using logisticsSystem.Exceptions;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -17,10 +18,12 @@ namespace logisticsSystem.Controllers
     public class MaintenancesController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly LoggerService _logger;
 
-        public MaintenancesController(LogisticsSystemContext context)
+        public MaintenancesController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         
@@ -177,6 +180,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Maintenance id {id} updated successfully.");
 
             return Ok(maintenance);
 
@@ -201,6 +205,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Maintenance id {id} deleted successfully.");
 
             return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
 

@@ -13,6 +13,8 @@ using logisticsSystem.Models;
 using logisticsSystem.Exceptions;
 using Microsoft.Data.SqlClient;
 using System.Text.RegularExpressions;
+using System.Net;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -21,10 +23,12 @@ namespace logisticsSystem.Controllers
     public class ClientsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly LoggerService _logger;
 
-        public ClientsController(LogisticsSystemContext context)
+        public ClientsController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet("/clients")]
@@ -84,6 +88,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Client id {newClient.FkPersonId} registered succesfully.");
 
             // Retornar o novo cliente criado
             return CreatedAtAction("GetClient", new { FkPersonId = newClient.FkPersonId }, clientDTO);
@@ -108,6 +113,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Client id {id} updated successfully.");
 
             // Retornar o cliente atualizado
             return Ok(new
@@ -128,6 +134,7 @@ namespace logisticsSystem.Controllers
 
             _context.Clients.Remove(client);
             await _context.SaveChangesAsync();
+            _logger.WriteLogData($"Client id {id} deleted successfully.");
 
             return NoContent();
         }

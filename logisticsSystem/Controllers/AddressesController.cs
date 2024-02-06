@@ -20,9 +20,9 @@ namespace logisticsSystem.Controllers
     public class AddressesController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
-        private readonly ErrorLoggerService _logger;
+        private readonly LoggerService _logger;
 
-        public AddressesController(LogisticsSystemContext context, ErrorLoggerService logger)
+        public AddressesController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
             _logger = logger;
@@ -117,7 +117,7 @@ namespace logisticsSystem.Controllers
 
             _context.Addresses.Add(address);
             await _context.SaveChangesAsync();
-            _logger.WriteLogData($"Endereço de ID {address.Id} registrado com sucesso.");
+            _logger.WriteLogData($"Address id {address.Id} registered succesfully.");
 
             return CreatedAtAction("GetAddress", new { id = address.Id }, addressDTO);
         }
@@ -162,6 +162,7 @@ namespace logisticsSystem.Controllers
 
             _context.Entry(address).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            _logger.WriteLogData($"Address id {id} updated successfully.");
 
             return NoContent();
         }
@@ -178,6 +179,7 @@ namespace logisticsSystem.Controllers
 
             _context.Addresses.Remove(address);
             await _context.SaveChangesAsync();
+            _logger.WriteLogData($"Address id {id} deleted successfully.");
 
             return NoContent();
         }

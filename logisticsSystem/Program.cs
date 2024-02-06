@@ -17,7 +17,7 @@ builder.Services.AddScoped<TruckService>();
 builder.Services.AddScoped<ItensShippedService>();
 builder.Services.AddScoped<EmployeeWageService>();
 builder.Services.AddScoped<HandleException>();
-builder.Services.AddScoped<ErrorLoggerService>();
+builder.Services.AddScoped<LoggerService>();
 
 
 
