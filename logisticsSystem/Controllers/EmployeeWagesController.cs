@@ -20,12 +20,14 @@ namespace logisticsSystem.Controllers
         private readonly LogisticsSystemContext _context;
         private readonly EmployeeWageService _employeeWageService;
         private readonly LoggerService _logger;
+        private readonly ReceiptService _receiptService;
 
-        public EmployeeWagesController(LogisticsSystemContext context, EmployeeWageService employeeWageService, LoggerService logger)
+        public EmployeeWagesController(LogisticsSystemContext context, EmployeeWageService employeeWageService, LoggerService logger, ReceiptService receiptService)
         {
             _context = context;
             _employeeWageService = employeeWageService;
             _logger = logger;
+            _receiptService = receiptService;
         }
 
         [HttpGet("employeewages")]
@@ -163,32 +165,19 @@ namespace logisticsSystem.Controllers
         [HttpGet("netSalary/{EmployeeId}")]
         public IActionResult GetEmployeeNetSalary(int EmployeeId)
         {
-            var netSalary = _context.Employees
-                .Where(e => e.FkPersonId == EmployeeId)
-                .Join(
-                    _context.EmployeeWages,
-                    e => e.FkPersonId,
-                    ew => ew.FkEmployeeId,
-                    (e, ew) => new { Employee = e, EmployeeWage = ew }
-                )
-                .Join(
-                    _context.WageDeductions,
-                    joined => joined.EmployeeWage.Id,
-                    wd => wd.FkWageId,
-                    (joined, wd) => new { Employee = joined.Employee, EmployeeWage = joined.EmployeeWage, Deduction = wd }
-                )
-                .Join(
-                    _context.Deductions,
-                    joined => joined.Deduction.FkDeductionsId,
-                    d => d.Id,
-                    (joined, d) => new { Employee = joined.Employee, EmployeeWage = joined.EmployeeWage, Deduction = joined.Deduction, DeductionDetail = d }
-                )
-                .Select(
-                    result => result.EmployeeWage.Amount + result.EmployeeWage.Commission - result.DeductionDetail.Amount
-                )
-                .FirstOrDefault();
+            var netSalary = _employeeWageService.GetEmployeeNetSalary(EmployeeId);
 
             return Ok(netSalary);
+        }
+
+        [HttpGet("generatereceipt/{EmployeeId}")]
+        public IActionResult GenerateEmGenerateEmployeeReceipt(int EmployeeId)
+        {
+            var netSalary = _employeeWageService.GetEmployeeNetSalary(EmployeeId);
+
+            _receiptService.GenerateEmployeeReceipt(EmployeeId, netSalary);
+
+            return Ok("Receipt generated successfully!");
         }
     }
 }

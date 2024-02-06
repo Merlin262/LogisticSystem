@@ -87,13 +87,15 @@ namespace logisticsSystem.Controllers
 
             _context.Entry(wageDeduction).State = EntityState.Modified;
 
-            // Verificar se a dedução salarial existe antes de salvar as alterações no banco de dados
-            if (!WageDeductionExists(id))
+
+            await _context.SaveChangesAsync();
+
+
+            // Verificar se a exceção ocorreu devido à inexistência da entidade
+            if (!_context.WageDeductions.Any(w => w.Id == id))
             {
                 throw new NotFoundException($"WageDeduction com ID: {id} não encontrada no banco de dados");
             }
-
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -143,12 +145,6 @@ namespace logisticsSystem.Controllers
             _logger.WriteLogData($"Wage Deduction id {id} deleted successfully.");
 
             return NoContent();
-        }
-
-
-        private bool WageDeductionExists(int id)
-        {
-            return _context.WageDeductions.Any(e => e.Id == id);
         }
     }
 }
