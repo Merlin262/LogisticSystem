@@ -29,7 +29,6 @@ namespace logisticsSystem.Controllers
         }
 
 
-
         [HttpGet("/addresses")]
         public IActionResult GetAddresses()
         {
