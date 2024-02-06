@@ -10,6 +10,7 @@ using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using logisticsSystem.Exceptions;
 using System.Text.RegularExpressions;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -18,10 +19,12 @@ namespace logisticsSystem.Controllers
     public class PeopleController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly LoggerService _logger;
 
-        public PeopleController(LogisticsSystemContext context)
+        public PeopleController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // CREATE - Método POST para Person
@@ -68,6 +71,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Person name '{newPerson.Name}' recorded successfully.");
 
             // Retornar a nova pessoa criada
             return Ok(newPerson);
@@ -153,6 +157,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Person id {id} updated successfully.");
 
             return Ok(person);
 
@@ -183,6 +188,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Person id {id} deleted successfully.");
 
             return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }

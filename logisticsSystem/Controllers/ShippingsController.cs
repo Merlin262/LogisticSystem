@@ -22,13 +22,15 @@ namespace logisticsSystem.Controllers
         private readonly TruckService _truckService;
         private readonly ItensShippedService _itensShippedService;
         private readonly EmployeeWageService _employeeWageService;
+        private readonly LoggerService _logger;
 
-        public ShippingsController(LogisticsSystemContext context, TruckService truckService, ItensShippedService itensShippedService, EmployeeWageService employeeWageService)
+        public ShippingsController(LogisticsSystemContext context, TruckService truckService, ItensShippedService itensShippedService, EmployeeWageService employeeWageService, LoggerService logger)
         {
             _context = context;
             _truckService = truckService;
             _itensShippedService = itensShippedService;
             _employeeWageService = employeeWageService;
+            _logger = logger;
         }
 
         [HttpPost("create-shipping")]
@@ -70,6 +72,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Shipping id {newShipping.Id} recorded successfully.");
 
             decimal employeeComission = _employeeWageService.GetEmployeeComission(newShipping.Id);
 
@@ -201,6 +204,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Shipping id {id} updated successfully.");
 
             // Retornar o envio atualizado, evitando referências circulares
             return Ok(new
@@ -240,6 +244,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Shipping id {id} deleted successfully.");
 
             return NoContent(); 
         }

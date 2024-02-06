@@ -9,6 +9,7 @@ using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using logisticsSystem.Exceptions;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -17,10 +18,12 @@ namespace logisticsSystem.Controllers
     public class ShippingPaymentsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly LoggerService _logger;
 
-        public ShippingPaymentsController(LogisticsSystemContext context)
+        public ShippingPaymentsController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/shipping-payments
@@ -101,6 +104,7 @@ namespace logisticsSystem.Controllers
 
             _context.ShippingPayments.Add(shippingPayment);
             _context.SaveChanges();
+            _logger.WriteLogData($"Payment of shipping id {shippingPayment.FkShippingId} recorded successfully.");
 
             return CreatedAtAction(nameof(GetShippingPaymentById), new { id = shippingPayment.Id }, shippingPaymentDTO);
         }
@@ -138,6 +142,7 @@ namespace logisticsSystem.Controllers
             existingShippingPayment.FkShippingId = updatedShippingPaymentDTO.FkShippingId;
 
             _context.SaveChanges();
+            _logger.WriteLogData($"Shipping payment of shipping id {existingShippingPayment.FkShippingId} updated successfully.");
 
             var updatedShippingPaymentResponse = new ShippingPaymentDTO
             {
@@ -164,6 +169,7 @@ namespace logisticsSystem.Controllers
 
             _context.ShippingPayments.Remove(shippingPayment);
             _context.SaveChanges();
+            _logger.WriteLogData($"Shipping payment id {id} deleted successfully.");
 
             return NoContent();
         }

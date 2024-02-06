@@ -9,6 +9,7 @@ using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using logisticsSystem.Exceptions;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -17,10 +18,12 @@ namespace logisticsSystem.Controllers
     public class WageDeductionsController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly LoggerService _logger;
 
-        public WageDeductionsController(LogisticsSystemContext context)
+        public WageDeductionsController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/WageDeductions
@@ -69,31 +72,28 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        /*
-
-        // POST: api/WageDeductions
+        //POST: api/WageDeductions
         [HttpPost]
         public async Task<ActionResult<WageDeduction>> PostWageDeduction([FromBody] WageDeductionDTO wageDeductionDTO)
         {
-            if (!wageDeductionDTO.FkDeductionsId || !wageDeductionDTO.FkWageId)
-            {
-                throw new InvalidDataTypeException("FkDeductionsId and FkWageId are required.");
-            }
-
             var wageDeduction = new WageDeduction
             {
                 FkDeductionsId = wageDeductionDTO.FkDeductionsId,
                 FkWageId = wageDeductionDTO.FkWageId,
             };
 
+            if (wageDeductionDTO.FkDeductionsId == null || wageDeductionDTO.FkWageId == null)
+            {
+                throw new InvalidDataTypeException("FkDeductionsId and FkWageId are required.");
+            }
+
             _context.WageDeductions.Add(wageDeduction);
             await _context.SaveChangesAsync();
+            _logger.WriteLogData($"Wage deduction of wage id {wageDeduction.FkWageId} recorded successfully.");
 
             return CreatedAtAction("GetWageDeduction", new { id = wageDeduction.Id }, wageDeduction);
         }
 
-        */
-        // DELETE: api/WageDeductions/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWageDeduction(int id)
         {
@@ -106,6 +106,7 @@ namespace logisticsSystem.Controllers
 
             _context.WageDeductions.Remove(wageDeduction);
             await _context.SaveChangesAsync();
+            _logger.WriteLogData($"Wage Deduction id {id} deleted successfully.");
 
             return NoContent();
         }

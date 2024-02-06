@@ -9,6 +9,7 @@ using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using logisticsSystem.Exceptions;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -17,10 +18,12 @@ namespace logisticsSystem.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly LoggerService _logger;
 
-        public EmployeesController(LogisticsSystemContext context)
+        public EmployeesController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // CREATE - Método POST
@@ -39,6 +42,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Employee id '{newEmployee.FkPersonId}' registered successfully.");
 
             // Retornar o novo funcionário criado
             return Ok(newEmployee);
@@ -101,6 +105,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Employee id {fkPersonId} updated successfully.");
 
             return Ok(employee);
         }
@@ -122,6 +127,7 @@ namespace logisticsSystem.Controllers
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            _logger.WriteLogData($"Employee id {fkPersonId} deleted successfully.");
 
             return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
         }

@@ -9,6 +9,7 @@ using logisticsSystem.Data;
 using logisticsSystem.Models;
 using logisticsSystem.DTOs;
 using logisticsSystem.Exceptions;
+using logisticsSystem.Services;
 
 namespace logisticsSystem.Controllers
 {
@@ -17,10 +18,12 @@ namespace logisticsSystem.Controllers
     public class ItensStocksController : ControllerBase
     {
         private readonly LogisticsSystemContext _context;
+        private readonly LoggerService _logger;
 
-        public ItensStocksController(LogisticsSystemContext context)
+        public ItensStocksController(LogisticsSystemContext context, LoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/ItensStock
@@ -111,6 +114,7 @@ namespace logisticsSystem.Controllers
 
             _context.ItensStocks.Add(itensStock);
             _context.SaveChanges();
+            _logger.WriteLogData($"Item id {itensStock.Id} recorded successfully.");
 
             return CreatedAtAction(nameof(GetItensStockById), new { id = itensStock.Id }, itensStockDTO);
         }
@@ -161,6 +165,7 @@ namespace logisticsSystem.Controllers
             itensStock.Weight = itensStockDTO.Weight;
 
             _context.SaveChanges();
+            _logger.WriteLogData($"Item id {id} updated successfully.");
 
             return Ok(itensStockDTO);
         }
@@ -179,6 +184,7 @@ namespace logisticsSystem.Controllers
 
             _context.ItensStocks.Remove(itensStock);
             _context.SaveChanges();
+            _logger.WriteLogData($"Item id {id} deleted successfully.");
 
             return NoContent();
         }
