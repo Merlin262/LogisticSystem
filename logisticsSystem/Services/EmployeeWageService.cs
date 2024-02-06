@@ -18,6 +18,7 @@ namespace logisticsSystem.Services
 
         public decimal GetEmployeeComission(int ShippingId)
         {
+            //Calcula a comissão do motorista proporcional ao valor do envio
             var employee = _context.Shippings
                 .Where(s => s.Id == ShippingId)
                 .Join(
@@ -33,6 +34,11 @@ namespace logisticsSystem.Services
 
         public decimal GetEmployeeNetSalary(int employeeId)
         {
+            /*
+             *   Faz a intercessão entre todas as tabelas necessárias (EmployeeWages, WageDeductions e Deductions
+             *   para calcular o salário líquido somando os atributos de Amount e Comission (EmployeeWages) e subtraindo
+             *   os valores de todos os descontos (Deductions)
+             */
             var netSalary = _context.Employees
                 .Where(e => e.FkPersonId == employeeId)
                 .Join(

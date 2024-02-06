@@ -18,10 +18,13 @@ namespace logisticsSystem.Services
             string filePath = $"E:\\codes\\receiptsClients\\{shippingPaymentId}.txt";
             if (!File.Exists(filePath))
             {
-                // Cria o arquivo e fecha imediatamente
                 using (File.Create(filePath)) { }
             }
 
+            /*
+             * Faz intersecções entre as tabelas de ShippingPayments, Shippings, Clients e Person para resgatar os dados 
+             * necessários para geração do recibo: valor (Shippings) e nome do cliente (Person)
+             */
             var dataReceipt = _context.ShippingPayments
                 .Where(sp => sp.Id == shippingPaymentId)
                 .Join(
@@ -41,8 +44,8 @@ namespace logisticsSystem.Services
                     (c, p) => new { name = p.Name, c.value }
                 ).FirstOrDefault();
 
-            string name = dataReceipt?.name ?? ""; // Use um operador de coalescência nula para garantir que não seja nulo
-            decimal value = dataReceipt?.value ?? 0;
+            string name = dataReceipt.name;
+            decimal value = dataReceipt.value;
 
             using (var file = File.AppendText(filePath))
             {
@@ -56,6 +59,7 @@ namespace logisticsSystem.Services
 
         public void GenerateEmployeeReceipt(int employeeId, decimal netSalary)
         {
+            //Obtém nome e cpf do employee fazendo o join com person
             var employee = _context.Employees
                 .Where(e => e.FkPersonId == employeeId)
                 .Join(
@@ -71,6 +75,8 @@ namespace logisticsSystem.Services
                 )
                 .FirstOrDefault();
 
+            //Obtém os dados do pagamento fazendo a intesecção entre EmployeeWages, WageDeductions e gera uma lista de descontos
+            //fazendo a intersecção com a tabela Deductions
             var employeeSalaryData = _context.EmployeeWages
                 .Where(ew => ew.FkEmployeeId == employeeId)
                 .Select(ew => new {
@@ -88,11 +94,11 @@ namespace logisticsSystem.Services
                                 DeductionName = d.Name,
                                 DeductionAmount = d.Amount
                             }
-                        )
-                        .ToList()  // Lista de deduções associadas ao salário do funcionário
+                        ).ToList()
                 })
                 .FirstOrDefault();
 
+            //Atribui para variáveis todos os atributos resgatados na consulta  SQL
             string name = employee.Name;
             string cpf = employee.CPF;
             DateOnly payDay = employeeSalaryData.PayDay;
@@ -100,6 +106,8 @@ namespace logisticsSystem.Services
             decimal grossSalary = employeeSalaryData.GrossSalary;
             decimal commission = employeeSalaryData.Commission;
 
+            //Cria o arquivo a partir do CPF + mês de pagamento, de forma que em todos os meses possa ser gerado um novo recibo 
+            //irrepetível para cada funcionário
             string filePath = $"E:\\codes\\receiptsEmployees\\{cpf}_{payDay.Month}-{payDay.Year}.txt";
             using (File.Create(filePath)) { }
 
@@ -115,6 +123,7 @@ namespace logisticsSystem.Services
                 file.WriteLine($"   COMISSÃO: R$ {commission}");
                 file.WriteLine($"   DEDUÇÕES:");
 
+                //Percorre todas a lista de descontos e registra cada um no recibo
                 employeeSalaryData.Deductions.ForEach(d =>
                 {
                     file.WriteLine($"       {d.DeductionName}: R$ {d.DeductionAmount}");
