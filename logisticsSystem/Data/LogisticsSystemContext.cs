@@ -220,6 +220,9 @@ public partial class LogisticsSystemContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedOnAdd()
                 .HasColumnName("ID");
+            entity.Property(e => e.CPF)
+                .HasMaxLength(14)
+                .IsUnicode(false);
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
                 .IsUnicode(false);

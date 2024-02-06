@@ -27,11 +27,9 @@ namespace logisticsSystem.Controllers
             _logger = logger;
         }
 
-        // CREATE - Método POST para Person
         [HttpPost]
         public IActionResult CreatePerson([FromBody] PersonDTO personDTO)
         {
-
             // Verificar se a solicitação é nula
             if (personDTO == null)
             {
@@ -55,6 +53,12 @@ namespace logisticsSystem.Controllers
                 throw new InvalidDataException("O e-mail da pessoa não pode ser nulo ou vazio.");
             }
 
+            // Validar se o CPF é único
+            if (_context.People.Any(p => p.CPF == personDTO.CPF))
+            {
+                throw new InvalidDataException($"Já existe uma pessoa cadastrada com o CPF '{personDTO.CPF}'.");
+            }
+
             // Adicionar validações adicionais conforme necessário para outras propriedades
 
             // Mapear PersonDTO para a entidade Person
@@ -63,6 +67,7 @@ namespace logisticsSystem.Controllers
                 Id = personDTO.Id,
                 Name = personDTO.Name,
                 Email = personDTO.Email,
+                CPF = personDTO.CPF,
                 BirthDate = personDTO.BirthDate,
                 FkAddressId = personDTO.FkAddressId
             };
@@ -76,8 +81,8 @@ namespace logisticsSystem.Controllers
 
             // Retornar a nova pessoa criada
             return Ok(newPerson);
-
         }
+
 
 
 
@@ -101,6 +106,7 @@ namespace logisticsSystem.Controllers
                 Name = p.Name,
                 Email = p.Email,
                 BirthDate = p.BirthDate,
+                CPF = p.CPF,
                 FkAddressId = p.FkAddressId,
 
             }).ToList();
@@ -128,6 +134,7 @@ namespace logisticsSystem.Controllers
                 Id = person.Id,
                 Name = person.Name,
                 Email = person.Email,
+                CPF = person.CPF,
                 BirthDate = person.BirthDate,
                 FkAddressId = person.FkAddressId,
             };
@@ -150,9 +157,17 @@ namespace logisticsSystem.Controllers
                 throw new NotFoundException("Pessoa não encontrada.");
             }
 
+            // Validar se o CPF é único
+            if (_context.People.Any(p => p.CPF == personDTO.CPF))
+            {
+                throw new InvalidDataException($"Já existe uma pessoa cadastrada com o CPF '{personDTO.CPF}'.");
+            }
+
             // Atualizar propriedades da pessoa
             person.Name = personDTO.Name;
             person.Email = personDTO.Email;
+            person.CPF = personDTO.CPF;
+            person.BirthDate = personDTO.BirthDate;
             person.FkAddressId = personDTO.FkAddressId;
 
 

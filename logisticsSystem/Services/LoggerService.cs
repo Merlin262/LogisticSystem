@@ -13,7 +13,7 @@ namespace logisticsSystem.Services
         }
         public void WriteLogError(string message)
         {
-            string logDirectory = "E:\\codes\\logisticsSystem\\logisticsSystem\\Logs\\";
+            string logDirectory = "C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\erros";
             string logFileName = $"{DateTime.Now.ToString("yyyy-MM-dd")}_ErrorLog.txt";
             string logPath = Path.Combine(logDirectory, logFileName);
 
@@ -30,7 +30,7 @@ namespace logisticsSystem.Services
 
         public void WriteLogData(string message)
         {
-            string logDirectory = "E:\\codes\\logisticsSystem\\logisticsSystem\\Logs\\";
+            string logDirectory = "C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\erros";
             string logFileName = $"{DateTime.Now.ToString("yyyy-MM-dd")}_DataLog.txt";
             string logPath = Path.Combine(logDirectory, logFileName);
 

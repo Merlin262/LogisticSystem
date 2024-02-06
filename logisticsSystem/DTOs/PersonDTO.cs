@@ -10,7 +10,7 @@ public class PersonDTO
     public int Id { get; set; }
 
     public string Name { get; set; }
-
+    public string? CPF { get; set; }
     public DateOnly BirthDate { get; set; }
 
     public string Email { get; set; }
