@@ -60,6 +60,7 @@ namespace logisticsSystem.Controllers
                 Id = personDTO.Id,
                 Name = personDTO.Name,
                 Email = personDTO.Email,
+                BirthDate = personDTO.BirthDate,
                 FkAddressId = personDTO.FkAddressId
             };
 
@@ -95,8 +96,8 @@ namespace logisticsSystem.Controllers
                 Id = p.Id,
                 Name = p.Name,
                 Email = p.Email,
+                BirthDate = p.BirthDate,
                 FkAddressId = p.FkAddressId,
-                // Mapear Address para AddressDTO se existir
 
             }).ToList();
 
@@ -123,6 +124,7 @@ namespace logisticsSystem.Controllers
                 Id = person.Id,
                 Name = person.Name,
                 Email = person.Email,
+                BirthDate = person.BirthDate,
                 FkAddressId = person.FkAddressId,
             };
 
@@ -147,9 +149,8 @@ namespace logisticsSystem.Controllers
             // Atualizar propriedades da pessoa
             person.Name = personDTO.Name;
             person.Email = personDTO.Email;
-            //person.FkAddressId = personDTO.FkAddressId;
+            person.FkAddressId = personDTO.FkAddressId;
 
-            // Adicionar lógica para mapear e adicionar novos telefones, se necessário
 
             // Salvar as alterações no banco de dados
             _context.SaveChanges();

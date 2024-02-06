@@ -25,13 +25,23 @@ namespace logisticsSystem.Controllers
 
         // GET: api/WageDeductions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<WageDeduction>>> GetWageDeductions()
+        public IActionResult GetWageDeductions()
         {
-            return await _context.WageDeductions.ToListAsync();
+            var wageDeductions = _context.WageDeductions.ToList();
+
+            var wageDeductionDTOs = wageDeductions.Select(wd => new WageDeductionDTO
+            {
+                FkDeductionsId = wd.FkDeductionsId,
+                FkWageId = wd.FkWageId,
+            }).ToList();
+
+            return Ok(wageDeductionDTOs);
         }
 
+
+        // GET: api/WageDeductions/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<WageDeduction>> GetWageDeduction(int id)
+        public async Task<ActionResult<WageDeductionDTO>> GetWageDeduction(int id)
         {
             // Obter a dedução salarial com o Id fornecido
             var wageDeduction = await _context.WageDeductions.FindAsync(id);
@@ -42,19 +52,35 @@ namespace logisticsSystem.Controllers
                 throw new NotFoundException("Dedução salarial não encontrada.");
             }
 
-            return wageDeduction;
+            // Mapear a entidade para o DTO
+            var wageDeductionDTO = new WageDeductionDTO
+            {
+                FkDeductionsId = wageDeduction.FkDeductionsId,
+                FkWageId = wageDeduction.FkWageId,
+            };
+
+            return wageDeductionDTO;
         }
+
 
 
         // PUT: api/WageDeductions/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutWageDeduction(int id, WageDeduction wageDeduction)
+        public async Task<IActionResult> PutWageDeduction(int id, [FromBody] WageDeductionDTO wageDeductionDTO)
         {
             // Verificar se o ID na solicitação corresponde ao ID da dedução salarial
-            if (id != wageDeduction.Id)
+            if (id != wageDeductionDTO.FkDeductionsId)
             {
                 throw new NotFoundException("O ID na solicitação não corresponde ao ID da dedução salarial.");
             }
+
+            // Mapear o DTO para a entidade
+            var wageDeduction = new WageDeduction
+            {
+                Id = id,
+                FkDeductionsId = wageDeductionDTO.FkDeductionsId,
+                FkWageId = wageDeductionDTO.FkWageId,
+            };
 
             _context.Entry(wageDeduction).State = EntityState.Modified;
 
@@ -69,15 +95,16 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-        /*
+
+
 
         // POST: api/WageDeductions
         [HttpPost]
         public async Task<ActionResult<WageDeduction>> PostWageDeduction([FromBody] WageDeductionDTO wageDeductionDTO)
         {
-            if (!wageDeductionDTO.FkDeductionsId || !wageDeductionDTO.FkWageId)
+            if (wageDeductionDTO.FkDeductionsId == 0 || wageDeductionDTO.FkWageId == 0)
             {
-                throw new InvalidDataTypeException("FkDeductionsId and FkWageId are required.");
+                throw new InvalidDataTypeException("FkDeductionsId and FkWageId are required and must be valid IDs.");
             }
 
             var wageDeduction = new WageDeduction
@@ -92,7 +119,8 @@ namespace logisticsSystem.Controllers
             return CreatedAtAction("GetWageDeduction", new { id = wageDeduction.Id }, wageDeduction);
         }
 
-        */
+
+
         // DELETE: api/WageDeductions/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWageDeduction(int id)
@@ -117,4 +145,3 @@ namespace logisticsSystem.Controllers
         }
     }
 }
-

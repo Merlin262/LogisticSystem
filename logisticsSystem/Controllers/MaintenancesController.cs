@@ -82,6 +82,7 @@ namespace logisticsSystem.Controllers
         [HttpPost]
         public IActionResult CreateMaintenance([FromBody] MaintenanceDTO maintenanceDTO)
         {
+            
             // Verificar se a solicitação é nula
             if (maintenanceDTO == null)
             {
@@ -120,21 +121,23 @@ namespace logisticsSystem.Controllers
             // Adicionar a nova manutenção ao contexto
             _context.Maintenances.Add(newMaintenance);
 
-            // Salvar as alterações no banco de dados
-            _context.SaveChanges();
-
             // Atualizar o caminhão para indicar que está em manutenção
             var truckToUpdate = _context.Trucks.FirstOrDefault(tc => tc.Chassis == maintenanceDTO.FkTruckChassis);
 
             if (truckToUpdate != null)
             {
+                truckToUpdate.LastMaintenanceKilometers = 0; // Definir LastMaintenance como 0
                 truckToUpdate.InMaintenance = true;
-                _context.SaveChanges();
             }
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
 
             // Retornar a nova manutenção criada
             return Ok(newMaintenance);
+            
         }
+
 
 
         // UPDATE - Método PUT para Maintenance
