@@ -26,23 +26,24 @@ namespace logisticsSystem.Controllers
             _employeeWageService = employeeWageService;
         }
 
-        [HttpGet]
-        public IActionResult GetAllRecords()
+        [HttpGet("employeewages")]
+        public IActionResult GetEmployeeWages()
         {
-            // Obter todos os registros de EmployeeWage
-            var employeeWages = _context.EmployeeWages.ToList();
+            var employeeWages = _context.EmployeeWages
+                .Select(ew => new EmployeeWageDTO
+                {
+                    Id = ew.Id,
+                    PayDay = ew.PayDay,
+                    Amount = ew.Amount,
+                    FkEmployeeId = ew.FkEmployeeId,
+                    ComissionPercentage = ew.ComissionPercentage,
+                    Commission = ew.Commission
+                })
+                .ToList();
 
-            // Mapear EmployeeWage para objeto dinâmico
-            var result = employeeWages.Select(ew => new
-            {
-                Id = ew.Id,
-                PayDay = ew.PayDay,
-                Amount = ew.Amount,
-                FkEmployeeId = ew.FkEmployeeId
-            }).ToList();
-
-            return Ok(result);
+            return Ok(employeeWages);
         }
+
 
         [HttpPost("/employeewages")]
         public IActionResult CreateEmployeeWage([FromBody] EmployeeWageDTO employeeWageDTO)
@@ -61,7 +62,9 @@ namespace logisticsSystem.Controllers
                 Id = employeeWageDTO.Id,
                 PayDay = employeeWageDTO.PayDay,
                 Amount = employeeWageDTO.Amount,
-                FkEmployeeId = employeeWageDTO.FkEmployeeId
+                FkEmployeeId = employeeWageDTO.FkEmployeeId,
+                ComissionPercentage = employeeWageDTO.ComissionPercentage,
+                Commission = employeeWageDTO.Commission
             };
 
             // Adicionar a nova remuneração ao contexto
@@ -71,13 +74,7 @@ namespace logisticsSystem.Controllers
             _context.SaveChanges();
 
             // Retornar a nova remuneração criada
-            return Ok(new
-            {
-                newEmployeeWage.Id,
-                newEmployeeWage.PayDay,
-                newEmployeeWage.Amount,
-                newEmployeeWage.FkEmployeeId
-            });
+            return Ok(newEmployeeWage);
             
         }
 
@@ -97,7 +94,9 @@ namespace logisticsSystem.Controllers
                 ew.Id,
                 ew.PayDay,
                 ew.Amount,
-                ew.FkEmployeeId
+                ew.FkEmployeeId,
+                ew.ComissionPercentage,
+                ew.Commission
             }).ToList();
 
             return Ok(employeeWagesDto);

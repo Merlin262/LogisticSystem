@@ -23,54 +23,7 @@ namespace logisticsSystem.Controllers
             _context = context;
         }
 
-        // CREATE - Método POST para Maintenance
-        [HttpPost]
-        public IActionResult CreateMaintenance([FromBody] MaintenanceDTO maintenanceDTO)
-        {
-            // Verificar se a solicitação é nula
-            if (maintenanceDTO == null)
-            {
-                throw new NullRequestException("Solicitação inválida para criação de manutenção.");
-            }
-
-            // Verificar se a data de manutenção é uma data válida
-            if (maintenanceDTO.MaintenanceDate == default)
-            {
-                throw new InvalidDataTypeException("Data de manutenção inválida.");
-            }
-
-            // Verificar se o funcionário associado à manutenção existe
-            var employeeExists = _context.Employees.Any(e => e.FkPersonId == maintenanceDTO.FkEmployee);
-            if (!employeeExists)
-            {
-                throw new NotFoundException("Funcionário associado à manutenção não encontrado.");
-            }
-
-            // Verificar se o chassi do caminhão associado à manutenção existe
-            var truckChassisExists = _context.Trucks.Any(tc => tc.Chassis == maintenanceDTO.FkTruckChassis);
-
-            if (!truckChassisExists)
-            {
-                throw new NotFoundException("Chassi do caminhão associado à manutenção não encontrado.");
-            }
-
-            // Mapear MaintenanceDTO para a entidade Maintenance
-            var newMaintenance = new Maintenance
-            {
-                MaintenanceDate = maintenanceDTO.MaintenanceDate,
-                FkEmployee = maintenanceDTO.FkEmployee,
-                FkTruckChassis = maintenanceDTO.FkTruckChassis
-            };
-
-            // Adicionar a nova manutenção ao contexto
-            _context.Maintenances.Add(newMaintenance);
-
-            // Salvar as alterações no banco de dados
-            _context.SaveChanges();
-
-            // Retornar a nova manutenção criada
-            return Ok(newMaintenance);
-        }
+        
 
 
 
@@ -123,6 +76,65 @@ namespace logisticsSystem.Controllers
             return Ok(maintenanceDto);
         }
 
+
+
+
+        [HttpPost]
+        public IActionResult CreateMaintenance([FromBody] MaintenanceDTO maintenanceDTO)
+        {
+            // Verificar se a solicitação é nula
+            if (maintenanceDTO == null)
+            {
+                throw new NullRequestException("Solicitação inválida para criação de manutenção.");
+            }
+
+            // Verificar se a data de manutenção é uma data válida
+            if (maintenanceDTO.MaintenanceDate == default)
+            {
+                throw new InvalidDataTypeException("Data de manutenção inválida.");
+            }
+
+            // Verificar se o funcionário associado à manutenção existe
+            var employeeExists = _context.Employees.Any(e => e.FkPersonId == maintenanceDTO.FkEmployee);
+            if (!employeeExists)
+            {
+                throw new NotFoundException("Funcionário associado à manutenção não encontrado.");
+            }
+
+            // Verificar se o chassi do caminhão associado à manutenção existe
+            var truckChassisExists = _context.Trucks.Any(tc => tc.Chassis == maintenanceDTO.FkTruckChassis);
+
+            if (!truckChassisExists)
+            {
+                throw new NotFoundException("Chassi do caminhão associado à manutenção não encontrado.");
+            }
+
+            // Mapear MaintenanceDTO para a entidade Maintenance
+            var newMaintenance = new Maintenance
+            {
+                MaintenanceDate = maintenanceDTO.MaintenanceDate,
+                FkEmployee = maintenanceDTO.FkEmployee,
+                FkTruckChassis = maintenanceDTO.FkTruckChassis
+            };
+
+            // Adicionar a nova manutenção ao contexto
+            _context.Maintenances.Add(newMaintenance);
+
+            // Salvar as alterações no banco de dados
+            _context.SaveChanges();
+
+            // Atualizar o caminhão para indicar que está em manutenção
+            var truckToUpdate = _context.Trucks.FirstOrDefault(tc => tc.Chassis == maintenanceDTO.FkTruckChassis);
+
+            if (truckToUpdate != null)
+            {
+                truckToUpdate.InMaintenance = true;
+                _context.SaveChanges();
+            }
+
+            // Retornar a nova manutenção criada
+            return Ok(newMaintenance);
+        }
 
 
         // UPDATE - Método PUT para Maintenance
