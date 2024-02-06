@@ -34,7 +34,6 @@ namespace logisticsSystem.Controllers
         [HttpGet("/clients")]
         public IActionResult GetClients()
         {
-            // Obter todos os ClientDTOs do contexto
             var clients = _context.Clients.ToList();
 
             var clientsDto = clients.Select(e => new ClientDTO
@@ -42,7 +41,6 @@ namespace logisticsSystem.Controllers
                 FkPersonId = e.FkPersonId,
             }).ToList();
 
-            // Retornar a lista de ClientDTOs
             return Ok(clientsDto);
         }
 
@@ -54,10 +52,9 @@ namespace logisticsSystem.Controllers
 
             if (client == null)
             {
-                throw new NotFoundException("Client não encontrado no banco de daods.");
+                throw new NotFoundException($"Client de ID: {id} não encontrado no banco de daods.");
             }
 
-            // Mapear o cliente para um ClientDTO
             var clientDto = new ClientDTO
             {
                 FkPersonId = client.FkPersonId,
@@ -67,45 +64,42 @@ namespace logisticsSystem.Controllers
             return Ok(clientDto);
         }
 
+
         [HttpPost("/clients")]
         public IActionResult CreateClient([FromBody] ClientDTO clientDTO)
         {
-            // Validar se FkPersonId é maior que 0
-            if (clientDTO.FkPersonId <= 0)
+            // Verifica se o FKPerson existe no banco de dados
+            var personExists = _context.People.Any(p => p.Id == clientDTO.FkPersonId);
+            if (!personExists)
             {
-                throw new InvalidDataException("FkPersonId deve ser maior que zero.");
+                throw new NotFoundException($"Pessoa de ID {clientDTO.FkPersonId} não encontrado.");
             }
 
-            // Mapear ClientDTO para a entidade Client
             var newClient = new Client
             {
                 FkPersonId = clientDTO.FkPersonId
-                // Adicione outras propriedades conforme necessário
             };
 
-            // Adicionar o novo cliente ao contexto
             _context.Clients.Add(newClient);
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
+            // Escreve a criação no DataLog
             _logger.WriteLogData($"Client id {newClient.FkPersonId} registered succesfully.");
 
-            // Retornar o novo cliente criado
-            return CreatedAtAction("GetClient", new { FkPersonId = newClient.FkPersonId }, clientDTO);
+            // Retorna o novo cliente criado
+            return CreatedAtAction(nameof(GetClients), new { FkPersonId = newClient.FkPersonId }, clientDTO);
         }
-
 
 
         [HttpPut("/clients/{id}")]
         public IActionResult UpdateClient(int id, [FromBody] ClientDTO updatedClientDTO)
         {
             
-            // Obter o cliente pelo ID do contexto
             var existingClient = _context.Clients.FirstOrDefault(c => c.FkPersonId == id);
 
             if (existingClient == null)
             {
-                throw new NotFoundException("Client não encontrado no banco de daods.");
+                throw new NotFoundException($"Client de ID {id} não encontrado no banco de daods.");
             }
 
             // Atualizar as propriedades do cliente existente com base no DTO fornecido
@@ -122,14 +116,13 @@ namespace logisticsSystem.Controllers
             });
         }
 
-        // DELETE: api/Clients/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(int id)
         {
             var client = await _context.Clients.FindAsync(id);
             if (client == null)
             {
-                throw new NotFoundException("Client não encontrado no banco de daods.");
+                throw new NotFoundException($"Client de ID: {id} não encontrado no banco de daods.");
             }
 
             _context.Clients.Remove(client);

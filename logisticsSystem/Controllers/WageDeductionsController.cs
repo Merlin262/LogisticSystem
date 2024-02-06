@@ -26,7 +26,7 @@ namespace logisticsSystem.Controllers
             _logger = logger;
         }
 
-        // GET: api/WageDeductions
+        // GET geral para WageDeduction
         [HttpGet]
         public IActionResult GetWageDeductions()
         {
@@ -42,20 +42,17 @@ namespace logisticsSystem.Controllers
         }
 
 
-        // GET: api/WageDeductions/{id}
+        // GET para WageDeduction por id
         [HttpGet("{id}")]
         public async Task<ActionResult<WageDeductionDTO>> GetWageDeduction(int id)
         {
-            // Obter a dedução salarial com o Id fornecido
             var wageDeduction = await _context.WageDeductions.FindAsync(id);
 
-            // Verificar se a dedução salarial foi encontrada
             if (wageDeduction == null)
             {
-                throw new NotFoundException("Dedução salarial não encontrada.");
+                throw new NotFoundException($"WageDeduction de Id: {id} não encontrada no banco de dados.");
             }
 
-            // Mapear a entidade para o DTO
             var wageDeductionDTO = new WageDeductionDTO
             {
                 FkDeductionsId = wageDeduction.FkDeductionsId,
@@ -66,13 +63,12 @@ namespace logisticsSystem.Controllers
         }
 
 
-        //POST: api/WageDeductions
         [HttpPost]
         public async Task<ActionResult<WageDeduction>> PostWageDeduction([FromBody] WageDeductionDTO wageDeductionDTO)
         {
-            if (wageDeductionDTO.FkDeductionsId == 0 || wageDeductionDTO.FkWageId == 0)
+            if (wageDeductionDTO.FkDeductionsId == 0 ||  wageDeductionDTO.FkWageId == 0)
             {
-                throw new InvalidDataTypeException("FkDeductionsId and FkWageId are required and must be valid IDs.");
+                throw new InvalidDataTypeException("FkDeductionsId e FkWageId são necessárias e devem ter IDs validos.");
             }
 
             var wageDeduction = new WageDeduction
@@ -81,33 +77,27 @@ namespace logisticsSystem.Controllers
                 FkWageId = wageDeductionDTO.FkWageId,
             };
 
-            _context.Entry(wageDeduction).State = EntityState.Modified;
-
-
-            await _context.SaveChangesAsync();
-
-
-            // Verificar se a exceção ocorreu devido à inexistência da entidade
-            if (!_context.WageDeductions.Any(w => w.Id == id))
+            if (wageDeductionDTO.FkDeductionsId == null ||  wageDeductionDTO.FkWageId == null)
             {
                 throw new InvalidDataTypeException("FkDeductionsId and FkWageId are required.");
             }
 
-            return NoContent();
+            _context.WageDeductions.Add(wageDeduction);
+            await _context.SaveChangesAsync();
+            _logger.WriteLogData($"Wage deduction of wage id {wageDeduction.FkWageId} recorded successfully.");
+
+            return CreatedAtAction("GetWageDeduction", new { id = wageDeduction.Id }, wageDeduction);
         }
 
 
-        // PUT: api/WageDeductions/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWageDeduction(int id, [FromBody] WageDeductionDTO wageDeductionDTO)
         {
-            // Verificar se o ID na solicitação corresponde ao ID da dedução salarial
             if (id != wageDeductionDTO.FkDeductionsId)
             {
-                throw new NotFoundException("O ID na solicitação não corresponde ao ID da dedução salarial.");
+                throw new NotFoundException("O ID na solicitação não corresponde ao ID de WageDeduction.");
             }
 
-            // Mapear o DTO para a entidade
             var wageDeduction = new WageDeduction
             {
                 Id = id,
@@ -117,11 +107,8 @@ namespace logisticsSystem.Controllers
 
             _context.Entry(wageDeduction).State = EntityState.Modified;
 
-            
-                await _context.SaveChangesAsync();
-            
-            
-            // Verificar se a exceção ocorreu devido à inexistência da entidade
+            await _context.SaveChangesAsync();
+                
             if (!_context.WageDeductions.Any(w => w.Id == id))
             {
                 throw new NotFoundException($"WageDeduction com ID: {id} não encontrada no banco de dados");
@@ -130,10 +117,6 @@ namespace logisticsSystem.Controllers
             return NoContent();
         }
 
-
-
-
-        // DELETE: api/WageDeductions/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWageDeduction(int id)
         {

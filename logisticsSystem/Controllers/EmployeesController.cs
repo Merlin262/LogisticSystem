@@ -26,36 +26,13 @@ namespace logisticsSystem.Controllers
             _logger = logger;
         }
 
-        // CREATE - Método POST
-        [HttpPost]
-        public IActionResult CreateEmployee([FromBody] EmployeeDTO employeeDTO)
-        {
-            // Mapear EmployeeDTO para a entidade Employee
-            var newEmployee = new Employee
-            {
-                FkPersonId = employeeDTO.FkPersonId,
-                Position = employeeDTO.Position,
-            };
-
-            // Adicionar o novo funcionário ao contexto
-            _context.Employees.Add(newEmployee);
-
-            // Salvar as alterações no banco de dados
-            _context.SaveChanges();
-            _logger.WriteLogData($"Employee id '{newEmployee.FkPersonId}' registered successfully.");
-
-            // Retornar o novo funcionário criado
-            return Ok(newEmployee);
-        }
-
-        // READ - Método GET (Todos)
+        
+        // GET para todos os funcionários
         [HttpGet]
         public IActionResult GetAllEmployees()
         {
-            // Obter todos os funcionários
             var employees = _context.Employees.ToList();
 
-            // Mapear Employee para EmployeeDTO
             var employeesDto = employees.Select(e => new EmployeeDTO
             {
                 FkPersonId = e.FkPersonId,
@@ -65,19 +42,17 @@ namespace logisticsSystem.Controllers
             return Ok(employeesDto);
         }
 
-        // READ - Método GET por FkPersonId
+        // GET para funcionário por FkPersonId
         [HttpGet("{fkPersonId}")]
         public IActionResult GetEmployeeByFkPersonId(int fkPersonId)
         {
-            // Obter o funcionário com o FkPersonId fornecido
             var employee = _context.Employees.FirstOrDefault(e => e.FkPersonId == fkPersonId);
 
             if (employee == null)
             {
-                throw new NotFoundException("Employee não encontrado no banco");
+                throw new NotFoundException($"Employee de {fkPersonId} não encontrado no banco");
             }
 
-            // Mapear Employee para EmployeeDTO
             var employeeDto = new EmployeeDTO
             {
                 FkPersonId = employee.FkPersonId,
@@ -87,34 +62,66 @@ namespace logisticsSystem.Controllers
             return Ok(employeeDto);
         }
 
-        // UPDATE - Método PUT
+
+
+        [HttpPost]
+        public IActionResult CreateEmployee([FromBody] EmployeeDTO employeeDTO)
+        {
+            var existingPerson = _context.People.FirstOrDefault(p => p.Id == employeeDTO.FkPersonId);
+            if (existingPerson == null)
+            {
+                throw new NotFoundException($"Person with id '{employeeDTO.FkPersonId}' not found.");
+            }
+
+            if (employeeDTO.Position.Length > 255)
+            {
+                throw new InvalidDataException("Position length cannot exceed 255 characters.");
+            }
+
+            var newEmployee = new Employee
+            {
+                FkPersonId = employeeDTO.FkPersonId,
+                Position = employeeDTO.Position,
+            };
+
+            _context.Employees.Add(newEmployee);
+            _context.SaveChanges();
+
+            _logger.WriteLogData($"Employee id '{newEmployee.FkPersonId}' registered successfully.");
+
+            return Ok(newEmployee);
+        }
+
+
+
         [HttpPut("{fkPersonId}")]
         public IActionResult UpdateEmployee(int fkPersonId, [FromBody] EmployeeDTO employeeDTO)
         {
-            // Obter o funcionário com o FkPersonId fornecido
             var employee = _context.Employees.FirstOrDefault(e => e.FkPersonId == fkPersonId);
 
             if (employee == null)
             {
-                throw new NotFoundException("Employee não encontrado no banco");
+                throw new NotFoundException("Employee not found in the database.");
             }
 
-            // Atualizar propriedades do funcionário
-            employee.Position = employeeDTO.Position;
-            //employee.Commission = employeeDTO.Commission;
+            if (employeeDTO.Position.Length > 255)
+            {
+                throw new InvalidDataException("Position length cannot exceed 255 characters.");
+            }
 
-            // Salvar as alterações no banco de dados
+            employee.Position = employeeDTO.Position;
+
             _context.SaveChanges();
             _logger.WriteLogData($"Employee id {fkPersonId} updated successfully.");
 
             return Ok(employee);
         }
 
-        // DELETE - Método DELETE
+
+
         [HttpDelete("{fkPersonId}")]
         public IActionResult DeleteEmployee(int fkPersonId)
         {
-            // Obter o funcionário com o FkPersonId fornecido
             var employee = _context.Employees.FirstOrDefault(e => e.FkPersonId == fkPersonId);
 
             if (employee == null)
@@ -122,14 +129,12 @@ namespace logisticsSystem.Controllers
                 throw new NotFoundException("Employee não encontrado no banco"); 
             }
 
-            // Remover o funcionário do contexto
             _context.Employees.Remove(employee);
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
             _logger.WriteLogData($"Employee id {fkPersonId} deleted successfully.");
 
-            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
+            return NoContent(); 
         }
     }
 }

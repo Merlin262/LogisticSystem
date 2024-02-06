@@ -79,6 +79,11 @@ namespace logisticsSystem.MiddleWares
                     status = HttpStatusCode.NotFound;
                     break;
 
+                case nameof(ItemNotAvailableInStockException):
+                    message = exception.Message;
+                    status = HttpStatusCode.NotFound;
+                    break;
+
                 case nameof(DatabaseConnectionException):
                     message = exception.Message;
                     status = HttpStatusCode.InternalServerError;

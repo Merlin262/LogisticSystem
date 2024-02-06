@@ -30,6 +30,8 @@ namespace logisticsSystem.Controllers
             _receiptService = receiptService;
         }
 
+
+        // GET geral para EmployeeWage
         [HttpGet("employeewages")]
         public IActionResult GetEmployeeWages()
         {
@@ -49,18 +51,63 @@ namespace logisticsSystem.Controllers
         }
 
 
+        // GET para EmployeeWage por employeeId
+        [HttpGet("/employeewages{employeeId}")]
+        public IActionResult GetEmployeeWages(int employeeId)
+        {
+            var employeeExists = _context.Employees.Any(e => e.FkPersonId == employeeId);
+            if (!employeeExists)
+            {
+                throw new NotFoundException($"Nenhum funcionário encontrado com ID {employeeId}.");
+            }
+
+            var employeeWages = _context.EmployeeWages
+                .Where(ew => ew.FkEmployeeId == employeeId)
+                .Select(ew => new EmployeeWageDTO
+                {
+                    Id = ew.Id,
+                    PayDay = ew.PayDay,
+                    Amount = ew.Amount,
+                    FkEmployeeId = ew.FkEmployeeId,
+                    ComissionPercentage = ew.ComissionPercentage,
+                    Commission = ew.Commission
+                })
+                .ToList();
+
+            return Ok(employeeWages);
+        }
+
+
+
         [HttpPost("/employeewages")]
         public IActionResult CreateEmployeeWage([FromBody] EmployeeWageDTO employeeWageDTO)
         {
-            
-            // Verificar se o FkEmployeeId é válido
             var existingEmployee = _context.Employees.Find(employeeWageDTO.FkEmployeeId);
             if (existingEmployee == null)
             {
                 throw new NotFoundException($"Funcionário com ID {employeeWageDTO.FkEmployeeId} não encontrado.");
             }
 
-            // Mapear EmployeeWageDTO para a entidade EmployeeWage
+            if (employeeWageDTO.PayDay == default)
+            {
+                throw new InvalidDataException("Data de pagamento inválida.");
+            }
+
+            if (employeeWageDTO.Amount <= 0)
+            {
+                throw new InvalidDataException("O valor do salário deve ser maior que zero.");
+            }
+
+            if (employeeWageDTO.ComissionPercentage <= 0 )
+            {
+                throw new InvalidDataException("A porcentagem de comissão deve ser maior do que zero.");
+            }
+
+            if (employeeWageDTO.Commission < 0)
+            {
+                throw new InvalidDataException("A comissão não pode ser menor que zero.");
+            }
+
             var newEmployeeWage = new EmployeeWage
             {
                 Id = employeeWageDTO.Id,
@@ -71,97 +118,85 @@ namespace logisticsSystem.Controllers
                 Commission = employeeWageDTO.Commission
             };
 
-            // Adicionar a nova remuneração ao contexto
             _context.EmployeeWages.Add(newEmployeeWage);
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
-            _logger.WriteLogData($"Employee wage of the employee id '{newEmployeeWage.FkEmployeeId}' recorded successfully.");
+            _logger.WriteLogData($"Employee wage do funcionário com ID '{newEmployeeWage.FkEmployeeId}' registrado com sucesso.");
 
-            // Retornar a nova remuneração criada
             return Ok(newEmployeeWage);
-            
         }
 
 
-        // READ - Método GET (Todos) para EmployeeWage
-        [HttpGet("{fkPersonId}/employeewages")]
-        public IActionResult GetEmployeeWages(int fkPersonId)
-        {
-            // Obter as remunerações do funcionário com o FkPersonId fornecido
-            var employeeWages = _context.EmployeeWages
-                .Where(ew => ew.FkEmployee.FkPersonId == fkPersonId)
-                .ToList();
-
-            // Mapear EmployeeWage para EmployeeWageDTO
-            var employeeWagesDto = employeeWages.Select(ew => new
-            {
-                ew.Id,
-                ew.PayDay,
-                ew.Amount,
-                ew.FkEmployeeId,
-                ew.ComissionPercentage,
-                ew.Commission
-            }).ToList();
-
-            return Ok(employeeWagesDto);
-        }
-
-        // UPDATE - Método PUT para EmployeeWage
         [HttpPut("/employeewages/{employeeWageId}")]
         public IActionResult UpdateEmployeeWage(int fkPersonId, int employeeWageId, [FromBody] EmployeeWageDTO employeeWageDTO)
         {
-            // Obter a remuneração do funcionário com o FkPersonId e Id fornecidos
             var employeeWage = _context.EmployeeWages
                 .FirstOrDefault(ew => ew.FkEmployee.FkPersonId == fkPersonId && ew.Id == employeeWageId);
 
             if (employeeWage == null)
             {
-                return NotFound(); // Retorna 404 Not Found se a remuneração não for encontrada
+                throw new NotFoundException($"Salário do funcionário com ID {employeeWageId} não encontrado.");
             }
 
-            // Atualizar propriedades da remuneração
+            if (employeeWageDTO.PayDay == default)
+            {
+                throw new InvalidDataException("Data de pagamento inválida.");
+            }
+
+            if (employeeWageDTO.Amount <= 0)
+            {
+                throw new InvalidDataException("O valor do salário deve ser maior que zero.");
+            }
+
+            if (employeeWageDTO.ComissionPercentage <= 0)
+            {
+                throw new InvalidDataException("A porcentagem de comissão deve ser maior do que zero.");
+            }
+
+            if (employeeWageDTO.Commission <= 0)
+            {
+                throw new InvalidDataException("A comissão não pode ser menor que zero.");
+            }
+
             employeeWage.PayDay = employeeWageDTO.PayDay;
             employeeWage.Amount = employeeWageDTO.Amount;
+            employeeWage.ComissionPercentage = employeeWageDTO.ComissionPercentage;
+            employeeWage.Commission = employeeWageDTO.Commission;
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
-            _logger.WriteLogData($"Employee wage id {employeeWageId} updated successfully.");
+            _logger.WriteLogData($"Salário do funcionário com ID {employeeWageId} atualizado com sucesso.");
 
             return Ok(new
             {
-                employeeWage.Id,
                 employeeWage.PayDay,
                 employeeWage.Amount,
+                employeeWage.ComissionPercentage,
+                employeeWage.Commission,
                 employeeWage.FkEmployeeId
             });
         }
 
-        // DELETE - Método DELETE para EmployeeWage
+
         [HttpDelete("{fkPersonId}/employeewages/{employeeWageId}")]
         public IActionResult DeleteEmployeeWage(int fkPersonId, int employeeWageId)
         {
-            // Obter a remuneração do funcionário com o FkPersonId e Id fornecidos
             var employeeWage = _context.EmployeeWages
                 .FirstOrDefault(ew => ew.FkEmployee.FkPersonId == fkPersonId && ew.Id == employeeWageId);
 
             if (employeeWage == null)
             {
-                throw new NotFoundException(
-                    "Employeewage não encontrado no banco");
+                throw new NotFoundException("Employeewage não encontrado no banco");
             }
 
-            // Remover a remuneração do contexto
             _context.EmployeeWages.Remove(employeeWage);
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
             _logger.WriteLogData($"Employee wage id {employeeWageId} deleted successfully.");
 
-            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
+            return NoContent(); 
         }
 
-        // READ - Método GET (Todos) para EmployeeWage
+        // GET para salario liquido do funcionário por EmployeeId
         [HttpGet("netSalary/{EmployeeId}")]
         public IActionResult GetEmployeeNetSalary(int EmployeeId)
         {
@@ -170,6 +205,7 @@ namespace logisticsSystem.Controllers
             return Ok(netSalary);
         }
 
+        
         [HttpGet("generatereceipt/{EmployeeId}")]
         public IActionResult GenerateEmGenerateEmployeeReceipt(int EmployeeId)
         {
