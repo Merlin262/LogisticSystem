@@ -19,11 +19,13 @@ namespace logisticsSystem.Controllers
     {
         private readonly LogisticsSystemContext _context;
         private readonly LoggerService _logger;
+        private readonly ReceiptService _receipt;
 
-        public ShippingPaymentsController(LogisticsSystemContext context, LoggerService logger)
+        public ShippingPaymentsController(LogisticsSystemContext context, LoggerService logger, ReceiptService receipt)
         {
             _context = context;
             _logger = logger;
+            _receipt = receipt;
         }
 
         // GET: api/shipping-payments
@@ -105,6 +107,7 @@ namespace logisticsSystem.Controllers
             _context.ShippingPayments.Add(shippingPayment);
             _context.SaveChanges();
             _logger.WriteLogData($"Payment of shipping id {shippingPayment.FkShippingId} recorded successfully.");
+            _receipt.GenerateClientReceipt(shippingPayment.Id);
 
             return CreatedAtAction(nameof(GetShippingPaymentById), new { id = shippingPayment.Id }, shippingPaymentDTO);
         }
