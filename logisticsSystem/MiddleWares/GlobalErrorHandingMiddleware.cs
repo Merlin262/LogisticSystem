@@ -26,7 +26,7 @@ namespace logisticsSystem.MiddleWares
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, ex, errorLogger); // Passando o objeto LoggerService como parâmetro
+                await HandleExceptionAsync(context, ex, errorLogger);
             }
         }
 
@@ -95,13 +95,11 @@ namespace logisticsSystem.MiddleWares
                     break;
             }
 
-            // Obter o stack trace
             string stackTrace = exception.StackTrace;
 
             // Registrar o erro no log
             logger.WriteLogError($"\nStatus: {status},\n Message: {message},\n StackTrace: {stackTrace}\n");
 
-            // Construir o resultado JSON sem incluir o stack trace
             var result = JsonSerializer.Serialize(new { status, message });
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)status;

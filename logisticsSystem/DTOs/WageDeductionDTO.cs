@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace logisticsSystem.DTOs;
-
-public class WageDeductionDTO
+namespace logisticsSystem.DTOs
 {
-    public int FkDeductionsId { get; set; }
-    public int FkWageId { get; set; }
+    public class WageDeductionDTO
+    {
+        public int FkDeductionsId { get; set; }
+        public int FkWageId { get; set; }
+    }
 }
