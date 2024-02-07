@@ -16,6 +16,7 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
+        // Recebe a Comissão do Funcionário por determinado Frete
         public decimal GetEmployeeComission(int ShippingId)
         {
             var employee = _context.Shippings
@@ -31,6 +32,7 @@ namespace logisticsSystem.Services
             return employee;
         }
 
+        // Recebe o Salário Líquido do Funcionário
         public decimal GetEmployeeNetSalary(int employeeId)
         {
             var netSalary = _context.Employees

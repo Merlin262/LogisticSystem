@@ -12,6 +12,7 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
+        // Escrever log de erro no diretório indicado (logDirectory)
         public void WriteLogError(string message)
         {
             string logDirectory = "C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\erros\\";
@@ -26,11 +27,11 @@ namespace logisticsSystem.Services
             using (StreamWriter writer = new StreamWriter(logPath, true))
             {
                 writer.WriteLine($"{DateTime.Now}: {message}");
-                //writer.WriteLine($"Stack Trace: {exception.StackTrace}");
-                writer.WriteLine(); // Adiciona uma linha em branco para separar os logs
+                writer.WriteLine(); 
             }
         }
 
+        // Escrever log de dados no diretório indicado (logDirectory)
         public void WriteLogData(string message)
         {
             string logDirectory = "C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\erros\\";

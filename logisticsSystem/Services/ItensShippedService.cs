@@ -13,6 +13,7 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
+        // Recebe o Peso Total dos Itens de um Pedido
         public decimal GetTotalItemWeight(int fkItensShippedId)
         {
             var totalWeight = _context.ItensShippeds

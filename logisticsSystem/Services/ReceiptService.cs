@@ -13,6 +13,7 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
+
         public void GenerateClientReceipt(int shippingPaymentId)
         {
             string filePath = $"C:\\Users\\joaom\\OneDrive\\Documentos\\Volvo\\Clone5002\\Receipts\\{shippingPaymentId}.txt";
@@ -41,7 +42,7 @@ namespace logisticsSystem.Services
                     (c, p) => new { name = p.Name, c.value }
                 ).FirstOrDefault();
 
-            string name = dataReceipt?.name ?? ""; // Use um operador de coalescência nula para garantir que não seja nulo
+            string name = dataReceipt?.name ?? ""; 
             decimal value = dataReceipt?.value ?? 0;
 
             using (var file = File.AppendText(filePath))
