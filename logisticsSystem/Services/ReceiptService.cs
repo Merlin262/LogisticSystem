@@ -132,7 +132,7 @@ namespace logisticsSystem.Services
                     file.WriteLine($"       {d.DeductionName}: R$ {d.DeductionAmount}");
                 });
 
-                file.WriteLine($"   SALÁRIO LÍQUIDO: {netSalary}");
+                file.WriteLine($"   SALÁRIO LÍQUIDO: R$ {netSalary}");
                 file.WriteLine($"   DATA: {payDay}");
                 file.WriteLine($"");
                 file.WriteLine("**********************************************************************");

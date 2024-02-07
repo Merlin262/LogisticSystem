@@ -104,7 +104,7 @@ namespace logisticsSystem.Controllers
 
             if (employeePosition != "Driver")
             {
-                throw new InvalidEmployeeException("O cargo do funcionário deve ser 'Driver' para criar um envio.");
+                throw new InvalidEmployeeException($"O cargo do funcionário deve ser 'Driver' para criar um envio. {employeePosition}");
             }
 
             var newShipping = new Shipping
