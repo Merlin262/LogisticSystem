@@ -29,10 +29,10 @@ namespace logisticsSystem.Controllers
         }
 
 
+        // GET geral para todos os endereços
         [HttpGet("/addresses")]
         public IActionResult GetAddresses()
         {
-            // Obter todos os AddressDTOs do contexto
             var addresses = _context.Addresses.ToList();
 
             var addressesDto = addresses.Select(a => new AddressDTO
@@ -47,15 +47,14 @@ namespace logisticsSystem.Controllers
                 Zipcode = a.Zipcode,
             }).ToList();
 
-            // Retornar a lista de AddressDTOs
             return Ok(addressesDto);
         }
 
 
+        // GET para endereço por ID
         [HttpGet("/addresses/{id}")]
         public IActionResult GetAddressById(int id)
         {
-            // Obter o AddressDTO com o ID fornecido do contexto
             var address = _context.Addresses.FirstOrDefault(a => a.Id == id);
 
             if (address == null)
@@ -63,7 +62,6 @@ namespace logisticsSystem.Controllers
                 throw new NotFoundException($"Endereço de {id} não encontrado.");
             }
 
-            // Mapear o Address para AddressDTO
             var addressDto = new AddressDTO
             {
                 Id = address.Id,
@@ -76,7 +74,6 @@ namespace logisticsSystem.Controllers
                 Zipcode = address.Zipcode,
             };
 
-            // Retornar o AddressDTO encontrado
             return Ok(addressDto);
         }
 
@@ -116,15 +113,12 @@ namespace logisticsSystem.Controllers
 
             _context.Addresses.Add(address);
             await _context.SaveChangesAsync();
-            _logger.WriteLogData($"Address id {address.Id} registered succesfully.");
+            _logger.WriteLogData($"Address de Id {address.Id} registrado com sucesso.");
 
-            // Retorna um objeto AddressDTO ao invés do objeto Address
             return CreatedAtAction(nameof(GetAddresses), new { id = address.Id }, addressDTO);
         }
 
 
-
-        // PUT: api/Addresses/update/{id}
         [HttpPut("update/{id}")]
         public async Task<IActionResult> PutAddress(int id, [FromBody] AddressDTO addressDTO)
         {
@@ -164,12 +158,12 @@ namespace logisticsSystem.Controllers
 
             _context.Entry(address).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-            _logger.WriteLogData($"Address id {id} updated successfully.");
+            _logger.WriteLogData($"Address de Id: {id} atualizado com sucesso.");
 
             return NoContent();
         }
 
-        // DELETE: api/Addresses/5
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAddress(int id)
         {
@@ -181,7 +175,7 @@ namespace logisticsSystem.Controllers
 
             _context.Addresses.Remove(address);
             await _context.SaveChangesAsync();
-            _logger.WriteLogData($"Address id {id} deleted successfully.");
+            _logger.WriteLogData($"Address de Id: {id} deletado com sucesso.");
 
             return NoContent();
         }

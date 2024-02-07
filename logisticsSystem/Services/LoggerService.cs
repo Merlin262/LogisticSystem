@@ -12,6 +12,7 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
+        // Escrever log de erro no diretório indicado (logDirectory)
         public void WriteLogError(string message)
         {
             try
@@ -37,6 +38,7 @@ namespace logisticsSystem.Services
             }
         }
 
+        // Escrever log de dados no diretório indicado (logDirectory)
         public void WriteLogData(string message)
         {
             try

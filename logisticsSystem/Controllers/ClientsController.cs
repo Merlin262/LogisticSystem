@@ -31,6 +31,8 @@ namespace logisticsSystem.Controllers
             _logger = logger;
         }
 
+
+        // GET geral para todos os clientes
         [HttpGet("/clients")]
         public IActionResult GetClients()
         {
@@ -44,10 +46,11 @@ namespace logisticsSystem.Controllers
             return Ok(clientsDto);
         }
 
+
+        // GET para cliente por ID
         [HttpGet("/clients/{id}")]
         public IActionResult GetClientById(int id)
         {
-            // Obter o cliente pelo ID do contexto
             var client = _context.Clients.FirstOrDefault(c => c.FkPersonId == id);
 
             if (client == null)
@@ -60,7 +63,6 @@ namespace logisticsSystem.Controllers
                 FkPersonId = client.FkPersonId,
             };
 
-            // Retornar o ClientDTO específico pelo ID
             return Ok(clientDto);
         }
 
@@ -68,7 +70,6 @@ namespace logisticsSystem.Controllers
         [HttpPost("/clients")]
         public IActionResult CreateClient([FromBody] ClientDTO clientDTO)
         {
-            // Verifica se o FKPerson existe no banco de dados
             var personExists = _context.People.Any(p => p.Id == clientDTO.FkPersonId);
             if (!personExists)
             {
@@ -83,10 +84,8 @@ namespace logisticsSystem.Controllers
             _context.Clients.Add(newClient);
 
             _context.SaveChanges();
-            // Escreve a criação no DataLog
             _logger.WriteLogData($"Client id {newClient.FkPersonId} registered succesfully.");
 
-            // Retorna o novo cliente criado
             return CreatedAtAction(nameof(GetClients), new { FkPersonId = newClient.FkPersonId }, clientDTO);
         }
 
@@ -102,14 +101,11 @@ namespace logisticsSystem.Controllers
                 throw new NotFoundException($"Client de ID {id} não encontrado no banco de daods.");
             }
 
-            // Atualizar as propriedades do cliente existente com base no DTO fornecido
             existingClient.FkPersonId = updatedClientDTO.FkPersonId;
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
             _logger.WriteLogData($"Client id {id} updated successfully.");
 
-            // Retornar o cliente atualizado
             return Ok(new
             {
                 FkPersonId = existingClient.FkPersonId,

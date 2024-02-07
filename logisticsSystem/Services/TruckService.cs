@@ -16,6 +16,7 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
+        // Retorna o peso maximo que o caminhão aguenta de acordo com o numero de eixos
         public int GetTruckAxlesWeight(int fkShippingId)
         {
             var truckAxles = _context.Shippings
@@ -26,6 +27,7 @@ namespace logisticsSystem.Services
             return truckAxles * 2000;
         }
 
+        // Atualiza o status de manutenção do caminhão
         public bool UpdateTruckMaintenanceStatus(int truckId, decimal distance)
         {
             // 50000 km é o limite para manutenção
@@ -36,10 +38,8 @@ namespace logisticsSystem.Services
 
             if (truck != null)
             {
-
                 if (truck.InMaintenance)
                 {
-                    // Lançar exceção se o caminhão já estiver em manutenção
                     throw new InvalidTruckException("O caminhão já está em manutenção.");
                 }
 
@@ -55,10 +55,8 @@ namespace logisticsSystem.Services
                     truck.InMaintenance = false;
                 }
 
-                // Salvar as alterações no banco de dados
                 _context.SaveChanges();
             }
-            // Você pode fazer outras verificações ou lógica específica para o serviço aqui
             return truck.InMaintenance;
         }
 

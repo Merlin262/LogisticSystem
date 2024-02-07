@@ -16,6 +16,7 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
+        // Recebe a Comissão do Funcionário por determinado Frete
         public decimal GetEmployeeComission(int ShippingId)
         {
             //Calcula a comissão do motorista proporcional ao valor do envio
@@ -32,6 +33,7 @@ namespace logisticsSystem.Services
             return employee;
         }
 
+        // Recebe o Salário Líquido do Funcionário
         public decimal GetEmployeeNetSalary(int employeeId)
         {
             /*

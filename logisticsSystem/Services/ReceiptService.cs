@@ -13,9 +13,10 @@ namespace logisticsSystem.Services
             _context = context;
         }
 
+
         public void GenerateClientReceipt(int shippingPaymentId)
         {
-            string filePath = $"E:\\codes\\receiptsClients\\{shippingPaymentId}.txt";
+            string filePath = $"E:\\codes\\receiptsClients\\ReciboCliente{shippingPaymentId}.txt";
             if (!File.Exists(filePath))
             {
                 using (File.Create(filePath)) { }
@@ -49,10 +50,12 @@ namespace logisticsSystem.Services
 
             using (var file = File.AppendText(filePath))
             {
-                file.WriteLine($"|-------------------RECIBO N° {shippingPaymentId}-------------------|");
+                file.WriteLine($"|*******************RECIBO N° {shippingPaymentId}*******************|");
+                file.WriteLine();
                 file.WriteLine("         VALOR         CLIENTE         DATA ");
-                file.WriteLine($"        R${value}       {name}        {DateTime.Now.ToString("dd/MM/yyyy")}");
-                file.WriteLine("|--------------------------------------------------|");
+                file.WriteLine($"        R${value}   {name}     {DateTime.Now.ToString("dd/MM/yyyy")}");
+                file.WriteLine();
+                file.WriteLine("|**************************************************|");
             }
 
         }
