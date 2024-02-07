@@ -29,6 +29,8 @@ namespace logisticsSystem.Controllers
                 _logger = logger;
             }
 
+
+            // GET geral para Truck
             [HttpGet]
             public IActionResult GetTrucks()
             {
@@ -54,7 +56,7 @@ namespace logisticsSystem.Controllers
                 return Ok(truckDTOs);
             }
 
-
+            // GET para Truck por chassi
             [HttpGet("{chassis}")]
             public IActionResult GetTruckByChassis(int chassis)
             {
@@ -62,7 +64,7 @@ namespace logisticsSystem.Controllers
 
                 if (truck == null)
                 {
-                    throw new NotFoundException($"Caminhão com chassi {chassis} não encontrado.");
+                    throw new NotFoundException($"Truck com chassi: {chassis} não encontrado.");
                 }
 
                 var truckDTO = new TruckDTO
@@ -91,13 +93,10 @@ namespace logisticsSystem.Controllers
                     throw new NotFoundException($"Caminhão com chassi {chassis} não encontrado.");
                 }
 
-                // Verificar se os atributos estão presentes e não nulos
                 if (truckDTO.Chassis == 0 || string.IsNullOrWhiteSpace(truckDTO.Model) || truckDTO.Year == 0)
                 {
                     throw new InvalidDataTypeException("Os atributos do caminhão são inválidos.");
                 }
-
-                // Adicione mais verificações conforme necessário para outros atributos
 
                 truck.Chassis = truckDTO.Chassis;
                 truck.TruckAxles = truckDTO.TruckAxles;
@@ -124,8 +123,6 @@ namespace logisticsSystem.Controllers
                 {
                     throw new InvalidDataTypeException("Os atributos do caminhão são inválidos.");
                 }
-
-                // Adicione mais verificações conforme necessário para outros atributos
 
                 var truck = new Truck
                 {
@@ -162,21 +159,16 @@ namespace logisticsSystem.Controllers
             [HttpDelete("{chassis}")]
             public async Task<IActionResult> DeleteTruck(int chassis)
             {
-                // Verificar se o caminhão existe
                 var truck = await _context.Trucks.FindAsync(chassis);
                 if (truck == null)
                 {
-                    throw new NotFoundException("Caminhão não encontrado.");
+                    throw new NotFoundException($"Truck de chassi: {chassis} não encontrado no banco de dados.");
                 }
 
-                // Adicione mais verificações conforme necessário antes de excluir
-
-                // Remover o caminhão do contexto
                 _context.Trucks.Remove(truck);
 
-                // Salvar as alterações no banco de dados
                 await _context.SaveChangesAsync();
-                _logger.WriteLogData($"Truck chassis {chassis} deleted successfully.");
+                _logger.WriteLogData($"Truck de chassis {chassis} deletado com sucesso.");
 
                 return NoContent();
             }

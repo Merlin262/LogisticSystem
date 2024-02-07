@@ -33,76 +33,13 @@ namespace logisticsSystem.Controllers
             _logger = logger;
         }
 
-        [HttpPost("create-shipping")]
-        public IActionResult CreateShipping([FromBody] ShippingDTO shippingDTO)
-        {
-            if (_truckService.UpdateTruckMaintenanceStatus(shippingDTO.FkTruckId, shippingDTO.DistanceKm))
-            { 
-                throw new InvalidTruckException("Caminhão não está disponível para envio, ele necessita de manutenção antes de realizar o envio");
-            }
-            
-            // Verificar se o cargo do funcionário é "Driver"
-            var employeePosition = _context.Employees
-                .Where(e => e.FkPersonId == shippingDTO.FkEmployeeId)
-                .Select(e => e.Position)
-                .FirstOrDefault();
 
-            if (employeePosition != "Driver")
-            {
-                throw new InvalidEmployeeException("O cargo do funcionário deve ser 'Driver' para criar um envio.");
-            }
-
-            // Mapear ShippingDTO para a entidade Shipping
-            var newShipping = new Shipping
-            {
-                SendDate = shippingDTO.SendDate,
-                EstimatedDate = shippingDTO.EstimatedDate,
-                DeliveryDate = shippingDTO.DeliveryDate,
-                DistanceKm = shippingDTO.DistanceKm,
-                RegistrationDate = shippingDTO.RegistrationDate,
-                ShippingPrice = shippingDTO.ShippingPrice,
-                FkClientId = shippingDTO.FkClientId,
-                FkEmployeeId = shippingDTO.FkEmployeeId,
-                FkAddressId = shippingDTO.FkAddressId,
-                FkTruckId = shippingDTO.FkTruckId // Adicione esta propriedade se não existir
-            };
-
-            // Adicionar o novo envio ao contexto
-            _context.Shippings.Add(newShipping);
-
-            // Salvar as alterações no banco de dados
-            _context.SaveChanges();
-            _logger.WriteLogData($"Shipping id {newShipping.Id} recorded successfully.");
-
-            decimal employeeComission = _employeeWageService.GetEmployeeComission(newShipping.Id);
-
-            //Necessario ter um EmployeeWage correspondente
-            var employeeToUpdate = _context.EmployeeWages.FirstOrDefault(e => e.FkEmployeeId == shippingDTO.FkEmployeeId);
-            if (employeeToUpdate == null)
-            {
-                throw new NotFoundException("Employee not found");
-            }
-
-            employeeToUpdate.Commission = employeeToUpdate.Commission + employeeComission;
-
-            
-
-            _context.SaveChanges();
-
-            // Retornar o novo envio criado, evitando referências circulares
-            return Ok("Pedido criado");
-            
-        }
-
-
-        // READ - Método GET (Todos) para Shipping
+        // GET geral para Shippings
         [HttpGet]
         public IActionResult GetAllShippings()
         {
-            // Obter todos os envios
             var shippings = _context.Shippings.ToList();
 
-            // Mapear Shipping para ShippingDTO
             var shippingDtoList = shippings.Select(s => new ShippingDTO
             {
                 //Id = s.Id,
@@ -122,22 +59,19 @@ namespace logisticsSystem.Controllers
             return Ok(shippingDtoList);
         }
 
-        // READ - Método GET por Id para Shipping
+        // GET para Shipping por id
         [HttpGet("{id}")]
         public IActionResult GetShippingById(int id)
         {
-            // Obter o envio com o Id fornecido
             var shipping = _context.Shippings.FirstOrDefault(s => s.Id == id);
 
             if (shipping == null)
             {
-                throw new NotFoundException("Envio não encontrado"); 
+                throw new NotFoundException($"Shipping de Id: {id} não encontrado no banco de dados");
             }
 
-            // Mapear Shipping para ShippingDTO
             var shippingDto = new ShippingDTO
             {
-                //Id = shipping.Id,
                 SendDate = shipping.SendDate,
                 EstimatedDate = shipping.EstimatedDate,
                 DeliveryDate = shipping.DeliveryDate,
@@ -154,16 +88,71 @@ namespace logisticsSystem.Controllers
         }
 
 
+        [HttpPost("create-shipping")]
+        public IActionResult CreateShipping([FromBody] ShippingDTO shippingDTO)
+        {
+            if (_truckService.UpdateTruckMaintenanceStatus(shippingDTO.FkTruckId, shippingDTO.DistanceKm))
+            { 
+                throw new InvalidTruckException("Caminhão não está disponível para envio, ele necessita de manutenção antes de realizar o envio");
+            }
+            
+            // Verificar se o cargo do funcionário é "Driver"
+            var employeePosition = _context.Employees
+                .Where(e => e.FkPersonId == shippingDTO.FkEmployeeId)
+                .Select(e => e.Position)
+                .FirstOrDefault();
+
+            if (employeePosition != "Driver")
+            {
+                throw new InvalidEmployeeException("O cargo do funcionário deve ser 'Driver' para criar um envio.");
+            }
+
+            var newShipping = new Shipping
+            {
+                SendDate = shippingDTO.SendDate,
+                EstimatedDate = shippingDTO.EstimatedDate,
+                DeliveryDate = shippingDTO.DeliveryDate,
+                DistanceKm = shippingDTO.DistanceKm,
+                RegistrationDate = shippingDTO.RegistrationDate,
+                ShippingPrice = shippingDTO.ShippingPrice,
+                FkClientId = shippingDTO.FkClientId,
+                FkEmployeeId = shippingDTO.FkEmployeeId,
+                FkAddressId = shippingDTO.FkAddressId,
+                FkTruckId = shippingDTO.FkTruckId 
+            };
+
+            _context.Shippings.Add(newShipping);
+
+            _context.SaveChanges();
+            _logger.WriteLogData($"Shipping de Id: {newShipping.Id} registrado com sucesso.");
+
+            decimal employeeComission = _employeeWageService.GetEmployeeComission(newShipping.Id);
+
+            //Necessario ter um EmployeeWage correspondente
+            var employeeToUpdate = _context.EmployeeWages.FirstOrDefault(e => e.FkEmployeeId == shippingDTO.FkEmployeeId);
+            if (employeeToUpdate == null)
+            {
+                throw new NotFoundException("Employee not found");
+            }
+
+            employeeToUpdate.Commission = employeeToUpdate.Commission + employeeComission;
+
+            _context.SaveChanges();
+
+            return Ok("Pedido criado");
+        }
+        
+
+
         [HttpPut("update-shipping/{id}")]
         public IActionResult UpdateShipping(int id, [FromBody] ShippingDTO updatedShippingDTO)
         {
             
-            // Verificar se o envio com o id fornecido existe
             var existingShipping = _context.Shippings.Find(id);
 
             if (existingShipping == null)
             {
-                throw new NotFoundException($"Envio com ID {id} não encontrado.");
+                throw new NotFoundException($"Shipping com ID: {id} não encontrado.");
             }
 
             if (_truckService.UpdateTruckMaintenanceStatus(updatedShippingDTO.FkTruckId, updatedShippingDTO.DistanceKm))
@@ -182,14 +171,12 @@ namespace logisticsSystem.Controllers
                 throw new InvalidEmployeeException("O cargo do funcionário deve ser 'Driver' para criar um envio.");
             }
 
-            // Verificar se o FkTruckId é válido
             var existingTruck = _context.Trucks.Find(updatedShippingDTO.FkTruckId);
             if (existingTruck == null)
             {
                 throw new NotFoundException($"Caminhão com ID {updatedShippingDTO.FkTruckId} não encontrado.");
             }
 
-            // Atualizar as propriedades do envio existente com base no DTO fornecido
             existingShipping.SendDate = updatedShippingDTO.SendDate;
             existingShipping.EstimatedDate = updatedShippingDTO.EstimatedDate;
             existingShipping.DeliveryDate = updatedShippingDTO.DeliveryDate;
@@ -202,24 +189,17 @@ namespace logisticsSystem.Controllers
             existingShipping.FkAddressId = updatedShippingDTO.FkAddressId;
             existingShipping.FkTruckId = updatedShippingDTO.FkTruckId;
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
-            _logger.WriteLogData($"Shipping id {id} updated successfully.");
+            _logger.WriteLogData($"Shipping de Id: {id} atualizado com sucesso.");
 
-            // Retornar o envio atualizado, evitando referências circulares
             return Ok(new
             {
                 existingShipping.Id,
                 existingShipping.SendDate,
-                // Adicione outras propriedades relevantes de Shipping
-                // ...
-
                 FkTruck = new
                 {
                     existingShipping.FkTruck.Chassis,
                     existingShipping.FkTruck.TruckAxles,
-                    // Adicione outras propriedades relevantes de Truck
-                    // ...
                 }
             });
             
@@ -227,24 +207,20 @@ namespace logisticsSystem.Controllers
 
 
 
-        // DELETE - Método DELETE para Shipping
         [HttpDelete("{id}")]
         public IActionResult DeleteShipping(int id)
         {
-            // Obter o envio com o Id fornecido
             var shipping = _context.Shippings.FirstOrDefault(s => s.Id == id);
 
             if (shipping == null)
             {
-                throw new NotFoundException("Envio não encontrado no banco de dados"); // Retorna 404 Not Found se o envio não for encontrado
+                throw new NotFoundException($"Shipping de Id: {id} não encontrado no banco de dados"); 
             }
 
-            // Remover o envio do contexto
             _context.Shippings.Remove(shipping);
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
-            _logger.WriteLogData($"Shipping id {id} deleted successfully.");
+            _logger.WriteLogData($"Shipping de Id: {id} deletado com sucesso.");
 
             return NoContent(); 
         }

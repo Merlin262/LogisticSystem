@@ -30,19 +30,61 @@ namespace logisticsSystem.Controllers
             _logger = logger;
         }
 
+
+        // GET geral para ItensShipped
+        [HttpGet]
+        public IActionResult GetAllItensShipped()
+        {
+            var itensShipped = _context.ItensShippeds.ToList();
+
+            var itensShippedDto = itensShipped.Select(isd => new ItensShippedDTO
+            {
+                Id = isd.Id,
+                FkItensStockId = isd.FkItensStockId,
+                FkShippingId = isd.FkShippingId,
+                QuantityItens = isd.QuantityItens
+            }).ToList();
+
+            return Ok(itensShippedDto);
+        }
+
+
+        // GET para ItensShipped por id
+        [HttpGet("{id}")]
+        public IActionResult GetItensShippedById(int id)
+        {
+            var itemStockExists = _context.ItensShippeds.Any(isp => isp.Id == id);
+            if (!itemStockExists)
+            {
+                throw new NotFoundException($"Nenhum ItensShipped com ID: {id} encontrado no banco de dados.");
+            }
+
+            var itensShipped = _context.ItensShippeds
+                .Where(isd => isd.FkItensStockId == id)
+                .ToList();
+
+            var itensShippedDto = itensShipped.Select(isd => new ItensShippedDTO
+            {
+                Id = isd.Id,
+                FkItensStockId = isd.FkItensStockId,
+                FkShippingId = isd.FkShippingId,
+                QuantityItens = isd.QuantityItens
+            }).ToList();
+
+            return Ok(itensShippedDto);
+        }
+
+
         [HttpPost]
         public IActionResult CreateItensShipped([FromBody] ItensShippedDTO itensShippedDTO)
         {
-            // Obter o item em ItensStock correspondente ao FkItensStockId
             var itensStockItem = _context.ItensStocks.FirstOrDefault(ist => ist.Id == itensShippedDTO.FkItensStockId);
 
-            // Validar se há itens em estoque e se a quantidade desejada está disponível
             if (itensStockItem == null || itensStockItem.Quantity < itensShippedDTO.QuantityItens)
             {
                 throw new InsufficientQuantityException("A quantidade desejada de itens não está disponível em ItensStock.");
             }
 
-            // Mapear ItensShippedDTO para a entidade ItensShipped
             var newItensShipped = new ItensShipped
             {
                 Id = itensShippedDTO.Id,
@@ -51,34 +93,29 @@ namespace logisticsSystem.Controllers
                 QuantityItens = itensShippedDTO.QuantityItens
             };
 
-            // Adicionar o novo item enviado ao contexto
             _context.ItensShippeds.Add(newItensShipped);
             _context.SaveChanges();
             _logger.WriteLogData($"Item shipped id {newItensShipped.Id} recorded successfully.");
 
-            // Calcular totalItemWeight
+            // Calcula o peso total de um pedido
             decimal totalItemWeight = _itensShippedService.GetTotalItemWeight(itensShippedDTO.Id);
 
-            // Calcular o peso dos eixos do caminhão
+            // Calcular o peso maximo suportado pelos eixos do caminhão
             decimal truckAxlesWeight = _truckService.GetTruckAxlesWeight(itensShippedDTO.FkShippingId);
 
-            // Obter TotalWeight atual da tabela Shipping
             var shippingToUpdate = _context.Shippings.FirstOrDefault(s => s.Id == itensShippedDTO.FkShippingId);
             if (shippingToUpdate == null)
             {
-                throw new NotFoundException("Shipping not found.");
+                throw new NotFoundException($"Shipping com o ID: {shippingToUpdate.Id}");
             }
 
-            // Somar totalItemWeight ao TotalWeight
+            // Soma os itens do pedido com os outros itens no caminhão (se existirem)
             decimal updatedTotalWeight = shippingToUpdate.TotalWeight + totalItemWeight;
 
-            // Validar se o resultado da soma é maior que truckAxlesWeight
+            // Validar se o resultado da soma é maior que o peso maximo do caminhão
             if (updatedTotalWeight > truckAxlesWeight)
             {
-                // Remover ItensShipped do banco de dados em caso de BadRequest
-                DeleteItensShipped(newItensShipped.Id); // Use the correct property for the FK
-
-                // Delete the referenced Shipping in case of BadRequest
+                DeleteItensShipped(newItensShipped.Id);
                 throw new TruckOverloadedException("A soma do peso dos itens excede o peso dos eixos do caminhão.");
             }
 
@@ -90,63 +127,20 @@ namespace logisticsSystem.Controllers
             itensStockItem.Quantity -= itensShippedDTO.QuantityItens;
             _context.SaveChanges();
 
-            // Retornar o novo item enviado criado
             return Ok(new { TotalItemWeight = totalItemWeight, TruckAxlesWeight = truckAxlesWeight });
-
         }
 
 
-        [HttpGet]
-        public IActionResult GetAllItensShipped()
-        {
-            // Obter todos os itens enviados
-            var itensShipped = _context.ItensShippeds.ToList();
-
-            // Mapear ItensShipped para ItensShippedDTO
-            var itensShippedDto = itensShipped.Select(isd => new ItensShippedDTO
-            {
-                Id = isd.Id,
-                FkItensStockId = isd.FkItensStockId,
-                FkShippingId = isd.FkShippingId,
-                QuantityItens = isd.QuantityItens
-            }).ToList();
-
-            return Ok(itensShippedDto);
-        }
-
-
-        // READ - Método GET por FkItensStockId para ItensShipped
-        [HttpGet("{id}")]
-        public IActionResult GetItensShippedByFkItensStockId(int id)
-        {
-            // Obter os itens enviados com o FkItensStockId fornecido
-            var itensShipped = _context.ItensShippeds
-                .Where(isd => isd.FkItensStockId == id)
-                .ToList();
-
-            // Mapear ItensShipped para ItensShippedDTO
-            var itensShippedDto = itensShipped.Select(isd => new ItensShippedDTO
-            {
-                Id = isd.Id,
-                FkItensStockId = isd.FkItensStockId,
-                FkShippingId = isd.FkShippingId,
-                QuantityItens = isd.QuantityItens
-            }).ToList();
-
-            return Ok(itensShippedDto);
-        }
 
         [HttpPut("{id}")]
         public IActionResult UpdateItensShipped(int id, [FromBody] ItensShippedDTO updatedItensShippedDTO)
         {
 
-            // Obter o item em ItensShipped correspondente ao id
             var existingItensShipped = _context.ItensShippeds.FirstOrDefault(isd => isd.Id == id);
 
-            // Validar se o item existe
             if (existingItensShipped == null)
             {
-                return NotFound("ItensShipped not found.");
+                throw new NotFoundException($"ItensShipped com o ID: {id} não encontrado no banco de dados.");
             }
 
             // Obter o item em ItensStock correspondente ao FkItensStockId
@@ -155,15 +149,13 @@ namespace logisticsSystem.Controllers
             // Validar se há itens em estoque e se a quantidade desejada está disponível
             if (itensStockItem == null || itensStockItem.Quantity < updatedItensShippedDTO.QuantityItens)
             {
-                return BadRequest("A quantidade desejada de itens não está disponível em ItensStock.");
+                throw new ItemNotAvailableInStockException("A quantidade desejada de itens não está disponível em ItensStock.");
             }
 
-            // Atualizar as propriedades do ItensShipped existente
             existingItensShipped.FkItensStockId = updatedItensShippedDTO.FkItensStockId;
             existingItensShipped.FkShippingId = updatedItensShippedDTO.FkShippingId;
             existingItensShipped.QuantityItens = updatedItensShippedDTO.QuantityItens;
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
             _logger.WriteLogData($"Item shipped id {id} updated successfully.");
 
@@ -177,7 +169,7 @@ namespace logisticsSystem.Controllers
             var shippingToUpdate = _context.Shippings.FirstOrDefault(s => s.Id == existingItensShipped.FkShippingId);
             if (shippingToUpdate == null)
             {
-                return NotFound("Shipping not found.");
+                throw new NotFoundException("Shipping not found.");
             }
 
             // Somar totalItemWeight ao TotalWeight
@@ -192,7 +184,7 @@ namespace logisticsSystem.Controllers
                 existingItensShipped.QuantityItens = updatedItensShippedDTO.QuantityItens;
                 _context.SaveChanges();
 
-                return BadRequest("A soma do peso dos itens excede o peso dos eixos do caminhão.");
+                throw new TruckOverloadedException("A soma do peso dos itens excede o peso dos eixos do caminhão.");
             }
 
             // Atualizar TotalWeight na tabela Shipping
@@ -217,25 +209,21 @@ namespace logisticsSystem.Controllers
         }
 
 
-        // DELETE: api/ItensShipped/1
         [HttpDelete("{id}")]
         public IActionResult DeleteItensShipped(int id)
         {
-            // Encontrar a entidade ItensShippedDTO com o id fornecido
             var itensShipped = _context.ItensShippeds.FirstOrDefault(isd => isd.Id == id);
 
             if (itensShipped == null)
             {
-                return NotFound(); // Retorna 404 Not Found se o item não for encontrado
+                throw new NotFoundException($"ItensShipped com o ID: {id} não encontrado no banco de dados.");
             }
 
-            // Remover o item do contexto
             _context.ItensShippeds.Remove(itensShipped);
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
 
-            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
+            return NoContent(); 
         }
 
     }

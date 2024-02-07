@@ -82,20 +82,19 @@ namespace logisticsSystem.Controllers
 
 
 
-        // POST: api/Addresses/create
-        [HttpPost("create")]
+        [HttpPost("create-address")]
         public async Task<ActionResult<AddressDTO>> PostAddress([FromBody] AddressDTO addressDTO)
         {
-            // Validar se Country contém apenas letras
-            if (!Regex.IsMatch(addressDTO.Country, "^[a-zA-Z]+$"))
+            // Validar se Country contém apenas letras e espaços
+            if (!Regex.IsMatch(addressDTO.Country, @"^[a-zA-Z\s]+$"))
             {
-                throw new InvalidDataTypeException("Country deve conter apenas letras.");
+                throw new InvalidDataTypeException("Country deve conter apenas letras e espaços.");
             }
 
-            // Validar se State contém apenas letras
-            if (!Regex.IsMatch(addressDTO.State, "^[a-zA-Z]+$"))
+            // Validar se State contém apenas letras e espaços
+            if (!Regex.IsMatch(addressDTO.State, @"^[a-zA-Z\s]+$"))
             {
-                throw new InvalidDataTypeException("State deve conter apenas letras.");
+                throw new InvalidDataTypeException("State deve conter apenas letras e espaços.");
             }
 
             // Validar se Zipcode contém apenas números
@@ -119,8 +118,11 @@ namespace logisticsSystem.Controllers
             await _context.SaveChangesAsync();
             _logger.WriteLogData($"Address id {address.Id} registered succesfully.");
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, addressDTO);
+            // Retorna um objeto AddressDTO ao invés do objeto Address
+            return CreatedAtAction(nameof(GetAddresses), new { id = address.Id }, addressDTO);
         }
+
+
 
         // PUT: api/Addresses/update/{id}
         [HttpPut("update/{id}")]

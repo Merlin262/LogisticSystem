@@ -28,6 +28,54 @@ namespace logisticsSystem.Controllers
             _logger = logger;
         }
 
+
+
+        // GET para todas as deduções
+        [HttpGet]
+        public IActionResult GetAllDeductions()
+        {
+            var deductions = _context.Deductions.ToList();
+
+            if (deductions == null)
+            {
+                throw new NotFoundException("Nenhuma Deduction encontrada no banco de dados.");
+            }
+
+            var deductionsDto = deductions.Select(d => new DeductionDTO
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Amount = d.Amount,
+                Description = d.Description
+            }).ToList();
+
+            return Ok(deductionsDto);
+        }
+
+
+        // GET para dedução por ID
+        [HttpGet("{id}")]
+        public IActionResult GetDeductionById(int id)
+        {
+            var deduction = _context.Deductions.Find(id);
+
+            if (deduction == null)
+            {
+                throw new NotFoundException($"Nenhuma Deduction encontrada com o ID {id}.");
+            }
+
+            var deductionDto = new DeductionDTO
+            {
+                Id = deduction.Id,
+                Name = deduction.Name,
+                Amount = deduction.Amount,
+                Description = deduction.Description
+            };
+
+            return Ok(deductionDto);
+        }
+
+
         [HttpPost]
         public IActionResult CreateDeduction([FromBody] DeductionDTO deductionDTO)
         {
@@ -41,6 +89,11 @@ namespace logisticsSystem.Controllers
                 throw new InvalidDataTypeException("O nome da dedução deve conter apenas letras.");
             }
 
+            if (deductionDTO.Name.Length > 255)
+            {
+                throw new InvalidDataTypeException("O nome da dedução deve ter no máximo 255 caracteres.");
+            }
+
             if (deductionDTO.Amount < 0)
             {
                 throw new InvalidDataTypeException("O valor da dedução deve ser maior ou igual a zero.");
@@ -51,108 +104,74 @@ namespace logisticsSystem.Controllers
                 throw new InvalidDataTypeException("A descrição da dedução deve ter no máximo 255 caracteres.");
             }
 
-            // Mapear DeductionDTO para a entidade Deduction
             var newDeduction = new Deduction
             {
-                Id = deductionDTO.Id,
                 Name = deductionDTO.Name,
                 Amount = deductionDTO.Amount,
                 Description = deductionDTO.Description
             };
 
-            // Adicionar a nova dedução ao contexto
             _context.Deductions.Add(newDeduction);
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
-            _logger.WriteLogData($"Discount name '{newDeduction.Name}' registered succesfully.");
+            _logger.WriteLogData($"Dedução de nome '{newDeduction.Name}' registrado com sucesso.");
 
-            // Retornar a nova dedução criada
             return Ok(newDeduction);
         }
 
-        [HttpGet]
-        public IActionResult GetAllDeductions()
-        {
-            // Obter todas as deduções
-            var deductions = _context.Deductions.ToList();
-
-            if (deductions == null)
-            {
-                throw new NotFoundException("Nenhuma dedução encontrada.");
-            }
-
-            // Mapear Deduction para DeductionDTO
-            var deductionsDto = deductions.Select(d => new DeductionDTO
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Amount = d.Amount,
-                Description = d.Description
-            }).ToList();
-
-            return Ok(deductionsDto);
-        }
 
 
-        [HttpGet("{id}")]
-        public IActionResult GetDeductionById(int id)
-        {
-            // Obter a dedução com o ID fornecido
-            var deduction = _context.Deductions.Find(id);
-
-            if (deduction == null)
-            {
-                throw new NotFoundException($"Nenhuma Deduction encontrada com o ID {id}.");
-            }
-
-            // Mapear Deduction para DeductionDTO
-            var deductionDto = new DeductionDTO
-            {
-                Id = deduction.Id,
-                Name = deduction.Name,
-                Amount = deduction.Amount,
-                Description = deduction.Description
-            };
-
-            return Ok(deductionDto);
-        }
-
-
-
-
-        // UPDATE - Método PUT
         [HttpPut("{id}")]
         public IActionResult UpdateDeduction(int id, [FromBody] DeductionDTO deductionDTO)
         {
 
-            // Obter a dedução com o ID fornecido
             var deduction = _context.Deductions.Find(id);
 
             if (deduction == null)
             {
-                throw new NotFoundException($"Nenhuma Deduction encontrada com o ID {id}.");
+                throw new NotFoundException($"Não há dedução com esse ID: {id} no banco de dados.");
             }
 
-            // Atualizar propriedades da dedução
+            if (string.IsNullOrWhiteSpace(deductionDTO.Name))
+            {
+                throw new InvalidDataException("O campo de nome não pode ser vazio.");
+            }
+
+            if (deductionDTO.Amount < 0)
+            {
+                throw new InvalidDataException("Amount não pode ser maior do que zero.");
+            }
+
+            if (string.IsNullOrWhiteSpace(deductionDTO.Description))
+            {
+                throw new InvalidDataException("O campo de Description não pode ser vazio.");
+            }
+
+            if (deductionDTO.Name.Length > 255)
+            {
+                throw new InvalidDataException("Name não pode ter mais do que 255 caracteres.");
+            }
+
+            if (deductionDTO.Description.Length > 255)
+            {
+                throw new InvalidDataException("Description não pode ter mais do que 255 caracteres.");
+            }
+
             deduction.Name = deductionDTO.Name;
             deduction.Amount = deductionDTO.Amount;
             deduction.Description = deductionDTO.Description;
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
             _logger.WriteLogData($"Deductions id {id} updated successfully.");
 
             return Ok(deduction);
         }
 
+        
 
-
-        // DELETE - Método DELETE
         [HttpDelete("{id}")]
         public IActionResult DeleteDeduction(int id)
         {
-            // Obter a dedução com o ID fornecido
             var deduction = _context.Deductions.Find(id);
 
             if (deduction == null)
@@ -160,20 +179,18 @@ namespace logisticsSystem.Controllers
                 throw new NotFoundException($"Nenhuma Deduction encontrada com o ID {id}.");
             }
 
-            // Remover a dedução do contexto
             _context.Deductions.Remove(deduction);
 
-            // Salvar as alterações no banco de dados
             _context.SaveChanges();
             _logger.WriteLogData($"Deduction id {id} deleted successfully.");
 
-            return NoContent(); // Retorna 204 No Content para indicar sucesso na exclusão
+            return NoContent(); 
         }
 
+        // Regex para verificar se a string contém apenas letras
         private bool IsAlpha(string value)
         {
-            // Use uma expressão regular para verificar se a string contém apenas letras
-            return Regex.IsMatch(value, @"^[a-zA-Z]+$");
+            return Regex.IsMatch(value, @"^[a-zA-Z\s]+$");
         }
     }
 }
