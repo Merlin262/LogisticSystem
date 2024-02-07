@@ -1,0 +1,235 @@
+use master;
+drop database logisticsSystem;
+create database logisticsSystem;
+use logisticsSystem;
+
+CREATE TABLE Address (
+    Country varchar(255),
+    State varchar(255),
+    City varchar(255),
+    Street varchar(255),
+    Number varchar(255),
+    Complement varchar(255),
+    ZIPCode varchar(255),
+    ID int PRIMARY KEY IDENTITY
+);
+
+CREATE TABLE Person (
+    ID int PRIMARY KEY IDENTITY,
+    Name varchar(255),
+	CPF varchar(14),
+	Phone varchar(50),
+    BirthDate DATE,
+    Email varchar(255),
+    fk_Address_ID int REFERENCES Address(ID) ON DELETE NO ACTION
+);
+
+CREATE TABLE Client (
+    fk_Person_ID int PRIMARY KEY REFERENCES Person(ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Employee (
+    fk_Person_ID int PRIMARY KEY REFERENCES Person(ID) ON DELETE NO ACTION,
+    Position varchar(255)
+);
+
+CREATE TABLE Employee_Wage (
+    ID int PRIMARY KEY IDENTITY,
+    PayDay DATE,
+    Amount Decimal(10, 2),
+    ComissionPercentage Decimal(5,2),
+    Commission Decimal(10, 2),
+    fk_Employee_ID int REFERENCES Employee(fk_Person_ID) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Truck (
+    Chassis int PRIMARY KEY,
+    KilometerCount decimal,
+    Model varchar(255),
+    Year int,
+    Color varchar(255),
+    TruckAxles int,
+    LastMaintenanceKilometers decimal,
+    InMaintenance bit
+);
+
+CREATE TABLE Deductions (
+    ID int PRIMARY KEY IDENTITY,
+    Name varchar(255),
+    Amount Decimal(10, 2),
+    Description varchar(255)
+);
+
+
+CREATE TABLE Maintenance (
+    ID int PRIMARY KEY IDENTITY,
+    MaintenanceDate DATE,
+    fk_Employee int REFERENCES Employee(fk_Person_ID) ON DELETE SET NULL,
+    fk_Truck_Chassis int REFERENCES Truck(Chassis) ON DELETE CASCADE
+);
+
+
+CREATE TABLE ItensStock (
+    ID int PRIMARY KEY IDENTITY,
+    Description varchar(255),
+	Weight Decimal(10, 2),
+    Quantity int,
+    Price Decimal(10, 2)
+);
+
+CREATE TABLE Shipping (
+	ID int PRIMARY KEY IDENTITY,
+    SendDate DATE,
+    EstimatedDate DATE,
+    DeliveryDate DATE,
+    TotalWeight Decimal(10, 2),
+    DistanceKm Decimal(10, 2),
+    RegistrationDate DATE,
+    ShippingPrice Decimal(10, 2),
+    fk_Client_ID int REFERENCES Client(fk_Person_ID) ON DELETE SET NULL,
+    fk_Employee_ID int REFERENCES Employee(fk_Person_ID) ON DELETE SET NULL,
+    fk_Address_ID int REFERENCES Address(ID) ON DELETE SET NULL,
+    fk_Truck_ID int REFERENCES Truck(Chassis) ON DELETE SET NULL
+);
+
+
+CREATE TABLE ShippingPayment (
+    ID int PRIMARY KEY IDENTITY,
+    PaymentDate DATE,
+    fk_Shipping_ID int REFERENCES Shipping(ID) ON DELETE CASCADE
+);
+
+CREATE TABLE ItensShipped (
+	ID int PRIMARY KEY,
+	QuantityItens int,
+    fk_ItensStock_ID int REFERENCES ItensStock(ID) ON DELETE SET NULL,
+    fk_Shipping_ID int REFERENCES Shipping(ID) ON DELETE CASCADE
+);
+
+CREATE TABLE WageDeductions (
+	ID int PRIMARY KEY IDENTITY,
+    fk_Deductions_ID int REFERENCES Deductions(ID) ON DELETE CASCADE,
+    fk_Wage_ID int REFERENCES Employee_Wage(ID) ON DELETE CASCADE
+);
+
+
+-- Populando as tabelas do sistema
+
+INSERT INTO Address (Country, State, City, Street, Number, Complement, ZIPCode)
+VALUES 
+    ('Brazil', 'Sao Paulo', 'Sao Paulo', 'Avenida Paulista', '123', 'Apt 101', '01234-567'),
+    ('USA', 'California', 'Los Angeles', 'Sunset Blvd', '456', 'Suite 201', '90001'),
+    ('UK', 'England', 'London', 'Baker Street', '789', 'Flat 3B', 'W1U 6SJ'),
+    ('France', 'Ile-de-France', 'Paris', 'Champs-Elysées', '101', '3rd Floor', '75008'),
+    ('Japan', 'Tokyo', 'Shibuya', 'Harajuku', '456', '12th Floor', '150-0001');
+
+
+INSERT INTO Person (Name, BirthDate, CPF, Email, fk_Address_ID)
+VALUES 
+	('teste', '1980-05-15',12345678901111, 'john.doe@example.com', 1),
+    ('John Doe', '1980-05-15',12444478901111, 'john.doe@example.com', 1),
+    ('Jane Smith', '1992-08-20',12333378901111, 'jane.smith@example.com', 2),
+    ('Alice Johnson', '1985-03-10',12345555901111, 'alice.johnson@example.com', 3),
+    ('Bob Williams', '1977-11-25',12345111901111, 'bob.williams@example.com', 4),
+    ('Eva Davis', '1990-06-30',12345672221111, 'eva.davis@example.com', 5);
+
+
+INSERT INTO Employee (fk_Person_ID, Position)
+VALUES 
+    (1, 'Manager'),
+    (2, 'Developer'),
+    (3, 'HR Specialist'),
+    (4, 'Accountant'),
+    (5, 'Marketing Coordinator'),
+	(6, 'Driver');
+
+
+INSERT INTO Client (fk_Person_ID)
+VALUES 
+    (1),
+    (2),
+    (3),
+    (4),
+    (5);
+
+
+INSERT INTO Truck (Chassis, KilometerCount, Model, Year, Color, TruckAxles, LastMaintenanceKilometers, InMaintenance)
+VALUES 
+    (123456, 50000, 'Volvo', 2020, 'Blue', 2,  50000, 0),
+    (789012, 75000, 'Scania', 2018, 'Red', 3,  75000, 1),
+    (345678, 60000, 'Mercedes', 2019, 'White', 2,  60000, 0),
+    (901234, 55000, 'MAN', 2021, 'Green', 4, 55000, 0),
+    (567890, 80000, 'Iveco', 2017, 'Yellow', 3, 80000, 1);
+
+
+INSERT INTO Deductions (Name, Amount, Description)
+VALUES 
+    ('Tax', 100.00, 'Income Tax Deduction'),
+    ('Health Insurance', 50.00, 'Health Insurance Premium'),
+    ('Pension', 75.00, 'Pension Contribution'),
+    ('Union Dues', 20.00, 'Union Membership Dues'),
+    ('Other', 30.00, 'Other Deductions');
+
+
+INSERT INTO Maintenance (MaintenanceDate, fk_Employee, fk_Truck_Chassis)
+VALUES 
+    ('2023-01-15', 1, 123456),
+    ('2022-11-20', 2, 789012),
+    ('2022-12-05', 3, 345678),
+    ('2023-02-10', 4, 901234),
+    ('2022-10-01', 5, 567890);
+
+
+INSERT INTO ItensStock (Description, Weight, Quantity, Price)
+VALUES 
+    ('Laptop', 2.5, 10, 1200.00),
+    ('Printer', 15.0, 5, 300.00),
+    ('Monitor', 8.0, 8, 500.00),
+    ('Desk Chair', 12.0, 6, 150.00),
+    ('Office Desk', 30.0, 4, 400.00);
+
+
+INSERT INTO Shipping (SendDate, EstimatedDate, DeliveryDate, TotalWeight, DistanceKm, RegistrationDate, ShippingPrice, fk_Client_ID, fk_Employee_ID, fk_Address_ID, fk_Truck_ID)
+VALUES 
+    ('2023-03-01', '2023-03-10', NULL, 150.5, 300, '2023-02-28', 200.00, 1, 1, 1, 123456),
+    ('2023-02-15', '2023-02-25', '2023-02-22', 100.2, 200, '2023-02-10', 150.00, 2, 2, 2, 789012),
+    ('2023-02-05', '2023-02-15', '2023-02-11', 75.0, 150, '2023-01-30', 120.00, 3, 3, 3, 345678),
+    ('2023-01-25', '2023-02-05', '2023-02-03', 50.8, 100, '2023-01-20', 80.00, 4, 4, 4, 901234),
+    ('2023-02-20', '2023-03-01', NULL, 200.0, 250, '2023-02-15', 180.00, 5, 5, 5, 567890);
+
+
+INSERT INTO ShippingPayment (PaymentDate, fk_Shipping_ID)
+VALUES 
+    ('2023-03-05', 1),
+    ('2023-02-28', 2),
+    ('2023-02-10', 3),
+    ('2023-02-15', 4),
+    ('2023-03-02', 5);
+
+
+INSERT INTO ItensShipped (ID, QuantityItens, fk_ItensStock_ID, fk_Shipping_ID)
+VALUES 
+    (1, 5, 1, 1),
+    (2, 3, 2, 2),
+    (3, 4, 3, 3),
+    (4, 2, 4, 4),
+    (5, 6, 5, 5);
+
+
+INSERT INTO Employee_Wage (PayDay, Amount, Commission, ComissionPercentage, fk_Employee_ID)
+VALUES 
+    ('2023-03-05', 3000.00, 0, 0.1, 1),
+    ('2023-02-28', 2500.00, 0, 0.15, 2),
+    ('2023-02-10', 2800.00, 0, 0, 3),
+    ('2023-02-15', 3200.00, 0, 0.2, 4),
+    ('2023-03-02', 2700.00, 0, 0, 5);
+
+
+INSERT INTO WageDeductions (fk_Deductions_ID, fk_Wage_ID)
+VALUES 
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5);
