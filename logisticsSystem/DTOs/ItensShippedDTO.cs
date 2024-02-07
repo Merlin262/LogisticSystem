@@ -2,13 +2,13 @@
 using System.Text.Json.Serialization;
 
 
-namespace logisticsSystem.DTOs;
-
-public class ItensShippedDTO
+namespace logisticsSystem.DTOs
 {
-    public int Id { get; set; }
-    public int FkItensStockId { get; set; }
-    public int FkShippingId { get; set; }
-
-    public int QuantityItens { get; set; }
+    public class ItensShippedDTO
+    {
+        public int Id { get; set; }
+        public int FkItensStockId { get; set; }
+        public int FkShippingId { get; set; }
+        public int QuantityItens { get; set; }
+    }
 }

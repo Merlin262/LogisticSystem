@@ -16,9 +16,6 @@ namespace logisticsSystem.DTOs
 
         public DateOnly? RegistrationDate { get; set; }
 
-        //[JsonIgnore]
-        //public int Id { get; set; }
-
         public decimal ShippingPrice { get; set; }
 
         public int FkClientId { get; set; }
@@ -28,8 +25,5 @@ namespace logisticsSystem.DTOs
         public int FkAddressId { get; set; }
 
         public int FkTruckId { get; set; }
-
     }
-
-
 }
