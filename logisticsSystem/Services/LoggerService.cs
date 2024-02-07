@@ -25,6 +25,7 @@ namespace logisticsSystem.Services
                     Directory.CreateDirectory(logDirectory);
                 }
 
+                //Registra no arquivo o erro recebido, bem como a data e hora 
                 using (StreamWriter writer = new StreamWriter(logPath, true))
                 {
                     writer.WriteLine($"{DateTime.Now}: {message}");
@@ -49,6 +50,7 @@ namespace logisticsSystem.Services
                     Directory.CreateDirectory(logDirectory);
                 }
 
+                //Registra no arquivo o erro recebido, bem como a data e hora 
                 using (StreamWriter writer = new StreamWriter(logPath, true))
                 {
                     writer.WriteLine($"{DateTime.Now}: {message}");

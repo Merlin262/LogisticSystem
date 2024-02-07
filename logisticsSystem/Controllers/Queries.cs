@@ -1,5 +1,6 @@
 ﻿using logisticsSystem.Data;
 using logisticsSystem.DTOs;
+using logisticsSystem.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,12 @@ namespace logisticsSystem.Controllers
         [HttpGet("employee-total-commission/{employeeId}")]
         public IActionResult GetEmployeeTotalCommission(int employeeId)
         {
+            var employee = _context.Employees.FindAsync(employeeId);
+            if (employee == null)
+            {
+                throw new NotFoundException($"Funcionário de Id: {employeeId} não encontrada no banco de dados.");
+            }
+
             var totalCommission = _context.EmployeeWages
                 .Where(e => e.FkEmployeeId == employeeId)
                 .GroupBy(e => e.FkEmployeeId)

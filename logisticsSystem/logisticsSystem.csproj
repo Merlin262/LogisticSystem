@@ -7,7 +7,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <UserSecretsId>9d05f34e-95b5-46c5-92a1-91d245b97da2</UserSecretsId>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <DocumentationFile>C:\Users\joaom\OneDrive\Documentos\Volvo\ProjetoFinal\file.xml</DocumentationFile>
+    <DocumentationFile>E:\codes\logisticsSystem\file.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
